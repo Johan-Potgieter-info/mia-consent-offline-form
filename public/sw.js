@@ -1,6 +1,6 @@
 
 // PWA Builder Service Worker with Workbox - Combined offline experience
-const CACHE = "mia-consent-offline-page-v2";
+const CACHE = "mia-consent-offline-page-v3";
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js');
 
@@ -14,7 +14,7 @@ self.addEventListener("message", (event) => {
 });
 
 self.addEventListener('install', async (event) => {
-  console.log('Mia Healthcare PWA Service Worker installing...');
+  console.log('🔧 Mia Healthcare PWA Service Worker installing...');
   event.waitUntil(
     caches.open(CACHE)
       .then((cache) => {
@@ -27,13 +27,13 @@ self.addEventListener('install', async (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  console.log('Mia Healthcare PWA Service Worker activating...');
+  console.log('✅ Mia Healthcare PWA Service Worker activating...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE) {
-            console.log('Deleting old cache:', cacheName);
+            console.log('🧹 Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -81,7 +81,7 @@ self.addEventListener('fetch', (event) => {
         const networkResp = await fetch(event.request);
         return networkResp;
       } catch (error) {
-        console.log('Network failed, serving offline page');
+        console.log('🌐 Network failed, serving offline page');
         const cache = await caches.open(CACHE);
         const cachedResp = await cache.match(offlineFallbackPage);
         return cachedResp || new Response('Offline - Please check your connection', {
@@ -93,4 +93,4 @@ self.addEventListener('fetch', (event) => {
   }
 });
 
-console.log('Mia Healthcare PWA Service Worker loaded with Workbox v5.1.2');
+console.log('🚀 Mia Healthcare PWA Service Worker loaded with Workbox v5.1.2');

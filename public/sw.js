@@ -1,238 +1,96 @@
 
-const CACHE_NAME = 'mia-consent-form-v5';
-const RUNTIME_CACHE = 'mia-runtime-v5';
+// PWA Builder Service Worker with Workbox - Combined offline experience
+const CACHE = "mia-consent-offline-page-v2";
 
-// Resources to cache immediately - updated with correct logo
-const STATIC_RESOURCES = [
-  '/',
-  '/consent-form',
-  '/manifest.json',
-  '/lovable-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png'
-];
+importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js');
 
-// Install event - cache static resources
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('SW: Caching static resources');
-        return cache.addAll(STATIC_RESOURCES);
-      })
-      .then(() => {
-        console.log('SW: Static resources cached successfully');
-        return self.skipWaiting();
-      })
-      .catch((error) => {
-        console.error('SW: Failed to cache static resources:', error);
-      })
-  );
-});
+// Offline fallback page
+const offlineFallbackPage = "offline.html";
 
-// Activate event - clean up old caches and take control
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    Promise.all([
-      // Clean up old caches
-      caches.keys().then((cacheNames) => {
-        return Promise.all(
-          cacheNames.map((cacheName) => {
-            if (cacheName !== CACHE_NAME && cacheName !== RUNTIME_CACHE) {
-              console.log('SW: Deleting old cache:', cacheName);
-              return caches.delete(cacheName);
-            }
-          })
-        );
-      }),
-      // Take control of all clients
-      self.clients.claim()
-    ])
-  );
-});
-
-// Fetch event - improved cache strategy with better error handling
-self.addEventListener('fetch', (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
-
-  // Skip non-GET requests
-  if (request.method !== 'GET') {
-    return;
-  }
-
-  // Handle app resources with cache-first strategy
-  if (url.origin === location.origin) {
-    event.respondWith(handleAppResource(request));
-    return;
-  }
-
-  // Handle external resources with network-first strategy
-  event.respondWith(handleExternalResource(request));
-});
-
-// Improved cache-first strategy for app resources
-async function handleAppResource(request) {
-  try {
-    // Always try cache first for static resources
-    const cachedResponse = await caches.match(request);
-    
-    if (cachedResponse) {
-      // For HTML files, also try to update cache in background
-      if (request.destination === 'document') {
-        updateCacheInBackground(request);
-      }
-      return cachedResponse;
-    }
-    
-    // If not in cache, fetch from network
-    const networkResponse = await fetch(request);
-    
-    if (networkResponse.ok) {
-      const cache = await caches.open(CACHE_NAME);
-      // Don't cache if response is too large or not cacheable
-      if (networkResponse.headers.get('content-length') < 50000000) {
-        cache.put(request, networkResponse.clone());
-      }
-    }
-    
-    return networkResponse;
-  } catch (error) {
-    console.log('SW: App resource failed, trying cache:', request.url);
-    
-    // Enhanced fallback logic
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-    
-    // Fallback to cache for app routes
-    if (request.destination === 'document') {
-      const indexResponse = await caches.match('/');
-      if (indexResponse) {
-        return indexResponse;
-      }
-    }
-    
-    return new Response('App offline - please check connection and try refreshing', {
-      status: 503,
-      statusText: 'Service Unavailable'
-    });
-  }
-}
-
-// Background cache update
-async function updateCacheInBackground(request) {
-  try {
-    const networkResponse = await fetch(request);
-    if (networkResponse.ok) {
-      const cache = await caches.open(CACHE_NAME);
-      cache.put(request, networkResponse);
-    }
-  } catch (error) {
-    console.log('SW: Background cache update failed:', error);
-  }
-}
-
-// Network-first strategy for external resources
-async function handleExternalResource(request) {
-  try {
-    const networkResponse = await fetch(request);
-    
-    // Cache successful responses
-    if (networkResponse.ok) {
-      const cache = await caches.open(RUNTIME_CACHE);
-      cache.put(request, networkResponse.clone());
-    }
-    
-    return networkResponse;
-  } catch (error) {
-    console.log('SW: External resource failed, trying cache:', request.url);
-    
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-    
-    // Return offline placeholder for failed external resources
-    return new Response('Resource unavailable offline', {
-      status: 503,
-      statusText: 'Service Unavailable'
-    });
-  }
-}
-
-// Background sync for form submissions
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'background-sync-forms') {
-    event.waitUntil(syncPendingData());
-  }
-});
-
-// Sync pending data when online
-async function syncPendingData() {
-  try {
-    console.log('SW: Starting background sync');
-    
-    // Import and execute sync from main app
-    const module = await import('/src/utils/indexedDB.js');
-    if (module.syncPendingForms) {
-      const results = await module.syncPendingForms();
-      console.log('SW: Background sync completed:', results);
-      
-      // Notify clients about sync completion
-      self.clients.matchAll().then(clients => {
-        clients.forEach(client => {
-          client.postMessage({
-            type: 'SYNC_COMPLETE',
-            results: results
-          });
-        });
-      });
-    }
-  } catch (error) {
-    console.error('SW: Background sync failed:', error);
-  }
-}
-
-// Enhanced message handling
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
-  
-  if (event.data && event.data.type === 'SYNC_NOW') {
-    syncPendingData();
-  }
-  
-  // Handle cache refresh requests
-  if (event.data && event.data.type === 'REFRESH_CACHE') {
-    refreshCaches();
+});
+
+self.addEventListener('install', async (event) => {
+  console.log('Mia Healthcare PWA Service Worker installing...');
+  event.waitUntil(
+    caches.open(CACHE)
+      .then((cache) => {
+        return cache.add(offlineFallbackPage).catch(err => {
+          console.log('Could not cache offline page:', err);
+        });
+      })
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  console.log('Mia Healthcare PWA Service Worker activating...');
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE) {
+            console.log('Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    }).then(() => {
+      return self.clients.claim();
+    })
+  );
+});
+
+if (workbox.navigationPreload.isSupported()) {
+  workbox.navigationPreload.enable();
+}
+
+// Cache strategy for all routes with GitHub Pages base path handling
+workbox.routing.registerRoute(
+  new RegExp('.*'),
+  new workbox.strategies.StaleWhileRevalidate({
+    cacheName: CACHE,
+    plugins: [{
+      cacheKeyWillBeUsed: async ({ request }) => {
+        // Normalize URLs for consistent caching
+        const url = new URL(request.url);
+        // Remove base path for caching consistency
+        if (url.pathname.startsWith('/mia-consent-offline-form-50/')) {
+          url.pathname = url.pathname.replace('/mia-consent-offline-form-50', '');
+        }
+        return url.href;
+      }
+    }]
+  })
+);
+
+// Enhanced fetch handler with offline fallback
+self.addEventListener('fetch', (event) => {
+  if (event.request.mode === 'navigate') {
+    event.respondWith((async () => {
+      try {
+        const preloadResp = await event.preloadResponse;
+
+        if (preloadResp) {
+          return preloadResp;
+        }
+
+        const networkResp = await fetch(event.request);
+        return networkResp;
+      } catch (error) {
+        console.log('Network failed, serving offline page');
+        const cache = await caches.open(CACHE);
+        const cachedResp = await cache.match(offlineFallbackPage);
+        return cachedResp || new Response('Offline - Please check your connection', {
+          status: 200,
+          headers: { 'Content-Type': 'text/html' }
+        });
+      }
+    })());
   }
 });
 
-// Cache refresh function
-async function refreshCaches() {
-  try {
-    // Clear all caches
-    const cacheNames = await caches.keys();
-    await Promise.all(cacheNames.map(name => caches.delete(name)));
-    
-    // Recreate main cache with static resources
-    const cache = await caches.open(CACHE_NAME);
-    await cache.addAll(STATIC_RESOURCES);
-    
-    console.log('SW: Caches refreshed successfully');
-    
-    // Notify clients
-    self.clients.matchAll().then(clients => {
-      clients.forEach(client => {
-        client.postMessage({
-          type: 'CACHE_REFRESHED'
-        });
-      });
-    });
-  } catch (error) {
-    console.error('SW: Cache refresh failed:', error);
-  }
-}
-
-console.log('SW: Service Worker v5 loaded with enhanced cache management');
+console.log('Mia Healthcare PWA Service Worker loaded with Workbox v5.1.2');

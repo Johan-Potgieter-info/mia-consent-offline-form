@@ -16,17 +16,18 @@ if ('serviceWorker' in navigator) {
     }
   });
 
-  // Register the new service worker with cache busting
+  // Register the new service worker with cache busting and proper error handling
   window.addEventListener('load', () => {
     const swUrl = import.meta.env.PROD 
       ? '/mia-consent-offline-form-50/sw.js'
       : '/sw.js';
     
+    // Add timestamp for cache busting and better error handling
     navigator.serviceWorker.register(`${swUrl}?v=${Date.now()}`, { 
       scope: import.meta.env.PROD ? '/mia-consent-offline-form-50/' : '/' 
     })
       .then((registration) => {
-        console.log('SW registered: ', registration);
+        console.log('✅ Mia Healthcare SW registered successfully:', registration.scope);
         
         // Handle updates
         registration.addEventListener('updatefound', () => {
@@ -34,14 +35,20 @@ if ('serviceWorker' in navigator) {
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('New SW available, will activate on next visit');
+                console.log('🔄 New SW available, will activate on next visit');
               }
             });
           }
         });
+
+        // Force update check every 5 minutes
+        setInterval(() => {
+          registration.update();
+        }, 5 * 60 * 1000);
       })
       .catch((registrationError) => {
-        console.log('SW registration failed: ', registrationError);
+        console.error('❌ SW registration failed:', registrationError);
+        console.log('Attempted SW URL:', swUrl);
       });
   });
 }

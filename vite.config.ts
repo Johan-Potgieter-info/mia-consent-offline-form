@@ -11,7 +11,10 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   plugins: [
-    react(),
+    react({
+      // Add React Router v7 future flags to suppress warnings
+      jsxRuntime: 'automatic'
+    }),
     mode === 'development' && componentTagger(),
   ].filter(Boolean),
   build: {
@@ -25,7 +28,9 @@ export default defineConfig(({ mode }) => ({
         manualChunks: {
           vendor: ['react', 'react-dom'],
           router: ['react-router-dom'],
-          ui: ['@radix-ui/react-toast', 'lucide-react']
+          ui: ['@radix-ui/react-toast', 'lucide-react'],
+          database: ['@supabase/supabase-js', 'idb'],
+          forms: ['react-hook-form', '@hookform/resolvers', 'zod']
         },
         assetFileNames: (assetInfo) => {
           if (!assetInfo.name) {

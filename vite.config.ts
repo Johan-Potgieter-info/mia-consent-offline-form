@@ -41,7 +41,9 @@ export default defineConfig(({ mode }) => ({
         entryFileNames: 'assets/js/[name]-[hash].js'
       }
     },
-    chunkSizeWarningLimit: 1000
+    chunkSizeWarningLimit: 1000,
+    // Ensure PWA files are copied to dist
+    copyPublicDir: true
   },
   resolve: {
     alias: {
@@ -50,5 +52,7 @@ export default defineConfig(({ mode }) => ({
   },
   define: {
     'process.env.NODE_ENV': JSON.stringify(mode),
-  }
+  },
+  // Ensure service worker and offline page are properly served
+  publicDir: 'public'
 }));

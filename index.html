@@ -12,29 +12,14 @@
     <meta name="apple-mobile-web-app-title" content="Mia Healthcare">
     
     <!-- Favicon using Mia logo -->
-    <link rel="icon" href="/lovable-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png" type="image/png">
-    <link rel="apple-touch-icon" href="/lovable-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png">
+    <link rel="icon" href="./lovable-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png" type="image/png">
+    <link rel="apple-touch-icon" href="./lovable-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png">
     
     <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json">
-    
-    <!-- Service Worker Registration -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js', { scope: '/' })
-            .then((registration) => {
-              console.log('SW registered: ', registration);
-            })
-            .catch((registrationError) => {
-              console.log('SW registration failed: ', registrationError);
-            });
-        });
-      }
-    </script>
+    <link rel="manifest" href="./manifest.json">
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="./src/main.tsx"></script>
   </body>
 </html>

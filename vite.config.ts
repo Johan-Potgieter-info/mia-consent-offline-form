@@ -5,6 +5,7 @@ import path from 'path';
 import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => ({
+  base: mode === 'production' ? '/mia-consent-offline-form-50/' : '/',
   server: {
     host: "::",
     port: 8080,
@@ -42,7 +43,6 @@ export default defineConfig(({ mode }) => ({
       }
     },
     chunkSizeWarningLimit: 1000,
-    // Ensure PWA files are copied to dist
     copyPublicDir: true
   },
   resolve: {
@@ -53,6 +53,5 @@ export default defineConfig(({ mode }) => ({
   define: {
     'process.env.NODE_ENV': JSON.stringify(mode),
   },
-  // Ensure service worker and offline page are properly served
   publicDir: 'public'
 }));

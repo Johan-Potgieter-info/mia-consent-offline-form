@@ -135,10 +135,17 @@ The app includes a comprehensive PWA manifest with:
 ## Configuration
 
 ### Environment Variables
-Create a `.env` file for production deployment:
+Copy `.env.example` to `.env` and fill in your credentials:
 ```
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_key
+# Optional build metadata
+VITE_APP_ENV=production
+VITE_APP_VERSION=1.0.0
+# EmailJS integration (if used)
+VITE_EMAILJS_SERVICE_ID=
+VITE_EMAILJS_TEMPLATE_ID=
+VITE_EMAILJS_PUBLIC_KEY=
 ```
 
 ### Region Detection

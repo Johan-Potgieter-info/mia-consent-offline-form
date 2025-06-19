@@ -28,8 +28,8 @@ export const saveCompletedForm = async (formData: FormData): Promise<number> => 
  * Get all completed forms
  * @returns Promise with all form data
  */
-export const getAllForms = async (): Promise<any[]> => {
-  return await getAllFromStore(FORMS_STORE);
+export const getAllForms = async (): Promise<FormData[]> => {
+  return await getAllFromStore<FormData>(FORMS_STORE);
 };
 
 /**
@@ -37,12 +37,12 @@ export const getAllForms = async (): Promise<any[]> => {
  * @param regionCode Region code to filter by
  * @returns Promise with filtered forms
  */
-export const getFormsByRegion = async (regionCode: string): Promise<any[]> => {
-  const predicate = (form: any) => 
+export const getFormsByRegion = async (regionCode: string): Promise<FormData[]> => {
+  const predicate = (form: FormData) =>
     form.regionCode === regionCode || 
     (!form.regionCode && regionCode === 'PTA');
   
-  return await filterFromStore(FORMS_STORE, predicate);
+  return await filterFromStore<FormData>(FORMS_STORE, predicate);
 };
 
 /**
@@ -50,7 +50,7 @@ export const getFormsByRegion = async (regionCode: string): Promise<any[]> => {
  * @param forms Array of form data
  * @returns Sorted array
  */
-export const sortFormsByDate = (forms: any[]): any[] => {
+export const sortFormsByDate = (forms: FormData[]): FormData[] => {
   return forms.sort((a, b) => {
     const dateA = new Date(a.lastModified || a.timestamp);
     const dateB = new Date(b.lastModified || b.timestamp);

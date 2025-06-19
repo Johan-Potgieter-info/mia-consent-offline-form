@@ -31,7 +31,7 @@ export const saveDraftForm = async (formData: FormData): Promise<number> => {
  * Get all drafts
  * @returns Promise with all drafts (decrypted)
  */
-export const getAllDrafts = async (): Promise<any[]> => {
+export const getAllDrafts = async (): Promise<FormData[]> => {
   const drafts = await getAllFromStore(DRAFTS_STORE);
   
   // Decrypt all drafts
@@ -59,7 +59,7 @@ export const deleteDraft = async (id: number): Promise<void> => {
  * @param regionCode Region code to filter by
  * @returns Promise with region-specific drafts
  */
-export const getDraftsByRegion = async (regionCode: string): Promise<any[]> => {
+export const getDraftsByRegion = async (regionCode: string): Promise<FormData[]> => {
   const allDrafts = await getAllDrafts();
   
   return allDrafts.filter(draft => 

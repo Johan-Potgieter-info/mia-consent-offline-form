@@ -47,7 +47,7 @@ export const saveToIndexedDB = async (formData: FormData, storeName: string): Pr
  * @param storeName Store name to query
  * @returns Promise with all items (decrypted)
  */
-export const getAllFromIndexedDB = async (storeName: string): Promise<any[]> => {
+export const getAllFromIndexedDB = async (storeName: string): Promise<unknown[]> => {
   try {
     const db = await initDB();
     const items = await db.getAll(storeName);

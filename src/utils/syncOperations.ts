@@ -3,6 +3,7 @@
 
 import { initDB, FORMS_STORE } from './database';
 import { decryptSensitiveFields } from './encryption';
+import { FormData } from '../types/formTypes';
 
 // Get region endpoint for form submission
 const getRegionEndpoint = (regionCode: string): string => {
@@ -16,7 +17,7 @@ const getRegionEndpoint = (regionCode: string): string => {
 };
 
 // Get all unsynced forms with retry mechanism
-export const getUnsyncedForms = async (): Promise<any[]> => {
+export const getUnsyncedForms = async (): Promise<FormData[]> => {
   const db = await initDB();
   const transaction = db.transaction([FORMS_STORE], 'readonly');
   const store = transaction.objectStore(FORMS_STORE);
@@ -80,7 +81,7 @@ export const markFormAsSynced = async (id: number): Promise<void> => {
 
 // Enhanced sync with retry logic and better error handling
 export const syncPendingForms = async (maxRetries: number = 3): Promise<{ success: number; failed: number }> => {
-  let results = { success: 0, failed: 0 };
+  const results = { success: 0, failed: 0 };
   
   try {
     const unsyncedForms = await getUnsyncedForms();

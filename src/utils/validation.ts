@@ -14,7 +14,7 @@ export const validatePhoneNumber = (phone: string): { isValid: boolean; message?
   }
 
   // Check if original input contains only allowed characters (digits, spaces, dashes, parentheses, plus)
-  const allowedPattern = /^[\d\s\-\(\)\+]+$/;
+  const allowedPattern = /^[\d\s-()+]+$/;
   if (!allowedPattern.test(phone)) {
     return { isValid: false, message: 'Phone number can only contain digits, spaces, dashes, parentheses, and plus sign' };
   }

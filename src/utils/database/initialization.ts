@@ -4,13 +4,13 @@
 import { openDB, IDBPDatabase } from 'idb';
 import { DB_NAME, DB_VERSION, FORMS_STORE, DRAFTS_STORE } from './config';
 
-let dbInstance: IDBPDatabase<any> | null = null;
+let dbInstance: IDBPDatabase<unknown> | null = null;
 
 /**
  * Initialize the IndexedDB database
  * @returns Promise with the database instance
  */
-export const initDB = async (): Promise<IDBPDatabase<any>> => {
+export const initDB = async (): Promise<IDBPDatabase<unknown>> => {
   if (dbInstance) {
     console.log('Reusing existing database instance');
     return dbInstance;

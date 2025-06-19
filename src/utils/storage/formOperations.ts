@@ -12,7 +12,7 @@ import { getStorageCapabilities, updateStorageCapabilities } from './capabilitie
  * @param isDraft Whether this is a draft
  * @returns Promise with saved form data
  */
-export const saveFormHybrid = async (formData: FormData, isDraft: boolean = false): Promise<any> => {
+export const saveFormHybrid = async (formData: FormData, isDraft: boolean = false): Promise<FormData> => {
   const capabilities = getStorageCapabilities();
   let supabaseResult = null;
   let indexedDBResult = null;
@@ -44,7 +44,7 @@ export const saveFormHybrid = async (formData: FormData, isDraft: boolean = fals
         const existingDraft = existingDrafts.find(draft => draft.id === formData.id);
         
         if (existingDraft) {
-          await updateDraftById(formData.id as any, formData);
+          await updateDraftById(formData.id as string | number, formData);
           indexedDBResult = { ...formData };
           console.log('Updated existing draft in IndexedDB');
           return indexedDBResult;
@@ -89,7 +89,7 @@ export const saveFormHybrid = async (formData: FormData, isDraft: boolean = fals
  * @param isDraft Whether to get drafts
  * @returns Promise with forms array
  */
-export const getFormsHybrid = async (isDraft: boolean = false): Promise<any[]> => {
+export const getFormsHybrid = async (isDraft: boolean = false): Promise<FormData[]> => {
   const capabilities = getStorageCapabilities();
   
   // Try Supabase first

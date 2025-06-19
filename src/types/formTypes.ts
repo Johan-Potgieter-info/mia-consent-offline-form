@@ -2,7 +2,7 @@
 import { Region } from '../utils/regionDetection';
 
 export interface FormData {
-  [key: string]: any;
+  [key: string]: unknown;
   id?: string | number; // Allow both for compatibility
   
   // Patient Details

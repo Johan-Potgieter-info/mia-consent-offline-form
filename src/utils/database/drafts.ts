@@ -18,7 +18,7 @@ export const saveDraftData = async (formData: FormData): Promise<number> => {
  * Get all drafts from IndexedDB
  * @returns Promise with all drafts (decrypted and sorted)
  */
-export const getAllDrafts = async (): Promise<any[]> => {
+export const getAllDrafts = async (): Promise<FormData[]> => {
   const drafts = await getAllFromIndexedDB(DRAFTS_STORE);
   
   // Sort drafts by lastModified (newest first)

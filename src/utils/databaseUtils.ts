@@ -2,6 +2,18 @@
 
 import { initDB } from './indexedDB';
 
+interface NavigatorWithConnection extends Navigator {
+  connection?: {
+    effectiveType: string;
+    downlink: number;
+    rtt: number;
+  };
+}
+
+interface StorageEstimateWithDetails extends StorageEstimate {
+  usageDetails?: Record<string, number>;
+}
+
 /**
  * Test if IndexedDB is available and can be initialized
  * @returns {Promise<boolean>} True if IndexedDB connection is successful
@@ -55,10 +67,10 @@ export const getBrowserInfo = () => {
       sessionStorage: !!window.sessionStorage,
       indexedDB: !!window.indexedDB,
     },
-    connection: (navigator as any).connection ? {
-      effectiveType: (navigator as any).connection.effectiveType,
-      downlink: (navigator as any).connection.downlink,
-      rtt: (navigator as any).connection.rtt,
+    connection: (navigator as NavigatorWithConnection).connection ? {
+      effectiveType: (navigator as NavigatorWithConnection).connection!.effectiveType,
+      downlink: (navigator as NavigatorWithConnection).connection!.downlink,
+      rtt: (navigator as NavigatorWithConnection).connection!.rtt,
     } : null
   };
   
@@ -77,7 +89,7 @@ export const checkStorageQuota = async () => {
         quota: estimate.quota,
         usage: estimate.usage,
         available: estimate.quota ? estimate.quota - (estimate.usage || 0) : null,
-        usageDetails: (estimate as any).usageDetails || null
+        usageDetails: (estimate as StorageEstimateWithDetails).usageDetails || null
       };
       console.log('Storage quota info:', info);
       return info;

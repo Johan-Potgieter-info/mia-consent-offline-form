@@ -18,6 +18,6 @@ export const saveFormData = async (formData: FormData): Promise<number> => {
  * Get all forms from IndexedDB
  * @returns Promise with all forms (decrypted)
  */
-export const getAllForms = async (): Promise<any[]> => {
+export const getAllForms = async (): Promise<FormData[]> => {
   return await getAllFromIndexedDB(FORMS_STORE);
 };

@@ -8,7 +8,7 @@ import { FormData } from '../types/formTypes';
  * Map form data to database schema (camelCase to snake_case)
  */
 const mapFormDataToDatabase = (formData: FormData, isDraft: boolean = false) => {
-  const mapped: any = {
+  const mapped: Record<string, unknown> = {
     // Remove the local id since Supabase will generate its own UUID
     patient_name: formData.patientName || '',
     id_number: formData.idNumber || '',
@@ -54,7 +54,7 @@ const mapFormDataToDatabase = (formData: FormData, isDraft: boolean = false) => 
 /**
  * Map database data back to form data (snake_case to camelCase)
  */
-const mapDatabaseToFormData = (dbData: any): FormData => {
+const mapDatabaseToFormData = (dbData: Record<string, unknown>): FormData => {
   return {
     id: dbData.id, // Keep the UUID as string
     patientName: dbData.patient_name,
@@ -103,7 +103,7 @@ const mapDatabaseToFormData = (dbData: any): FormData => {
  * @param isDraft Whether this is a draft or completed form
  * @returns Promise with saved form data
  */
-export const saveFormToSupabase = async (formData: FormData, isDraft: boolean = false): Promise<any> => {
+export const saveFormToSupabase = async (formData: FormData, isDraft: boolean = false): Promise<FormData> => {
   try {
     const tableName = isDraft ? 'form_drafts' : 'consent_forms';
     const timestamp = new Date().toISOString();
@@ -140,7 +140,7 @@ export const saveFormToSupabase = async (formData: FormData, isDraft: boolean = 
  * @param isDraft Whether this is a draft or completed form
  * @returns Promise with updated form data
  */
-export const updateFormInSupabase = async (id: string, formData: FormData, isDraft: boolean = false): Promise<any> => {
+export const updateFormInSupabase = async (id: string, formData: FormData, isDraft: boolean = false): Promise<FormData> => {
   try {
     const tableName = isDraft ? 'form_drafts' : 'consent_forms';
     const timestamp = new Date().toISOString();
@@ -175,7 +175,7 @@ export const updateFormInSupabase = async (id: string, formData: FormData, isDra
  * @param isDraft Whether to get drafts or completed forms
  * @returns Promise with forms array
  */
-export const getFormsFromSupabase = async (isDraft: boolean = false): Promise<any[]> => {
+export const getFormsFromSupabase = async (isDraft: boolean = false): Promise<FormData[]> => {
   try {
     const tableName = isDraft ? 'form_drafts' : 'consent_forms';
     
@@ -229,7 +229,7 @@ export const deleteFormFromSupabase = async (id: string, isDraft: boolean = fals
  * @param isDraft Whether to get drafts or completed forms
  * @returns Promise with filtered forms
  */
-export const getFormsByRegionFromSupabase = async (regionCode: string, isDraft: boolean = false): Promise<any[]> => {
+export const getFormsByRegionFromSupabase = async (regionCode: string, isDraft: boolean = false): Promise<FormData[]> => {
   try {
     const tableName = isDraft ? 'form_drafts' : 'consent_forms';
     

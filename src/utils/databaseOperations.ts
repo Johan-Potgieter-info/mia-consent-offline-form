@@ -11,10 +11,10 @@ import { encryptSensitiveFields, decryptSensitiveFields } from './encryption';
  * @param metadata Additional metadata to add
  * @returns Promise with the saved object ID
  */
-export const saveToStore = async (
+export const saveToStore = async <T extends Record<string, unknown>>( 
   storeName: string,
-  data: any,
-  metadata: Record<string, any> = {}
+  data: T,
+  metadata: Record<string, unknown> = {}
 ): Promise<number> => {
   if (!data) {
     throw new Error(`No data provided to save to ${storeName}`);
@@ -67,7 +67,7 @@ export const saveToStore = async (
  */
 export const getAllFromStore = async <T>(
   storeName: string,
-  processItem?: (item: any) => any
+  processItem?: (item: T) => T
 ): Promise<T[]> => {
   try {
     const db = await initDB();
@@ -79,11 +79,10 @@ export const getAllFromStore = async <T>(
 
       request.onsuccess = () => {
         const items = request.result.map(item => {
-          // Process item if processor provided
           if (processItem) {
-            return processItem(item);
+            return processItem(item as T);
           }
-          return item;
+          return item as T;
         });
         
         resolve(items as T[]);
@@ -150,11 +149,11 @@ export const deleteFromStore = async (storeName: string, id: number): Promise<vo
  */
 export const filterFromStore = async <T>(
   storeName: string,
-  predicate: (item: any) => boolean,
-  processItem?: (item: any) => any
+  predicate: (item: T) => boolean,
+  processItem?: (item: T) => T
 ): Promise<T[]> => {
   try {
-    const allItems = await getAllFromStore(storeName);
+    const allItems = await getAllFromStore<T>(storeName);
     
     return allItems
       .filter(predicate)
@@ -175,16 +174,16 @@ export const filterFromStore = async <T>(
  * @param items Array of potentially encrypted items
  * @returns Array of decrypted items
  */
-export const decryptItems = (items: any[]): any[] => {
+export const decryptItems = <T extends { encrypted?: boolean }>(items: T[]): T[] => {
   return items.map(item => {
     try {
       if (item.encrypted) {
-        return decryptSensitiveFields(item);
+        return decryptSensitiveFields(item) as T;
       }
       return item;
     } catch (decryptError) {
       console.warn('Failed to decrypt item, returning as is:', decryptError);
-      return { ...item, decryptionFailed: true };
+      return { ...item, decryptionFailed: true } as T;
     }
   });
 };

@@ -20,7 +20,7 @@ export const decrypt = (encryptedText: string): string => {
   }
 };
 
-export const encryptSensitiveFields = (data: any): any => {
+export const encryptSensitiveFields = <T extends Record<string, unknown>>(data: T): T => {
   const sensitiveFields = ['patientName', 'idNumber', 'contactNumber', 'email', 'address'];
   const processedData = { ...data };
   
@@ -33,7 +33,7 @@ export const encryptSensitiveFields = (data: any): any => {
   return processedData;
 };
 
-export const decryptSensitiveFields = (data: any): any => {
+export const decryptSensitiveFields = <T extends Record<string, unknown>>(data: T): T => {
   const sensitiveFields = ['patientName', 'idNumber', 'contactNumber', 'email', 'address'];
   const decryptedData = { ...data };
   

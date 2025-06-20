@@ -41,22 +41,22 @@ npm run build && cp public/sw.js dist/sw.js && cp public/offline.html dist/offli
 ```
 
 ### 4. GitHub Pages Configuration
-- Repository name: `mia-consent-offline-form-50`
+- Repository name: `mia-consent-offline-form`
 - Deploy from: `dist/` folder
-- Base URL: `https://username.github.io/mia-consent-offline-form-50/`
+- Base URL: `https://username.github.io/mia-consent-offline-form/`
 
 ## 🧪 Post-Deployment Verification Checklist
 
 ### Service Worker Tests
 ```bash
 # Test SW availability (should return 200)
-curl -I https://username.github.io/mia-consent-offline-form-50/sw.js
+curl -I https://username.github.io/mia-consent-offline-form/sw.js
 
 # Test offline page (should return 200)
-curl -I https://username.github.io/mia-consent-offline-form-50/offline.html
+curl -I https://username.github.io/mia-consent-offline-form/offline.html
 
 # Test manifest (should return 200)
-curl -I https://username.github.io/mia-consent-offline-form-50/manifest.json
+curl -I https://username.github.io/mia-consent-offline-form/manifest.json
 ```
 
 ### Browser DevTools Verification

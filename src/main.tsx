@@ -8,8 +8,8 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(function(registrations) {
     for(let registration of registrations) {
       // Unregister any old service workers
-      if (registration.scope.includes('lovableproject.com') || 
-          !registration.scope.includes('mia-consent-offline-form-50')) {
+      if (registration.scope.includes('lovableproject.com') ||
+          !registration.scope.includes('mia-consent-offline-form')) {
         console.log('Unregistering old service worker:', registration.scope);
         registration.unregister();
       }
@@ -18,13 +18,13 @@ if ('serviceWorker' in navigator) {
 
   // Register the new service worker with cache busting and proper error handling
   window.addEventListener('load', () => {
-    const swUrl = import.meta.env.PROD 
-      ? '/mia-consent-offline-form-50/sw.js'
+    const swUrl = import.meta.env.PROD
+      ? '/mia-consent-offline-form/sw.js'
       : '/sw.js';
     
     // Add timestamp for cache busting and better error handling
     navigator.serviceWorker.register(`${swUrl}?v=${Date.now()}`, { 
-      scope: import.meta.env.PROD ? '/mia-consent-offline-form-50/' : '/' 
+      scope: import.meta.env.PROD ? '/mia-consent-offline-form/' : '/'
     })
       .then((registration) => {
         console.log('✅ Mia Healthcare SW registered successfully:', registration.scope);

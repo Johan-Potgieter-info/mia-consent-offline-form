@@ -58,8 +58,8 @@ workbox.routing.registerRoute(
         // Normalize URLs for consistent caching
         const url = new URL(request.url);
         // Remove base path for caching consistency
-        if (url.pathname.startsWith('/mia-consent-offline-form-50/')) {
-          url.pathname = url.pathname.replace('/mia-consent-offline-form-50', '');
+        if (url.pathname.startsWith('/mia-consent-offline-form/')) {
+          url.pathname = url.pathname.replace('/mia-consent-offline-form', '');
         }
         return url.href;
       }

@@ -81,4 +81,4 @@ navigator.serviceWorker.ready.then((reg) => {
     }).catch(console.error);
   }
 });
-});
+}

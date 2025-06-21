@@ -59,19 +59,15 @@ createRoot(document.getElementById("root")!).render(<App />);
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.ready.then((reg) => {
     if ('sync' in reg) {
-        console.log('[SW] Background sync registered');
-      }).catch(console.error);
     }
 
         minInterval: 24 * 60 * 60 * 1000
       }).then(() => {
         console.log("[SW] Periodic sync registered");
-      }).catch(console.error);
     }
     }
     }
         console.log('[SW] Periodic sync registered');
-      }).catch(console.error);
     }
   });
 }
@@ -80,14 +76,11 @@ if ('serviceWorker' in navigator) {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.ready.then((reg) => {
     if ('sync' in reg) {
-        .then(() => console.log('[SW] Background sync registered'))
-        .catch(console.error);
     }
 
         minInterval: 24 * 60 * 60 * 1000
       }).then(() => {
         console.log("[SW] Periodic sync registered");
-      }).catch(console.error);
     }
   });
 }
@@ -97,11 +90,8 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.ready.then((reg) => {
     // BACKGROUND SYNC
     if ('sync' in reg) {
-      reg.sync.register('sync-consent')
         .then(() => {
-          console.log('[SW] Background sync registered');
         })
-        .catch(console.error);
     }
 
     // PERIODIC SYNC
@@ -110,7 +100,6 @@ if ('serviceWorker' in navigator) {
         minInterval: 24 * 60 * 60 * 1000 // 1 day
       }).then(() => {
         console.log('[SW] Periodic sync registered');
-      }).catch(console.error);
     }
   });
 }

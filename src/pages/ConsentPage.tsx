@@ -1,147 +1,92 @@
+import React, { useEffect, useState, useRef } from "react";
 
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, WifiOff } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useConnectivity } from '../hooks/useConnectivity';
+const ConsentPage: React.FC = () => {
+  const [termsHtml, setTermsHtml] = useState<string>("");
+  const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
+  const [consentGiven, setConsentGiven] = useState<boolean>(() => {
+    return localStorage.getItem("consentAccepted") === "true";
+  });
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const termsRef = useRef<HTMLDivElement>(null);
 
-const ConsentPage = () => {
-  const navigate = useNavigate();
-  const { isOnline } = useConnectivity();
+  useEffect(() => {
+    fetch("/mia-consent-offline-form/terms.html")
+      .then((res) => res.text())
+      .then(setTermsHtml)
+      .catch(console.error);
 
-  // Redirect to home if offline
-  React.useEffect(() => {
-    if (!isOnline) {
-      navigate('/', { replace: true });
-    }
-  }, [isOnline, navigate]);
+    const handleScroll = () => {
+      if (!termsRef.current) return;
+      const { scrollTop, scrollHeight, clientHeight } = termsRef.current;
+      if (scrollTop + clientHeight >= scrollHeight - 5) {
+        setIsScrolledToBottom(true);
+      }
+    };
 
-  // Show offline message if user somehow reaches this page while offline
-  if (!isOnline) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Card className="max-w-md w-full">
-          <CardHeader className="text-center">
-            <WifiOff className="w-16 h-16 text-orange-500 mx-auto mb-4" />
-            <CardTitle className="text-xl text-gray-900">
-              Consent Form Unavailable Offline
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-center">
-            <p className="text-gray-600 mb-6">
-              The consent form requires an internet connection to view. Please connect to the internet and try again.
-            </p>
-            <Button onClick={() => navigate('/consent-form')} className="w-full">
-              Return to Form
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+    const node = termsRef.current;
+    node?.addEventListener("scroll", handleScroll);
+    return () => node?.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleStatus = () => setIsOnline(navigator.onLine);
+    window.addEventListener("online", handleStatus);
+    window.addEventListener("offline", handleStatus);
+    return () => {
+      window.removeEventListener("online", handleStatus);
+      window.removeEventListener("offline", handleStatus);
+    };
+  }, []);
+
+  const handleConsent = () => {
+    localStorage.setItem("consentAccepted", "true");
+    setConsentGiven(true);
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-[#ef4805] p-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white p-3 inline-block rounded-lg">
-            <img 
-              src="/mia-consent-offline-form/icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png" 
-              alt="Mia Healthcare" 
-              className="h-16 w-auto"
-            />
-          </div>
-        </div>
-      </div>
+    <div className="max-w-2xl mx-auto p-4 text-left">
+      <h1 className="text-2xl font-semibold mb-4">Patient Consent Form</h1>
 
-      {/* Content */}
-      <div className="max-w-4xl mx-auto p-4">
-        <div className="mb-6">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/consent-form')}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Form
-          </Button>
-        </div>
+      <details className="mb-4 border border-gray-300 rounded">
+        <summary className="cursor-pointer p-3 bg-gray-100 font-medium">
+          View Terms and Conditions
+        </summary>
+        <div
+          ref={termsRef}
+          className="max-h-72 overflow-y-scroll p-4 border-t border-gray-300 text-sm"
+          dangerouslySetInnerHTML={{ __html: termsHtml }}
+        />
+      </details>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl text-[#ef4805]">
-              Dental Consent Form
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="prose max-w-none">
-            <div className="space-y-6">
-              <section>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  Informed Consent for Dental Treatment
-                </h3>
-                <p className="text-gray-700 leading-relaxed">
-                  I understand that dentistry is not an exact science and that therefore, reputable practitioners cannot properly guarantee results. I acknowledge that no guarantee or assurance has been made by anyone regarding the dental treatment which I have requested and authorized.
-                </p>
-              </section>
+      {isOnline && (
+        <a
+          href="https://johan-potgieter-info.github.io/mia-consent-offline-form/terms.html"
+          className="text-sm text-blue-600 underline mb-4 block"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View latest online version of Terms & Conditions
+        </a>
+      )}
 
-              <section>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  Treatment Risks and Complications
-                </h3>
-                <p className="text-gray-700 leading-relaxed mb-3">
-                  I understand that all dental procedures may involve risks and potential complications, including but not limited to:
-                </p>
-                <ul className="list-disc pl-6 text-gray-700 space-y-2">
-                  <li>Pain, swelling, and discomfort following treatment</li>
-                  <li>Infection requiring additional treatment</li>
-                  <li>Temporary or permanent nerve damage resulting in numbness</li>
-                  <li>Damage to adjacent teeth or existing dental work</li>
-                  <li>Allergic reactions to medications or materials</li>
-                  <li>Need for additional procedures that are not initially apparent</li>
-                </ul>
-              </section>
+      <label className="flex items-start space-x-2 mt-4">
+        <input
+          type="checkbox"
+          disabled={!isScrolledToBottom}
+          checked={consentGiven}
+          onChange={handleConsent}
+          className="mt-1"
+        />
+        <span>
+          I have read and agree to the Terms and Conditions.
+        </span>
+      </label>
 
-              <section>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  Financial Agreement
-                </h3>
-                <p className="text-gray-700 leading-relaxed">
-                  I understand that payment is due at the time of service unless other arrangements have been made. I understand that a service charge may be applied to any account that becomes delinquent.
-                </p>
-              </section>
-
-              <section>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  Acknowledgment and Consent
-                </h3>
-                <p className="text-gray-700 leading-relaxed">
-                  I acknowledge that I have read and understand this consent form. I have had the opportunity to ask questions about my treatment, and all my questions have been answered to my satisfaction. I understand the risks, benefits, and alternatives to the proposed treatment.
-                </p>
-                <p className="text-gray-700 leading-relaxed mt-3">
-                  By proceeding with treatment, I give my informed consent for the dental procedures discussed and any additional procedures that may become necessary during treatment.
-                </p>
-              </section>
-
-              <section className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                <h3 className="text-lg font-semibold text-blue-900 mb-3">
-                  Patient Rights
-                </h3>
-                <p className="text-blue-800 leading-relaxed">
-                  You have the right to refuse treatment, seek a second opinion, and have your questions answered. You may withdraw consent for treatment at any time before the procedure begins.
-                </p>
-              </section>
-
-              <div className="text-center pt-6 border-t border-gray-200">
-                <p className="text-sm text-gray-600">
-                  Return to the form to provide your consent agreement
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {!isScrolledToBottom && (
+        <p className="text-red-500 text-sm mt-2">
+          Please scroll to the bottom of the terms to enable the checkbox.
+        </p>
+      )}
     </div>
   );
 };

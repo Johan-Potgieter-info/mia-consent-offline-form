@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mia-consent-cache-v4';
+const CACHE_NAME = 'mia-consent-cache-v5';
 const OFFLINE_FILES = [
   '/mia-consent-offline-form/',
   '/mia-consent-offline-form/index.html',
@@ -13,9 +13,9 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME).then((cache) =>
       Promise.all(
         OFFLINE_FILES.map((url) =>
-          fetch(url).then((response) => {
-            if (!response.ok) throw new Error(`Failed to fetch ${url}`);
-            return cache.put(url, response.clone());
+          fetch(url).then((res) => {
+            if (!res.ok) throw new Error(`Failed to fetch ${url}`);
+            return cache.put(url, res.clone());
           })
         )
       )
@@ -35,6 +35,9 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  if (!url.protocol.startsWith("http")) return;
+
   if (event.request.method !== 'GET') return;
 
   event.respondWith(

@@ -1,4 +1,3 @@
-
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -9,11 +8,7 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-console.log("App component is rendering");
-
 const App = () => {
-  console.log("App render function called");
-  
   return (
     <QueryClientProvider client={queryClient}>
       <Toaster />

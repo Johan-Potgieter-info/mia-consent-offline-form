@@ -1,62 +1,13 @@
-
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import react from '@vitejs/plugin-react-swc';
 import path from 'path';
-import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => ({
   base: mode === 'production' ? '/mia-consent-offline-form/' : '/',
-  server: {
-    host: "::",
-    port: 8080,
-  },
-  plugins: [
-    react({
-      // Add React Router v7 future flags to suppress warnings
-      jsxRuntime: 'automatic'
-    }),
-    mode === 'development' && componentTagger(),
-  ].filter(Boolean),
-  build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
-    sourcemap: false,
-    minify: 'esbuild',
-    target: 'es2015',
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
-          ui: ['@radix-ui/react-toast', 'lucide-react'],
-          database: ['@supabase/supabase-js', 'idb'],
-          forms: ['react-hook-form', '@hookform/resolvers', 'zod']
-        },
-        assetFileNames: (assetInfo) => {
-          if (!assetInfo.name) {
-            return 'assets/[name]-[hash][extname]';
-          }
-          const info = assetInfo.name.split('.');
-          const ext = info[info.length - 1];
-          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext)) {
-            return `assets/images/[name]-[hash][extname]`;
-          }
-          return `assets/[name]-[hash][extname]`;
-        },
-        chunkFileNames: 'assets/js/[name]-[hash].js',
-        entryFileNames: 'assets/js/[name]-[hash].js'
-      }
-    },
-    chunkSizeWarningLimit: 1000,
-    copyPublicDir: true
-  },
+  plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      '@': path.resolve(__dirname, 'src'),
     },
   },
-  define: {
-    'process.env.NODE_ENV': JSON.stringify(mode),
-  },
-  publicDir: 'public'
 }));

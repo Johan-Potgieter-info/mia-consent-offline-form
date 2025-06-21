@@ -1,96 +1,39 @@
+const CACHE_NAME = 'mia-consent-cache-v3';
+const OFFLINE_FILES = [
+  '/',
+  '/mia-consent-offline-form/',
+  '/mia-consent-offline-form/index.html',
+  '/mia-consent-offline-form/terms.html',
+  '/mia-consent-offline-form/icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png',
+  '/mia-consent-offline-form/manifest.json'
+];
 
-// PWA Builder Service Worker with Workbox - Combined offline experience
-const CACHE = "mia-consent-offline-page-v3";
-
-importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js');
-
-// Offline fallback page
-const offlineFallbackPage = "offline.html";
-
-self.addEventListener("message", (event) => {
-  if (event.data && event.data.type === "SKIP_WAITING") {
-    self.skipWaiting();
-  }
-});
-
-self.addEventListener('install', async (event) => {
-  console.log('🔧 Mia Healthcare PWA Service Worker installing...');
+self.addEventListener('install', (event) => {
+  console.log('[SW] Installing new service worker and caching offline files...');
   event.waitUntil(
-    caches.open(CACHE)
-      .then((cache) => {
-        return cache.add(offlineFallbackPage).catch(err => {
-          console.log('Could not cache offline page:', err);
-        });
-      })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(OFFLINE_FILES))
   );
-  self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-  console.log('✅ Mia Healthcare PWA Service Worker activating...');
+  console.log('[SW] Activated');
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE) {
-            console.log('🧹 Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => {
-      return self.clients.claim();
-    })
+    caches.keys().then((keys) =>
+      Promise.all(keys.map((key) => key !== CACHE_NAME && caches.delete(key)))
+    )
   );
 });
 
-if (workbox.navigationPreload.isSupported()) {
-  workbox.navigationPreload.enable();
-}
-
-// Cache strategy for all routes with GitHub Pages base path handling
-workbox.routing.registerRoute(
-  new RegExp('.*'),
-  new workbox.strategies.StaleWhileRevalidate({
-    cacheName: CACHE,
-    plugins: [{
-      cacheKeyWillBeUsed: async ({ request }) => {
-        // Normalize URLs for consistent caching
-        const url = new URL(request.url);
-        // Remove base path for caching consistency
-        if (url.pathname.startsWith('/mia-consent-offline-form/')) {
-          url.pathname = url.pathname.replace('/mia-consent-offline-form', '');
-        }
-        return url.href;
-      }
-    }]
-  })
-);
-
-// Enhanced fetch handler with offline fallback
 self.addEventListener('fetch', (event) => {
-  if (event.request.mode === 'navigate') {
-    event.respondWith((async () => {
-      try {
-        const preloadResp = await event.preloadResponse;
+  if (event.request.method !== 'GET') return;
 
-        if (preloadResp) {
-          return preloadResp;
-        }
-
-        const networkResp = await fetch(event.request);
-        return networkResp;
-      } catch (error) {
-        console.log('🌐 Network failed, serving offline page');
-        const cache = await caches.open(CACHE);
-        const cachedResp = await cache.match(offlineFallbackPage);
-        return cachedResp || new Response('Offline - Please check your connection', {
-          status: 200,
-          headers: { 'Content-Type': 'text/html' }
-        });
-      }
-    })());
-  }
+  event.respondWith(
+    fetch(event.request)
+      .then((response) => {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        return response;
+      })
+      .catch(() => caches.match(event.request))
+  );
 });
-
-console.log('🚀 Mia Healthcare PWA Service Worker loaded with Workbox v5.1.2');

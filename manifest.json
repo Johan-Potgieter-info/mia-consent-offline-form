@@ -100,4 +100,14 @@
       ]
     }
   ]
+,
+  "related_applications": [
+    {
+      "platform": "windows",
+      "url": "https://apps.microsoft.com/detail/9P23LZQRW0QZ",
+      "id": "JohanPotgieter.MiaOfflineConsent"
+    }
+  ],
+  "prefer_related_applications": true,
+  "iarc_rating_id": "pending"
 }

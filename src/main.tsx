@@ -54,3 +54,22 @@ if ('serviceWorker' in navigator) {
 }
 
 createRoot(document.getElementById("root")!).render(<App />);
+
+// Register background and periodic sync events if supported
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.ready.then((reg) => {
+    if ('sync' in reg) {
+      reg.sync.register('sync-consent').then(() => {
+        console.log('[SW] Background sync registered');
+      }).catch(console.error);
+    }
+
+    if ('periodicSync' in reg) {
+      reg.periodicSync.register('update-consent-data', {
+        minInterval: 24 * 60 * 60 * 1000, // Once per day
+      }).then(() => {
+        console.log('[SW] Periodic sync registered');
+      }).catch(console.error);
+    }
+  });
+}

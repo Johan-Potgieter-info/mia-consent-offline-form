@@ -1,93 +1,84 @@
+import React, { useEffect, useState, useRef } from "react";
 
-import React from 'react';
-import { ExternalLink, WifiOff } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { FormData } from '../types/formTypes';
-import { useConnectivity } from '../hooks/useConnectivity';
+const ConsentSection: React.FC = () => {
+  const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
+  const [consentGiven, setConsentGiven] = useState(() => {
+    return localStorage.getItem("consentAccepted") === "true";
+  });
 
-interface ConsentSectionProps {
-  formData: FormData;
-  updateFormData: (updates: Partial<FormData>) => void;
-  validationErrors: string[];
-}
+  const termsRef = useRef<HTMLDivElement>(null);
 
-const ConsentSection = ({ formData, updateFormData, validationErrors }: ConsentSectionProps) => {
-  const { isOnline } = useConnectivity();
-  const hasConsentError = validationErrors.includes("You must agree to the consent form");
+  useEffect(() => {
+    const node = termsRef.current;
+    if (!node) return;
 
-  const handleConsentChange = (checked: boolean | 'indeterminate') => {
-    updateFormData({ consentAgreement: checked === true });
+    const checkScroll = () => {
+      if (node.scrollTop + node.clientHeight >= node.scrollHeight - 5) {
+        setIsScrolledToBottom(true);
+      }
+    };
+
+    node.addEventListener("scroll", checkScroll);
+
+    // auto-enable if scroll not needed
+    setTimeout(() => {
+      if (node.scrollHeight <= node.clientHeight + 5) {
+        setIsScrolledToBottom(true);
+      }
+    }, 200);
+
+    return () => node.removeEventListener("scroll", checkScroll);
+  }, []);
+
+  const handleConsent = () => {
+    localStorage.setItem("consentAccepted", "true");
+    setConsentGiven(true);
   };
 
   return (
-    <div className="space-y-6">
-      <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">
-        Consent and Agreement
-      </h3>
-      
-      {/* Consent Form Link */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h4 className="font-medium text-blue-900 mb-3">
-          Review Dental Consent Form
-        </h4>
-        <p className="text-blue-800 mb-4 text-sm">
-          Before proceeding, please review our complete consent form which outlines the risks, 
-          benefits, and your rights regarding dental treatment.
-        </p>
-        
-        {isOnline ? (
-          <Link to="/consent-page" target="_blank" rel="noopener noreferrer">
-            <Button variant="outline" className="flex items-center gap-2">
-              <ExternalLink className="w-4 h-4" />
-              View Consent Form (Opens in new tab)
-            </Button>
-          </Link>
-        ) : (
-          <div className="flex items-center gap-2 text-orange-600 bg-orange-50 p-3 rounded border border-orange-200">
-            <WifiOff className="w-4 h-4" />
-            <span className="text-sm">
-              Consent form requires internet connection. Please connect to view the full consent details.
-            </span>
-          </div>
-        )}
-      </div>
+    <div className="max-w-2xl mx-auto p-4 text-left">
+      <h2 className="text-2xl font-semibold mb-4">Consent and Agreement</h2>
 
-      {/* Consent Agreement Checkbox */}
-      <div className={`space-y-3 ${hasConsentError ? 'border border-red-300 rounded-lg p-4 bg-red-50' : ''}`}>
-        {hasConsentError && (
-          <p className="text-red-600 text-sm font-medium">
-            You must agree to the consent form to proceed
-          </p>
-        )}
-        
-        <div className="flex items-start space-x-3">
-          <Checkbox
-            id="consentAgreement"
-            checked={formData.consentAgreement === true}
-            onCheckedChange={handleConsentChange}
-            className="mt-1"
-          />
-          <label 
-            htmlFor="consentAgreement" 
-            className="text-sm text-gray-700 leading-relaxed cursor-pointer flex-1"
-          >
-            I acknowledge that I have read and understand the consent form (or have had it explained to me), 
-            and I agree to the dental treatment as outlined. I understand the risks, benefits, and alternatives 
-            to the proposed treatment, and I give my informed consent to proceed.
-          </label>
+      <details className="mb-4 border border-gray-300 rounded">
+        <summary className="cursor-pointer p-3 bg-gray-100 font-medium">
+          View Consent and Agreement Form
+        </summary>
+        <div
+          ref={termsRef}
+          className="max-h-72 overflow-y-scroll p-4 border-t border-gray-300 text-sm space-y-4"
+        >
+          <h3 className="text-lg font-semibold text-orange-600">Consent Form Contents</h3>
+          <p>1. I, the undersigned, hereby give my voluntary consent for dental examination, diagnosis and treatment as deemed necessary by the dental professional in attendance.</p>
+          <p>2. I understand that dental treatment may involve procedures such as cleaning, scaling, polishing, and the use of diagnostic tools including X-rays or photos.</p>
+          <p>3. I understand the nature and purpose of the treatment and acknowledge that no guarantees or assurances have been made to me concerning the results of the procedure.</p>
+          <p>4. I understand that there may be risks and complications associated with dental treatment, including but not limited to sensitivity, discomfort, and allergic reactions.</p>
+          <p>5. I confirm that I have disclosed all relevant medical history and current medications.</p>
+          <p>6. I understand that the dental provider may refer me for further treatment if necessary, and that this referral may incur additional costs not covered during the screening.</p>
+          <p>7. I acknowledge that I have the right to ask questions and that I may withdraw my consent at any time before or during the treatment.</p>
+          <p>8. I give consent for my dental records to be shared with other healthcare professionals if needed for further treatment or referral.</p>
+          <p>9. I understand the confidentiality of my health information and consent to the collection and use of this information for medical and administrative purposes.</p>
+          <p>10. I confirm that I have read and understood the information above, and that I am signing this consent voluntarily and without coercion.</p>
         </div>
-      </div>
+      </details>
 
-      {/* Additional Notes */}
-      <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded">
-        <p>
-          <strong>Note:</strong> By checking the agreement above, you confirm that you have reviewed 
-          the complete consent form and agree to the terms of treatment. If you have any questions 
-          or concerns, please discuss them with your dental provider before proceeding.
+      <label className="flex items-start space-x-2 mt-4">
+        <input
+          type="checkbox"
+          disabled={!isScrolledToBottom}
+          checked={consentGiven}
+          onChange={handleConsent}
+          className="mt-1"
+        />
+        <span>
+          I have read and agree to the Consent and Agreement terms above.
+        </span>
+      </label>
+
+      {!isScrolledToBottom && (
+        <p className="text-red-500 text-sm mt-2">
+          Please scroll to the bottom to enable the checkbox.
         </p>
-      </div>
+      )}
     </div>
   );
 };

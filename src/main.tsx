@@ -80,3 +80,9 @@ if ('serviceWorker' in navigator) {
     }
   });
 }
+
+import { createRoot } from 'react-dom/client';
+import App from './App.tsx';
+
+// Mount React App
+createRoot(document.getElementById("root")!).render(<App />);

@@ -86,3 +86,6 @@ import App from './App.tsx';
 
 // Mount React App
 createRoot(document.getElementById("root")!).render(<App />);
+
+// Mount React App
+createRoot(document.getElementById("root")!).render(<App />);

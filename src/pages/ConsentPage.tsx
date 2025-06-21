@@ -11,10 +11,28 @@ const ConsentPage: React.FC = () => {
 
   useEffect(() => {
     fetch("/mia-consent-offline-form/terms.html")
-      .then((res) => res.text())
-      .then(setTermsHtml)
-      .catch(console.error);
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch terms.html");
+        return res.text();
+      })
+      .then((html) => {
+        setTermsHtml(html);
 
+        // Wait until content renders, then measure scroll area
+        setTimeout(() => {
+          const node = termsRef.current;
+          if (node && node.scrollHeight <= node.clientHeight + 5) {
+            setIsScrolledToBottom(true); // No scroll needed
+          }
+        }, 250);
+      })
+      .catch((err) => {
+        console.error("Terms fetch failed:", err);
+        setTermsHtml("<p style='color:red'>⚠️ Failed to load Terms and Conditions. Please try again later.</p>");
+      });
+  }, []);
+
+  useEffect(() => {
     const handleScroll = () => {
       if (!termsRef.current) return;
       const { scrollTop, scrollHeight, clientHeight } = termsRef.current;
@@ -26,7 +44,7 @@ const ConsentPage: React.FC = () => {
     const node = termsRef.current;
     node?.addEventListener("scroll", handleScroll);
     return () => node?.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [termsHtml]);
 
   useEffect(() => {
     const handleStatus = () => setIsOnline(navigator.onLine);
@@ -77,9 +95,7 @@ const ConsentPage: React.FC = () => {
           onChange={handleConsent}
           className="mt-1"
         />
-        <span>
-          I have read and agree to the Terms and Conditions.
-        </span>
+        <span>I have read and agree to the Terms and Conditions.</span>
       </label>
 
       {!isScrolledToBottom && (

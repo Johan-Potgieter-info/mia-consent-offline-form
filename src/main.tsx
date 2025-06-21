@@ -59,21 +59,37 @@ createRoot(document.getElementById("root")!).render(<App />);
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.ready.then((reg) => {
     if ('sync' in reg) {
-      reg.sync.register('sync-consent').then(() => {
         console.log('[SW] Background sync registered');
       }).catch(console.error);
     }
 
-    if ("periodicSync" in reg) {
-    if ("periodicSync" in reg) {
-      (reg as any).periodicSync.register("update-consent-data", {
         minInterval: 24 * 60 * 60 * 1000
       }).then(() => {
         console.log("[SW] Periodic sync registered");
       }).catch(console.error);
     }
     }
+    }
         console.log('[SW] Periodic sync registered');
+      }).catch(console.error);
+    }
+  });
+}
+
+// Register background and periodic sync events if supported
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.ready.then((reg) => {
+    if ('sync' in reg) {
+      reg.sync.register('sync-consent')
+        .then(() => console.log('[SW] Background sync registered'))
+        .catch(console.error);
+    }
+
+    if ('periodicSync' in reg) {
+      (reg as any).periodicSync.register("update-consent-data", {
+        minInterval: 24 * 60 * 60 * 1000
+      }).then(() => {
+        console.log("[SW] Periodic sync registered");
       }).catch(console.error);
     }
   });

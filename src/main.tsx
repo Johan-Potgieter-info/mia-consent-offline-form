@@ -58,34 +58,26 @@ createRoot(document.getElementById("root")!).render(<App />);
 // Register background and periodic sync events if supported
 if ('serviceWorker' in navigator) {
 
+// Mount React App
+createRoot(document.getElementById("root")!).render(<App />);
+
 // Register background and periodic sync events if supported
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.ready.then((reg) => {
-    // BACKGROUND SYNC
-    if ('sync' in reg) {
-      reg.sync.register('sync-consent')
-        .then(() => {
-          console.log('[SW] Background sync registered');
-        })
-        .catch(console.error);
-    }
+navigator.serviceWorker.ready.then((reg) => {
+  // BACKGROUND SYNC
+  if ('sync' in reg) {
+    reg.sync.register('sync-consent')
+      .then(() => {
+        console.log('[SW] Background sync registered');
+      })
+      .catch(console.error);
+  }
 
-    // PERIODIC SYNC
-    if ('periodicSync' in reg) {
-      (reg as any).periodicSync.register('update-consent-data', {
-        minInterval: 24 * 60 * 60 * 1000
-      }).then(() => {
-        console.log('[SW] Periodic sync registered');
-      }).catch(console.error);
-    }
-  });
-}
-
-import { createRoot } from 'react-dom/client';
-import App from './App.tsx';
-
-// Mount React App
-createRoot(document.getElementById("root")!).render(<App />);
-
-// Mount React App
-createRoot(document.getElementById("root")!).render(<App />);
+  // PERIODIC SYNC
+  if ('periodicSync' in reg) {
+    (reg as any).periodicSync.register('update-consent-data', {
+      minInterval: 24 * 60 * 60 * 1000
+    }).then(() => {
+      console.log('[SW] Periodic sync registered');
+    }).catch(console.error);
+  }
+});

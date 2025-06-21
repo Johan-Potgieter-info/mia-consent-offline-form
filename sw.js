@@ -1,17 +1,27 @@
-const CACHE_NAME = 'mia-consent-cache-v3';
+const CACHE_NAME = 'mia-consent-cache-v4';
 const OFFLINE_FILES = [
-  '/',
   '/mia-consent-offline-form/',
   '/mia-consent-offline-form/index.html',
   '/mia-consent-offline-form/terms.html',
-  '/mia-consent-offline-form/icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png',
-  '/mia-consent-offline-form/manifest.json'
+  '/mia-consent-offline-form/manifest.json',
+  '/mia-consent-offline-form/icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png'
 ];
 
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing new service worker and caching offline files...');
+  console.log('[SW] Installing...');
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(OFFLINE_FILES))
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.all(
+        OFFLINE_FILES.map((url) =>
+          fetch(url).then((response) => {
+            if (!response.ok) throw new Error(`Failed to fetch ${url}`);
+            return cache.put(url, response.clone());
+          })
+        )
+      )
+    ).catch((err) => {
+      console.error('[SW] Precache failed:', err);
+    })
   );
 });
 

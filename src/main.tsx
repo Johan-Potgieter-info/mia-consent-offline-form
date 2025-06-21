@@ -57,64 +57,6 @@ createRoot(document.getElementById("root")!).render(<App />);
 
 // Register background and periodic sync events if supported
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.ready.then((reg) => {
-    if ('sync' in reg) {
-    }
-
-        minInterval: 24 * 60 * 60 * 1000
-      }).then(() => {
-    }
-    }
-    }
-    }
-  });
-}
-
-// Register background and periodic sync events if supported
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.ready.then((reg) => {
-    if ('sync' in reg) {
-    }
-
-        minInterval: 24 * 60 * 60 * 1000
-      }).then(() => {
-    }
-  });
-}
-
-// Register background and periodic sync events if supported
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.ready.then((reg) => {
-    // BACKGROUND SYNC
-    if ('sync' in reg) {
-        .then(() => {
-        })
-    }
-
-    // PERIODIC SYNC
-        minInterval: 24 * 60 * 60 * 1000 // 1 day
-      }).then(() => {
-    }
-  });
-}
-
-// Register background and periodic sync events if supported
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.ready.then((reg) => {
-    // BACKGROUND SYNC
-    if ('sync' in reg) {
-        .then(() => {
-        })
-        .catch(console.error);
-    }
-
-    // PERIODIC SYNC
-        minInterval: 24 * 60 * 60 * 1000 // once per day
-      }).then(() => {
-      }).catch(console.error);
-    }
-  });
-}
 
 // Register background and periodic sync events if supported
 if ('serviceWorker' in navigator) {

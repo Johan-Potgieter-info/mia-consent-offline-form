@@ -65,11 +65,13 @@ if ('serviceWorker' in navigator) {
     }
 
     if ("periodicSync" in reg) {
+    if ("periodicSync" in reg) {
       (reg as any).periodicSync.register("update-consent-data", {
         minInterval: 24 * 60 * 60 * 1000
       }).then(() => {
         console.log("[SW] Periodic sync registered");
       }).catch(console.error);
+    }
     }
         console.log('[SW] Periodic sync registered');
       }).catch(console.error);

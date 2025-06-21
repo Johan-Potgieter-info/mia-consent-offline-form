@@ -50,3 +50,21 @@ self.addEventListener('fetch', (event) => {
       .catch(() => caches.match(event.request))
   );
 });
+
+// BACKGROUND SYNC
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-consent') {
+    console.log('[SW] Background sync triggered for consent data');
+    // Put sync logic here, e.g., send drafts to Supabase
+    event.waitUntil(Promise.resolve());
+  }
+});
+
+// PERIODIC SYNC
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'update-consent-data') {
+    console.log('[SW] Periodic sync triggered');
+    // Place your daily refresh logic here if needed
+    event.waitUntil(Promise.resolve());
+  }
+});

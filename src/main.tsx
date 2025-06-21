@@ -63,11 +63,9 @@ if ('serviceWorker' in navigator) {
 
         minInterval: 24 * 60 * 60 * 1000
       }).then(() => {
-        console.log("[SW] Periodic sync registered");
     }
     }
     }
-        console.log('[SW] Periodic sync registered');
     }
   });
 }
@@ -80,7 +78,6 @@ if ('serviceWorker' in navigator) {
 
         minInterval: 24 * 60 * 60 * 1000
       }).then(() => {
-        console.log("[SW] Periodic sync registered");
     }
   });
 }
@@ -95,11 +92,8 @@ if ('serviceWorker' in navigator) {
     }
 
     // PERIODIC SYNC
-    if ('periodicSync' in reg) {
-      (reg as any).periodicSync.register('update-consent-data', {
         minInterval: 24 * 60 * 60 * 1000 // 1 day
       }).then(() => {
-        console.log('[SW] Periodic sync registered');
     }
   });
 }
@@ -109,19 +103,14 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.ready.then((reg) => {
     // BACKGROUND SYNC
     if ('sync' in reg) {
-      reg.sync.register('sync-consent')
         .then(() => {
-          console.log('[SW] Background sync registered');
         })
         .catch(console.error);
     }
 
     // PERIODIC SYNC
-    if ('periodicSync' in reg) {
-      (reg as any).periodicSync.register('update-consent-data', {
         minInterval: 24 * 60 * 60 * 1000 // once per day
       }).then(() => {
-        console.log('[SW] Periodic sync registered');
       }).catch(console.error);
     }
   });

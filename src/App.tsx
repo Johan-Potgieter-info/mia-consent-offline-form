@@ -12,7 +12,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <Toaster />
-      <BrowserRouter basename="/mia-consent-offline-form">
+      <BrowserRouter basename={import.meta.env.PROD ? "/mia-consent-offline-form" : "/"}>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/consent-form" element={<ConsentForm />} />

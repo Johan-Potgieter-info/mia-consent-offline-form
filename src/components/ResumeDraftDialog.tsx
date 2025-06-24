@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Clock } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +20,7 @@ interface ResumeDraftDialogProps {
 }
 
 const ResumeDraftDialog = ({ onDraftsChanged }: ResumeDraftDialogProps) => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const {
     drafts,
@@ -33,8 +35,9 @@ const ResumeDraftDialog = ({ onDraftsChanged }: ResumeDraftDialogProps) => {
     getDoctorOptions
   } = useDraftOperations(isOpen);
 
-  const handleContinue = () => {
+  const handleContinue = (draftId: string) => {
     setIsOpen(false);
+    navigate(`/consent-form?id=${draftId}`);
   };
 
   const handleDelete = async (draftId: string, e: React.MouseEvent) => {
@@ -103,7 +106,7 @@ const ResumeDraftDialog = ({ onDraftsChanged }: ResumeDraftDialogProps) => {
             onDoctorChange={handleDoctorChange}
             formatDate={formatDate}
             getDoctorOptions={getDoctorOptions}
-            onContinue={handleContinue}
+            onContinue={(id) => handleContinue(id)}
             isBulkDeleting={isBulkDeleting}
           />
         </div>

@@ -60,7 +60,7 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.ready.then((reg) => {
     // BACKGROUND SYNC
     if ('sync' in reg) {
-      reg.sync.register('sync-consent')
+      (reg as any).sync.register('sync-consent')
         .then(() => {
           console.log('[SW] Background sync registered');
         })
@@ -70,7 +70,7 @@ if ('serviceWorker' in navigator) {
     // PERIODIC SYNC
     if ('periodicSync' in reg) {
       const periodicSyncReg = reg as any;
-      if (periodicSyncReg.periodicSync && periodicSyncReg.periodicSync.register) {
+      if (periodicSyncReg.periodicSync && typeof periodicSyncReg.periodicSync.register === 'function') {
         periodicSyncReg.periodicSync.register('update-consent-data', {
           minInterval: 24 * 60 * 60 * 1000
         }).then(() => {

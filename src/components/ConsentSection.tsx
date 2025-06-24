@@ -1,12 +1,37 @@
-import React, { useEffect, useState, useRef } from "react";
 
-const ConsentSection: React.FC = () => {
+import React, { useEffect, useState, useRef } from "react";
+import { FormData } from "../types/formTypes";
+
+interface ConsentSectionProps {
+  formData?: FormData;
+  onInputChange?: (field: keyof FormData, value: string) => void;
+  onCheckboxChange?: (field: keyof FormData, value: string, checked: boolean) => void;
+  updateFormData?: (updates: Partial<FormData>) => void;
+  validationErrors?: string[];
+}
+
+const ConsentSection: React.FC<ConsentSectionProps> = ({
+  formData,
+  onCheckboxChange,
+  validationErrors
+}) => {
   const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
   const [consentGiven, setConsentGiven] = useState(() => {
+    // Check form data first, then localStorage as fallback
+    if (formData?.consentAgreement !== undefined) {
+      return formData.consentAgreement;
+    }
     return localStorage.getItem("consentAccepted") === "true";
   });
 
   const termsRef = useRef<HTMLDivElement>(null);
+
+  // Sync with form data when it changes
+  useEffect(() => {
+    if (formData?.consentAgreement !== undefined) {
+      setConsentGiven(formData.consentAgreement);
+    }
+  }, [formData?.consentAgreement]);
 
   useEffect(() => {
     const node = termsRef.current;
@@ -31,8 +56,18 @@ const ConsentSection: React.FC = () => {
   }, []);
 
   const handleConsent = () => {
+    const newConsentValue = true;
+    
+    // Update localStorage (preserve existing behavior)
     localStorage.setItem("consentAccepted", "true");
-    setConsentGiven(true);
+    
+    // Update local state (preserve existing behavior)
+    setConsentGiven(newConsentValue);
+    
+    // Update main form data (fix the issue)
+    if (onCheckboxChange) {
+      onCheckboxChange('consentAgreement', 'true', newConsentValue);
+    }
   };
 
   return (

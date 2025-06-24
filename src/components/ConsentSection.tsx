@@ -101,7 +101,7 @@ const ConsentSection: React.FC<ConsentSectionProps> = ({
         <input
           type="checkbox"
           disabled={!isScrolledToBottom}
-          checked={consentGiven}
+          checked={formData?.consentAgreement === "true"}
           onChange={handleConsent}
           className="mt-1"
         />

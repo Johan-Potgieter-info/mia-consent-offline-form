@@ -35,12 +35,12 @@ export const getAllDrafts = async (): Promise<FormData[]> => {
   const drafts = await getAllFromStore(DRAFTS_STORE);
   
   // Decrypt all drafts
-  const decryptedDrafts = decryptItems(drafts);
+  const decryptedDrafts = decryptItems(drafts) as FormData[];
   
   // Sort drafts by lastModified (newest first)
   return decryptedDrafts.sort((a, b) => {
-    const dateA = new Date(a.lastModified || a.timestamp);
-    const dateB = new Date(b.lastModified || b.timestamp);
+    const dateA = new Date((a as FormData).lastModified || (a as FormData).timestamp);
+    const dateB = new Date((b as FormData).lastModified || (b as FormData).timestamp);
     return dateB.getTime() - dateA.getTime();
   });
 };

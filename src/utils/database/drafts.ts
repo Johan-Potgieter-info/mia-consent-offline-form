@@ -19,12 +19,12 @@ export const saveDraftData = async (formData: FormData): Promise<number> => {
  * @returns Promise with all drafts (decrypted and sorted)
  */
 export const getAllDrafts = async (): Promise<FormData[]> => {
-  const drafts = await getAllFromIndexedDB(DRAFTS_STORE);
+  const drafts = await getAllFromIndexedDB(DRAFTS_STORE) as FormData[];
   
   // Sort drafts by lastModified (newest first)
   return drafts.sort((a, b) => {
-    const dateA = new Date(a.lastModified || a.timestamp);
-    const dateB = new Date(b.lastModified || b.timestamp);
+    const dateA = new Date((a as FormData).lastModified || (a as FormData).timestamp);
+    const dateB = new Date((b as FormData).lastModified || (b as FormData).timestamp);
     return dateB.getTime() - dateA.getTime();
   });
 };

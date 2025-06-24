@@ -25,8 +25,8 @@ export const encryptSensitiveFields = <T extends Record<string, unknown>>(data: 
   const processedData = { ...data };
   
   sensitiveFields.forEach(field => {
-    if (processedData[field]) {
-      processedData[field] = encrypt(processedData[field]);
+    if (processedData[field] && typeof processedData[field] === 'string') {
+      (processedData as any)[field] = encrypt(processedData[field] as string);
     }
   });
   
@@ -38,8 +38,8 @@ export const decryptSensitiveFields = <T extends Record<string, unknown>>(data: 
   const decryptedData = { ...data };
   
   sensitiveFields.forEach(field => {
-    if (decryptedData[field] && decryptedData.encrypted) {
-      decryptedData[field] = decrypt(decryptedData[field]);
+    if (decryptedData[field] && (decryptedData as any).encrypted && typeof decryptedData[field] === 'string') {
+      (decryptedData as any)[field] = decrypt(decryptedData[field] as string);
     }
   });
   

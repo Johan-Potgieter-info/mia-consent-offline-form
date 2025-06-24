@@ -26,7 +26,9 @@ export const syncToSupabase = async (): Promise<{ success: number; failed: numbe
         await saveFormToSupabase(draft, true);
         results.success++;
         // Optionally delete from IndexedDB after successful sync
-        await deleteDraft(draft.id);
+        if (typeof draft.id === 'number') {
+          await deleteDraft(draft.id);
+        }
       } catch (error) {
         console.error('Failed to sync draft:', draft.id, error);
         results.failed++;

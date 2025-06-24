@@ -93,7 +93,7 @@ export const useConsentFormContainer = () => {
     activeSection,
     setActiveSection,
     validationErrors,
-    showValidationErrors: validationErrors.length > 0,
+    showValidationErrors: (validationErrors?.length || 0) > 0,
     isOnline,
     dbInitialized: isInitialized,
     autoSaveStatus,

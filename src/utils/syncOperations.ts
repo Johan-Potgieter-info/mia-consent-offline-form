@@ -2,7 +2,8 @@
 // Sync operations for hybrid storage
 
 import { saveFormToSupabase } from './supabaseOperations';
-import { getAllDrafts, getAllForms, deleteDraft } from './database/drafts';
+import { getAllDrafts, deleteDraft } from './database/drafts';
+import { getAllForms } from './database/forms';
 import { getStorageCapabilities } from './storage/capabilities';
 
 /**

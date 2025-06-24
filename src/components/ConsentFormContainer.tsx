@@ -1,107 +1,108 @@
-
-import React, { useState } from 'react';
-import { useConsentForm } from '../hooks/useConsentForm';
-import { useFormSubmission } from '../hooks/useFormSubmission';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
+import { useHybridStorage } from '../hooks/useHybridStorage';
 import { FormData } from '../types/formTypes';
 
 export const useConsentFormContainer = () => {
-  const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
-  const [saveMessage, setSaveMessage] = useState('');
-  const [showOfflineDialog, setShowOfflineDialog] = useState(false);
-  const [showOnlineSuccessDialog, setShowOnlineSuccessDialog] = useState(false);
-  const [showOfflineSummaryDialog, setShowOfflineSummaryDialog] = useState(false);
-  const [offlineFormData, setOfflineFormData] = useState<FormData | undefined>();
-  const [onlineFormData, setOnlineFormData] = useState<FormData | undefined>();
-  const [pendingForms, setPendingForms] = useState<FormData[]>([]);
-  const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const [showValidationErrors, setShowValidationErrors] = useState(false);
-  
-  const consentFormData = useConsentForm();
-  
-  const { submitForm: submitFormHook } = useFormSubmission({ 
-    isOnline: consentFormData.isOnline,
-    onOfflineSubmission: (formData, pendingFormsList) => {
-      console.log('Offline submission callback triggered', { 
-        patientName: formData.patientName,
-        pendingCount: pendingFormsList.length 
-      });
-      setOfflineFormData(formData);
-      setPendingForms(pendingFormsList);
-      setShowOfflineSummaryDialog(true);
-      setShowValidationErrors(false); // Hide validation errors on successful submission
-    },
-    onOnlineSubmission: (formData) => {
-      console.log('Online submission callback triggered', { patientName: formData.patientName });
-      setOnlineFormData(formData);
-      setShowOnlineSuccessDialog(true);
-      setShowValidationErrors(false); // Hide validation errors on successful submission
-    },
-    onValidationErrors: (errors) => {
-      console.log('Validation errors callback triggered', { errors });
-      setValidationErrors(errors);
-      setShowValidationErrors(true);
-      // Scroll to top to show validation errors
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  });
+  const { draftId } = useParams();
+  const {
+    saveForm,
+    getForms,
+    deleteForm,
+    isInitialized,
+    capabilities,
+    isOnline
+  } = useHybridStorage();
 
-  const handleSave = async () => {
+  const [formData, setFormData] = useState<FormData>({} as FormData);
+  const [isDirty, setIsDirty] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
+  const [activeSection, setActiveSection] = useState('patient');
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<string>('idle');
+  const [retryCount, setRetryCount] = useState(0);
+
+  const loadDraftById = useCallback(async () => {
+    if (!draftId || !isInitialized) return;
+
     try {
-      console.log('Manual save initiated...');
-      await consentFormData.saveForm();
-      setSaveMessage('Form saved successfully to ' + (consentFormData.dbInitialized ? 'cloud storage' : 'local storage'));
-      setShowSaveConfirmation(true);
-      setTimeout(() => setShowSaveConfirmation(false), 3000);
+      const drafts = await getForms(true);
+      const matchingDraft = drafts.find((draft) => String(draft.id) === draftId);
+      if (matchingDraft) {
+        setFormData(matchingDraft);
+        console.log(`Loaded draft ID ${draftId}`);
+      } else {
+        console.warn(`Draft with ID ${draftId} not found`);
+      }
+    } catch (error) {
+      console.error('Failed to load draft:', error);
+    }
+  }, [draftId, isInitialized, getForms]);
+
+  useEffect(() => {
+    loadDraftById();
+  }, [loadDraftById]);
+
+  const handleInputChange = (field: keyof FormData, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    setIsDirty(true);
+  };
+
+  const handleCheckboxChange = (field: keyof FormData, value: string, checked: boolean) => {
+    setFormData((prev) => ({ ...prev, [field]: checked }));
+    setIsDirty(true);
+  };
+
+  const handleSave = async (isDraft = true) => {
+    try {
+      setAutoSaveStatus('saving');
+      await saveForm(formData, isDraft);
+      setIsDirty(false);
+      setJustSaved(true);
+      setTimeout(() => setJustSaved(false), 2000);
+      setAutoSaveStatus('idle');
     } catch (error) {
       console.error('Save failed:', error);
+      setAutoSaveStatus('failed');
+      setRetryCount((prev) => prev + 1);
     }
   };
 
   const handleSubmit = async () => {
-    try {
-      console.log('Form submission initiated...', { 
-        patientName: consentFormData.formData.patientName,
-        consentAgreement: consentFormData.formData.consentAgreement 
-      });
-      
-      // Clear previous validation errors
-      setShowValidationErrors(false);
-      setValidationErrors([]);
-      
-      const result = await submitFormHook(
-        consentFormData.formData, 
-        consentFormData.currentRegion, 
-        consentFormData.isResuming
-      );
-      
-      console.log('Submission result:', result);
-    } catch (error) {
-      console.error('Submit failed:', error);
+    // Add form validation logic if needed
+    console.log('Submitting form...');
+    await saveForm(formData, false);
+  };
+
+  const handleDiscard = async () => {
+    if (formData.id) {
+      await deleteForm(formData.id, true);
+      setFormData({} as FormData);
     }
   };
 
-  const handleDiscard = () => {
-    console.log('Form discarded');
-  };
-
   return {
-    ...consentFormData,
-    showSaveConfirmation,
-    setShowSaveConfirmation,
-    saveMessage,
-    showOfflineDialog,
-    setShowOfflineDialog,
-    showOnlineSuccessDialog,
-    setShowOnlineSuccessDialog,
-    showOfflineSummaryDialog,
-    setShowOfflineSummaryDialog,
-    offlineFormData,
-    onlineFormData,
-    pendingForms,
-    validationErrors,
-    showValidationErrors,
+    formData,
+    handleInputChange,
+    handleCheckboxChange,
     handleSave,
     handleSubmit,
-    handleDiscard
+    handleDiscard,
+    isDirty,
+    justSaved,
+    activeSection,
+    setActiveSection,
+    validationErrors,
+    showValidationErrors: validationErrors.length > 0,
+    isOnline,
+    dbInitialized: isInitialized,
+    autoSaveStatus,
+    retryCount,
+    showManualSelector: false,
+    setRegionManually: () => {},
+    isRegionFromDraft: false,
+    isRegionDetected: false,
+    currentRegion: null,
+    regionDetected: false
   };
 };

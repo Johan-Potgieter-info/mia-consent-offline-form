@@ -1,131 +1,102 @@
 
-// Core database operations
+// Core database operations with proper error handling
 
 import { initDB } from './initialization';
 import { encryptSensitiveFields, decryptSensitiveFields } from '../encryption';
 import { FormData } from '../../types/formTypes';
 
 /**
- * Save form data to IndexedDB
- * @param formData Form data to save
- * @param storeName Store name to save to
- * @returns Promise with the saved object ID
+ * Save data to a specific store
  */
-export const saveToIndexedDB = async (formData: FormData, storeName: string): Promise<number> => {
-  if (!formData) {
-    throw new Error(`No form data provided to save to ${storeName}`);
-  }
-
+export const saveToIndexedDB = async (data: FormData, storeName: string): Promise<number> => {
   try {
     const db = await initDB();
+    const tx = db.transaction(storeName, 'readwrite');
+    const store = tx.objectStore(storeName);
     
-    // Generate consistent ID if not present
-    const id = formData.id || Date.now();
-    const timestamp = new Date().toISOString();
+    console.log(`Saving to ${storeName}:`, data);
     
-    // Encrypt sensitive data
-    const processedData = encryptSensitiveFields(formData);
-    
+    // Add timestamp and encryption metadata
     const dataToSave = {
-      ...processedData,
-      id,
-      timestamp,
-      lastModified: timestamp,
-      encrypted: true
+      ...data,
+      timestamp: data.timestamp || new Date().toISOString(),
+      lastModified: new Date().toISOString(),
+      encrypted: true,
+      ...encryptSensitiveFields(data)
     };
-
-    const result = await db.put(storeName, dataToSave);
+    
+    const result = await store.add(dataToSave);
+    console.log(`Successfully saved to ${storeName} with ID:`, result);
     return result as number;
   } catch (error) {
-    console.error(`Error saving to ${storeName}:`, error);
+    console.error(`Failed to save to ${storeName}:`, error);
     throw error;
   }
 };
 
 /**
- * Get all items from a store
- * @param storeName Store name to query
- * @returns Promise with all items (decrypted)
+ * Get all data from a specific store
  */
-export const getAllFromIndexedDB = async (storeName: string): Promise<unknown[]> => {
+export const getAllFromIndexedDB = async (storeName: string): Promise<FormData[]> => {
   try {
     const db = await initDB();
-    const items = await db.getAll(storeName);
+    const tx = db.transaction(storeName, 'readonly');
+    const store = tx.objectStore(storeName);
     
-    return items.map(item => {
-      try {
-        if (item.encrypted) {
-          return { ...item, ...decryptSensitiveFields(item) };
-        }
-        return item;
-      } catch (decryptError) {
-        console.warn('Failed to decrypt item, returning as is:', decryptError);
-        return { ...item, decryptionFailed: true };
-      }
+    const allData = await store.getAll();
+    console.log(`Retrieved ${allData.length} items from ${storeName}`);
+    
+    // Decrypt sensitive fields and ensure proper typing
+    const decryptedData = allData.map(item => {
+      const formData = item as any;
+      return decryptSensitiveFields(formData) as FormData;
     });
+    
+    return decryptedData;
   } catch (error) {
-    console.error(`Error getting all items from ${storeName}:`, error);
-    throw error;
+    console.error(`Failed to get all from ${storeName}:`, error);
+    return [];
   }
 };
 
 /**
- * Delete an item from IndexedDB
- * @param id Item ID to delete
- * @param storeName Store name
- * @returns Promise that resolves when item is deleted
+ * Delete data from a specific store
  */
 export const deleteFromIndexedDB = async (id: number, storeName: string): Promise<void> => {
   try {
     const db = await initDB();
+    const tx = db.transaction(storeName, 'readwrite');
+    const store = tx.objectStore(storeName);
     
-    // First check if the item exists
-    const existingItem = await db.get(storeName, id);
-    
-    if (!existingItem) {
-      throw new Error(`Item ${id} not found in ${storeName}`);
-    }
-    
-    await db.delete(storeName, id);
-    console.log(`Item ${id} deleted from ${storeName}`);
+    await store.delete(id);
+    console.log(`Successfully deleted ID ${id} from ${storeName}`);
   } catch (error) {
-    console.error(`Error deleting item from ${storeName}:`, error);
+    console.error(`Failed to delete from ${storeName}:`, error);
     throw error;
   }
 };
 
 /**
- * Update an existing item by ID
- * @param id Item ID to update
- * @param formData Updated form data
- * @param storeName Store name
- * @returns Promise that resolves when item is updated
+ * Update data in a specific store
  */
-export const updateInIndexedDB = async (id: number | string, formData: FormData, storeName: string): Promise<void> => {
+export const updateInIndexedDB = async (id: number | string, data: FormData, storeName: string): Promise<void> => {
   try {
     const db = await initDB();
+    const tx = db.transaction(storeName, 'readwrite');
+    const store = tx.objectStore(storeName);
     
-    // Get existing item first
-    const existingItem = await db.get(storeName, id);
-    
-    if (!existingItem) {
-      throw new Error(`Item with ID ${id} not found in ${storeName}`);
-    }
-    
-    // Encrypt sensitive data
-    const processedData = encryptSensitiveFields(formData);
-    
-    const updatedData = {
-      ...existingItem,
-      ...processedData,
+    const dataToUpdate = {
+      ...data,
+      id: typeof id === 'string' ? parseInt(id) : id,
       lastModified: new Date().toISOString(),
-      encrypted: true
+      encrypted: true,
+      ...encryptSensitiveFields(data)
     };
     
-    await db.put(storeName, updatedData);
-    console.log(`Item ${id} updated successfully in ${storeName}`);
+    await store.put(dataToUpdate);
+    console.log(`Successfully updated ID ${id} in ${storeName}`);
   } catch (error) {
-    console.error(`Error updating item in ${storeName}:`, error);
+    console.error(`Failed to update in ${storeName}:`, error);
     throw error;
   }
 };

@@ -67,7 +67,7 @@ const ConsentSection: React.FC<ConsentSectionProps> = ({
     
     // Update main form data (fix the issue)
     if (onCheckboxChange) {
-      onCheckboxChange('consentAgreement', 'true', newConsentValue);
+      onCheckboxChange('consentAgreement', newConsentValue.toString(), newConsentValue);
     }
   };
 

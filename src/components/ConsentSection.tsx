@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { FormData } from "../types/formTypes";
 
+
 interface ConsentSectionProps {
   formData?: FormData;
   onInputChange?: (field: keyof FormData, value: string) => void;

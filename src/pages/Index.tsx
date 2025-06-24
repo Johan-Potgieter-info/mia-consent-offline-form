@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, MapPin, Wifi, WifiOff, RefreshCw } from 'lucide-react';
@@ -10,6 +9,7 @@ import { useHybridStorage } from '../hooks/useHybridStorage';
 import ResumeDraftDialog from '../components/ResumeDraftDialog';
 import RegionSelector from '../components/RegionSelector';
 import PendingFormsSection from '../components/PendingFormsSection';
+import ConsentSection from '../components/ConsentSection';
 import { FormData } from '../types/formTypes';
 
 const Index = () => {
@@ -17,20 +17,33 @@ const Index = () => {
   const [drafts, setDrafts] = useState<FormData[]>([]);
   const [isLoadingDrafts, setIsLoadingDrafts] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-  
+
+  const [formData, setFormData] = useState<FormData>({
+    consentAgreement: false,
+    // Add other required fields if needed
+  });
+
+  const handleCheckboxChange = (
+    field: keyof FormData,
+    value: string,
+    checked: boolean
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: checked,
+    }));
+  };
+
   const { isOnline } = useConnectivity();
-  const { 
-    currentRegion, 
-    detectAndSetRegion, 
-    regionDetected, 
+  const {
+    currentRegion,
+    detectAndSetRegion,
+    regionDetected,
     showManualSelector,
     setRegionManually,
-    showRegionSelector 
+    showRegionSelector
   } = useRegionDetection();
   const { getForms, capabilities, isInitialized } = useHybridStorage();
-
-  console.log('Index component loaded');
-  console.log('Using new Mia logo: /mia-consent-offline-form/icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png');
 
   useEffect(() => {
     if (isInitialized) {
@@ -40,10 +53,9 @@ const Index = () => {
 
   const loadDrafts = async () => {
     if (!isInitialized) return;
-    
+
     setIsLoadingDrafts(true);
     try {
-      // Only load drafts (true) - not completed forms
       const savedDrafts = await getForms(true);
       setDrafts(savedDrafts);
       console.log(`Loaded ${savedDrafts.length} draft forms`);
@@ -55,7 +67,7 @@ const Index = () => {
   };
 
   const refreshDrafts = () => {
-    setRefreshKey(prev => prev + 1);
+    setRefreshKey((prev) => prev + 1);
   };
 
   const handleStartNewForm = async () => {
@@ -88,9 +100,9 @@ const Index = () => {
         {currentRegion ? currentRegion.name : 'Detecting location...'}
       </span>
       {currentRegion && (
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={showRegionSelector}
           className="text-xs h-6 px-2"
         >
@@ -106,9 +118,9 @@ const Index = () => {
       <div className="bg-[#ef4805] p-4">
         <div className="max-w-4xl mx-auto">
           <div className="bg-white p-3 inline-block rounded-lg">
-            <img 
-              src="/mia-consent-offline-form/icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png" 
-              alt="Mia Healthcare" 
+            <img
+              src="/mia-consent-offline-form/icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png"
+              alt="Mia Healthcare"
               className="h-16 w-auto"
               onError={(e) => {
                 console.error('New Mia logo failed to load:', e);
@@ -162,6 +174,12 @@ const Index = () => {
           </div>
         )}
 
+        {/* Consent Agreement Section */}
+        <ConsentSection
+          formData={formData}
+          onCheckboxChange={handleCheckboxChange}
+        />
+
         {/* Main Actions */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           {/* Start New Form */}
@@ -176,7 +194,7 @@ const Index = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button 
+              <Button
                 onClick={handleStartNewForm}
                 className="w-full h-14 text-lg bg-[#ef4805] hover:bg-[#d63d04] text-white font-semibold"
                 size="lg"
@@ -208,7 +226,7 @@ const Index = () => {
         {/* Storage Status */}
         {isInitialized && (
           <div className="mt-4 text-center text-sm text-gray-500">
-            Storage: {capabilities.supabase ? 'Cloud + Local' : capabilities.indexedDB ? 'Local (IndexedDB)' : 'Local (Basic)'}
+            Storage: {capabilities.supabase ? 'Cloud + Local' : capabilities.indexedDB ? 'Local (IndexedDB)' : 'None'}
             <br />
             <span className="text-xs">Drafts saved locally • Completed forms go to cloud database</span>
           </div>
@@ -219,3 +237,4 @@ const Index = () => {
 };
 
 export default Index;
+

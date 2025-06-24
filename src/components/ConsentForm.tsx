@@ -1,11 +1,17 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useConsentFormContainer } from './ConsentFormContainer';
 import ConsentFormLayout from './ConsentFormLayout';
 import ConsentFormDialogs from './ConsentFormDialogs';
 
 const ConsentForm = () => {
   const containerData = useConsentFormContainer();
+
+  // 🔁 Auto-save draft whenever formData changes
+  useEffect(() => {
+    if (containerData.isDirty) {
+      containerData.handleSave(true); // Save as draft
+    }
+  }, [containerData.formData]);
 
   return (
     <>

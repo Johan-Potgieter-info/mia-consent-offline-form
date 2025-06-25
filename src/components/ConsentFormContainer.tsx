@@ -40,6 +40,9 @@ export const useConsentFormContainer = () => {
   }, [draftId, isInitialized, getForms]);
 
   useEffect(() => {
+  if (localStorage.getItem("consentAccepted") === "true") {
+    handleCheckboxChange("consentAgreement", "", true);
+  }
     loadDraftById();
   }, [loadDraftById]);
 

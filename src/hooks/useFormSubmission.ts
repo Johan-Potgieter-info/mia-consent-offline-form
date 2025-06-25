@@ -47,6 +47,8 @@ export const useFormSubmission = ({
       errors.push("Cell phone number is required");
     }
     
+    console.log("🔍 [DEBUG] Consent Agreement value:", formData.consentAgreement);
+  console.log("🔍 [DEBUG] Consent Agreement value:", formData.consentAgreement);
     if (!formData.consentAgreement) {
       errors.push("You must agree to the consent form");
     }

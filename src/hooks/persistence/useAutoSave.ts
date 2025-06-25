@@ -14,12 +14,17 @@ interface UseAutoSaveProps {
   setRetryCount: (fn: (prev: number) => number) => void;
 }
 
+interface UseAutoSaveResult {
+  autoSave: (formData: FormData) => Promise<void>;
+  autoSaveStatus: AutoSaveStatus;
+}
+
 export const useAutoSave = ({
   retryCount,
   setLastSaved,
   setIsDirty,
   setRetryCount
-}: UseAutoSaveProps) => {
+}: UseAutoSaveProps): UseAutoSaveResult => {
   const [autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveStatus>('idle');
   const { toast } = useToast();
   const { saveForm: saveToHybridStorage, capabilities } = useHybridStorage();

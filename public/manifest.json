@@ -1,6 +1,6 @@
 
 {
-  "id": "/mia-consent-offline-form/",
+  "id": "/",
   "name": "Mia Healthcare Consent Form",
   "short_name": "Mia Healthcare",
   "description": "Professional offline dental consent form application for Mia Healthcare - capture patient consent forms with full offline capability and automatic cloud sync",
@@ -10,8 +10,8 @@
   "orientation": "portrait-primary",
   "theme_color": "#ef4805",
   "background_color": "#ffffff",
-  "start_url": "/mia-consent-offline-form/",
-  "scope": "/mia-consent-offline-form/",
+  "start_url": "/",
+  "scope": "/",
   "lang": "en-US",
   "dir": "ltr",
   "categories": ["medical", "healthcare", "productivity", "business"],
@@ -25,7 +25,7 @@
   "protocol_handlers": [
     {
       "protocol": "web+miaconsent",
-      "url": "/mia-consent-offline-form/consent-form?form=%s"
+      "url": "/consent-form?form=%s"
     }
   ],
   "icons": [
@@ -80,7 +80,7 @@
   "shortcuts": [
     {
       "name": "New Consent Form",
-      "url": "/mia-consent-offline-form/consent-form",
+      "url": "/consent-form",
       "icons": [
         {
           "src": "icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png",
@@ -91,7 +91,7 @@
     },
     {
       "name": "Draft Forms",
-      "url": "/mia-consent-offline-form/?tab=drafts",
+      "url": "/?tab=drafts",
       "icons": [
         {
           "src": "icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png",

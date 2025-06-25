@@ -16,7 +16,14 @@ export const getAssetPath = (path: string): string => {
   return `${basePath}${cleanPath}`;
 };
 
-// Specific helper for icon uploads
+// Specific helper for icon uploads - handle both environments
 export const getIconPath = (): string => {
+  // In development, check if the file exists at the root level first
+  const isDev = import.meta.env.DEV;
+  if (isDev) {
+    // Try the public folder path first for development
+    return '/icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png';
+  }
+  
   return getAssetPath('icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png');
 };

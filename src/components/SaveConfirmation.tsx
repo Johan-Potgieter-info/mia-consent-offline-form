@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import { CheckCircle, Cloud, HardDrive } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
+import { AutoSaveStatus } from '../types/autoSaveTypes';
 
 interface SaveConfirmationProps {
   show: boolean;

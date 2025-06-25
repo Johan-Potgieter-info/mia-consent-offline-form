@@ -5,6 +5,7 @@ import { useHybridStorage } from '../useHybridStorage';
 import { useFallbackStorage } from './useFallbackStorage';
 import { useFormSession } from '../useFormSession';
 import { FormData } from '../../types/formTypes';
+import { AutoSaveStatus } from '../../types/autoSaveTypes';
 
 interface UseAutoSaveProps {
   retryCount: number;
@@ -19,7 +20,7 @@ export const useAutoSave = ({
   setIsDirty,
   setRetryCount
 }: UseAutoSaveProps) => {
-  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
+  const [autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveStatus>('idle');
   const { toast } = useToast();
   const { saveForm: saveToHybridStorage, capabilities } = useHybridStorage();
   const { saveToFallbackStorage } = useFallbackStorage();

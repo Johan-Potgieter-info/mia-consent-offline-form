@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { AlertCircle, Save, Database, CheckCircle, Loader2, X, Cloud, HardDrive } from 'lucide-react';
 import { Region } from '../utils/regionDetection';
+import { AutoSaveStatus } from '../types/autoSaveTypes';
 import RegionDropdown from './RegionDropdown';
 
 interface ConsentFormStatusBarProps {
@@ -12,7 +12,7 @@ interface ConsentFormStatusBarProps {
   formatLastSaved: () => string;
   onSave: () => void;
   dbInitialized?: boolean;
-  autoSaveStatus?: 'idle' | 'saving' | 'success' | 'error';
+  autoSaveStatus?: AutoSaveStatus;
   retryCount?: number;
   onRegionSelect?: (region: Region) => void;
   isRegionFromDraft?: boolean;

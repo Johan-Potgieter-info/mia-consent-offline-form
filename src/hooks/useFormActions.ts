@@ -55,7 +55,7 @@ export const useFormActions = ({
   useEffect(() => {
     if (!isInitialized || !isDirty || Object.keys(formData).length === 0) return;
 
-    // Prevent auto-save if currently saving
+    // Prevent auto-save if currently saving - check both refs and status
     if (isAutoSavingRef.current || autoSaveStatus === 'saving') {
       console.log('Auto-save skipped: already in progress');
       return;

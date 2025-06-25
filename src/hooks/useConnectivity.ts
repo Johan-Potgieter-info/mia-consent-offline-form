@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { syncPendingForms } from '../utils/indexedDB';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from './use-toast';
 
 export const useConnectivity = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);

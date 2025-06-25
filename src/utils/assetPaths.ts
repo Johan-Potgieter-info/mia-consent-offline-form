@@ -1,11 +1,8 @@
 
 // Helper function to get correct asset paths for both environments
 export const getAssetPath = (path: string): string => {
-  const isDev = import.meta.env.DEV;
-  const isPreview = window.location.hostname.includes('lovable.app') || window.location.hostname.includes('lovableproject.com');
-  
-  // Only use the GitHub Pages base path in actual production builds
-  const basePath = (!isDev && !isPreview) ? '/mia-consent-offline-form/' : '/';
+  // Use Vite's BASE_URL which is set correctly based on the environment
+  const basePath = import.meta.env.BASE_URL;
   
   // Remove leading slash if present to avoid double slashes
   const cleanPath = path.startsWith('/') ? path.slice(1) : path;

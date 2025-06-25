@@ -6,16 +6,14 @@ import { componentTagger } from "lovable-tagger";
 import path from "path";
 
 export default defineConfig(({ mode }) => {
-  const isProduction = mode === 'production';
-  const isDev = mode === 'development';
-  
-  // Only use base path in production (GitHub Pages)
-  const basePath = isProduction ? '/mia-consent-offline-form/' : '/';
-  
+  const isPreview = !!process.env.LOVABLE_PREVIEW || mode === 'development';
+  const basePath = isPreview ? '/' : '/mia-consent-offline-form/';
+
   return {
+    base: basePath,
     plugins: [
       react(),
-      mode === 'development' && componentTagger(),
+      isPreview && componentTagger(),
       VitePWA({
         registerType: 'autoUpdate',
         workbox: {
@@ -49,10 +47,9 @@ export default defineConfig(({ mode }) => {
           ],
           display: 'standalone'
         },
-        // Use generateSW strategy for better compatibility
         strategies: 'generateSW',
         devOptions: {
-          enabled: false // Disable in dev to avoid conflicts
+          enabled: false
         }
       }),
     ].filter(Boolean),
@@ -65,6 +62,5 @@ export default defineConfig(({ mode }) => {
         "@": path.resolve(__dirname, "./src"),
       },
     },
-    base: basePath,
   };
 });

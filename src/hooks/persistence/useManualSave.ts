@@ -27,10 +27,10 @@ export const useManualSave = ({
   const saveForm = async (formData: FormData): Promise<string | number | undefined> => {
     console.log('Manual save triggered - saving as DRAFT only', { id: formData.id });
     
-    const draftData = {
+    const draftData: FormData = {
       ...formData,
       timestamp: new Date().toISOString(),
-      status: 'draft',
+      status: 'draft' as const, // Properly typed as literal
       id: formData.id || Date.now()
     };
     

@@ -3,7 +3,6 @@ import React, { useEffect } from 'react';
 import { CheckCircle, Cloud, HardDrive } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
 
-
 interface SaveConfirmationProps {
   show: boolean;
   message: string;
@@ -19,6 +18,8 @@ const SaveConfirmation = ({
   isOnline = false,
   isAutoSave = false 
 }: SaveConfirmationProps) => {
+  const { toast } = useToast();
+
   useEffect(() => {
     if (show) {
       const getToastMessage = () => {
@@ -45,7 +46,7 @@ const SaveConfirmation = ({
         duration: duration,
       });
     }
-  }, [show, message, duration, isOnline, isAutoSave]);
+  }, [show, message, duration, isOnline, isAutoSave, toast]);
 
   if (!show) return null;
 

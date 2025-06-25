@@ -1,20 +1,41 @@
+
 import React from 'react';
 import { Button } from './ui/button';
 
 interface BackToStartButtonProps {
-  onBackToStart: () => void;
+  isDirty: boolean;
+  justSaved: boolean;
+  onSave: () => Promise<void>;
+  onDiscard: () => void;
+  onResetJustSaved: () => void;
 }
 
-const BackToStartButton: React.FC<BackToStartButtonProps> = ({ onBackToStart }) => {
+const BackToStartButton: React.FC<BackToStartButtonProps> = ({ 
+  isDirty, 
+  justSaved, 
+  onSave, 
+  onDiscard, 
+  onResetJustSaved 
+}) => {
+  const handleBackToStart = () => {
+    if (isDirty && !justSaved) {
+      // Show save dialog or auto-save
+      onSave().then(() => {
+        window.location.href = '/';
+      });
+    } else {
+      window.location.href = '/';
+    }
+    onResetJustSaved();
+  };
+
   return (
     <Button
-      onClick={() => {
-        onBackToStart();
-        console.log('🔍 [DEBUG] Back to start clicked');
-      }}
-      className="mt-4"
+      onClick={handleBackToStart}
+      variant="outline"
+      className="mb-4"
     >
-      Back to Start
+      ← Back to Start
     </Button>
   );
 };

@@ -6,8 +6,13 @@ export interface FormData {
   cellPhone?: string;
   email?: string;
   dateOfBirth?: string;
+  birthDate?: string; // Alternative field name used in PatientDetailsSection
   gender?: string;
   maritalStatus?: string;
+  employerSchool?: string; // Missing field
+  occupationGrade?: string; // Missing field
+  address?: string; // Missing field
+  postalCode?: string; // Missing field
   emergencyContactName?: string;
   emergencyContactNumber?: string;
   medicalAidScheme?: string;
@@ -31,6 +36,7 @@ export interface FormData {
   autoSaved?: boolean;
   synced?: boolean;
   submissionId?: string;
+  [key: string]: any; // Index signature for database operations
 }
 
 export interface FormSubmissionResult {

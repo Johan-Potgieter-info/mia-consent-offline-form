@@ -25,9 +25,17 @@ export const saveToIndexedDB = async (data: FormData, storeName: string): Promis
       ...encryptSensitiveFields(data)
     };
     
-    const result = await store.add(dataToSave);
-    console.log(`Successfully saved to ${storeName} with ID:`, result);
-    return result as number;
+    return new Promise((resolve, reject) => {
+      const request = store.add(dataToSave);
+      request.onsuccess = () => {
+        console.log(`Successfully saved to ${storeName} with ID:`, request.result);
+        resolve(request.result as number);
+      };
+      request.onerror = () => {
+        console.error(`Failed to save to ${storeName}:`, request.error);
+        reject(request.error);
+      };
+    });
   } catch (error) {
     console.error(`Failed to save to ${storeName}:`, error);
     throw error;
@@ -43,16 +51,25 @@ export const getAllFromIndexedDB = async (storeName: string): Promise<FormData[]
     const tx = db.transaction(storeName, 'readonly');
     const store = tx.objectStore(storeName);
     
-    const allData = await store.getAll();
-    console.log(`Retrieved ${allData.length} items from ${storeName}`);
-    
-    // Decrypt sensitive fields and ensure proper typing
-    const decryptedData = allData.map(item => {
-      const formData = item as any;
-      return decryptSensitiveFields(formData) as FormData;
+    return new Promise((resolve, reject) => {
+      const request = store.getAll();
+      request.onsuccess = () => {
+        const allData = request.result;
+        console.log(`Retrieved ${allData.length} items from ${storeName}`);
+        
+        // Decrypt sensitive fields and ensure proper typing
+        const decryptedData = allData.map(item => {
+          const formData = item as any;
+          return decryptSensitiveFields(formData) as FormData;
+        });
+        
+        resolve(decryptedData);
+      };
+      request.onerror = () => {
+        console.error(`Failed to get all from ${storeName}:`, request.error);
+        reject(request.error);
+      };
     });
-    
-    return decryptedData;
   } catch (error) {
     console.error(`Failed to get all from ${storeName}:`, error);
     return [];
@@ -68,8 +85,17 @@ export const deleteFromIndexedDB = async (id: number, storeName: string): Promis
     const tx = db.transaction(storeName, 'readwrite');
     const store = tx.objectStore(storeName);
     
-    await store.delete(id);
-    console.log(`Successfully deleted ID ${id} from ${storeName}`);
+    return new Promise((resolve, reject) => {
+      const request = store.delete(id);
+      request.onsuccess = () => {
+        console.log(`Successfully deleted ID ${id} from ${storeName}`);
+        resolve();
+      };
+      request.onerror = () => {
+        console.error(`Failed to delete from ${storeName}:`, request.error);
+        reject(request.error);
+      };
+    });
   } catch (error) {
     console.error(`Failed to delete from ${storeName}:`, error);
     throw error;
@@ -93,8 +119,17 @@ export const updateInIndexedDB = async (id: number | string, data: FormData, sto
       ...encryptSensitiveFields(data)
     };
     
-    await store.put(dataToUpdate);
-    console.log(`Successfully updated ID ${id} in ${storeName}`);
+    return new Promise((resolve, reject) => {
+      const request = store.put(dataToUpdate);
+      request.onsuccess = () => {
+        console.log(`Successfully updated ID ${id} in ${storeName}`);
+        resolve();
+      };
+      request.onerror = () => {
+        console.error(`Failed to update in ${storeName}:`, request.error);
+        reject(request.error);
+      };
+    });
   } catch (error) {
     console.error(`Failed to update in ${storeName}:`, error);
     throw error;

@@ -37,12 +37,11 @@ const ResumeDraftDialog = ({ onDraftsChanged }: ResumeDraftDialogProps) => {
 
   const handleContinue = (draftId: string) => {
     setIsOpen(false);
-    navigate(`/consent-form?id=${draftId}`);
+    navigate(`/consent-form/${draftId}`);
   };
 
   const handleDelete = async (draftId: string, e: React.MouseEvent) => {
     await handleDeleteDraft(draftId, e);
-    // Call the callback to refresh the parent component's draft count
     if (onDraftsChanged) {
       onDraftsChanged();
     }
@@ -50,7 +49,6 @@ const ResumeDraftDialog = ({ onDraftsChanged }: ResumeDraftDialogProps) => {
 
   const handleBulkDelete = async (draftIds: string[]) => {
     await handleBulkDeleteDrafts(draftIds);
-    // Call the callback to refresh the parent component's draft count
     if (onDraftsChanged) {
       onDraftsChanged();
     }
@@ -58,7 +56,6 @@ const ResumeDraftDialog = ({ onDraftsChanged }: ResumeDraftDialogProps) => {
 
   const handleDialogClose = (open: boolean) => {
     setIsOpen(open);
-    // Refresh drafts count when dialog closes
     if (!open && onDraftsChanged) {
       onDraftsChanged();
     }

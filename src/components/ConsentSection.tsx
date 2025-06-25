@@ -16,20 +16,17 @@ const ConsentSection: React.FC<ConsentSectionProps> = ({
   validationErrors
 }) => {
   const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
-  const [consentGiven, setConsentGiven] = useState(() => {
-    // Check form data first, then localStorage as fallback
-    if (formData?.consentAgreement !== undefined) {
-      return formData.consentAgreement;
-    }
-    return localStorage.getItem("consentAccepted") === "true";
-  });
+  const [consentGiven, setConsentGiven] = useState(false);
 
   const termsRef = useRef<HTMLDivElement>(null);
 
-  // Sync with form data when it changes
+  // Reset consent state on component mount - don't auto-tick
   useEffect(() => {
-    if (formData?.consentAgreement !== undefined) {
-      setConsentGiven(formData.consentAgreement);
+    // Only check formData, don't auto-load from localStorage
+    if (formData?.consentAgreement === true) {
+      setConsentGiven(true);
+    } else {
+      setConsentGiven(false);
     }
   }, [formData?.consentAgreement]);
 
@@ -55,18 +52,18 @@ const ConsentSection: React.FC<ConsentSectionProps> = ({
     return () => node.removeEventListener("scroll", checkScroll);
   }, []);
 
-  const handleConsent = () => {
-    const newConsentValue = true;
+  const handleConsent = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
     
     // Update localStorage (preserve existing behavior)
-    localStorage.setItem("consentAccepted", "true");
+    localStorage.setItem("consentAccepted", checked.toString());
     
     // Update local state (preserve existing behavior)
-    setConsentGiven(newConsentValue);
+    setConsentGiven(checked);
     
     // Update main form data (fix the issue)
     if (onCheckboxChange) {
-      onCheckboxChange('consentAgreement', newConsentValue.toString(), newConsentValue);
+      onCheckboxChange('consentAgreement', checked.toString(), checked);
     }
   };
 
@@ -115,7 +112,7 @@ const ConsentSection: React.FC<ConsentSectionProps> = ({
           <input
             type="checkbox"
             disabled={!isScrolledToBottom}
-            checked={formData?.consentAgreement === true}
+            checked={consentGiven}
             onChange={handleConsent}
             className="mt-1 h-4 w-4"
           />

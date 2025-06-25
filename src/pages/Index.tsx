@@ -5,10 +5,8 @@ import { FileText, MapPin, Wifi, WifiOff, RefreshCw } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { useConnectivity } from '../hooks/useConnectivity';
-import { useRegionDetection } from '../hooks/useRegionDetection';
 import { useHybridStorage } from '../hooks/useHybridStorage';
 import ResumeDraftDialog from '../components/ResumeDraftDialog';
-import RegionSelector from '../components/RegionSelector';
 import PendingFormsSection from '../components/PendingFormsSection';
 import ConsentSection from '../components/ConsentSection';
 import { FormData } from '../types/formTypes';
@@ -22,7 +20,6 @@ const Index = () => {
 
   const [formData, setFormData] = useState<FormData>({
     consentAgreement: false,
-    // Add other required fields if needed
   });
 
   // Check consent state on app start
@@ -52,14 +49,6 @@ const Index = () => {
   };
 
   const { isOnline } = useConnectivity();
-  const {
-    currentRegion,
-    detectAndSetRegion,
-    regionDetected,
-    showManualSelector,
-    setRegionManually,
-    showRegionSelector
-  } = useRegionDetection();
   const { getForms, capabilities, isInitialized } = useHybridStorage();
 
   useEffect(() => {
@@ -87,10 +76,8 @@ const Index = () => {
     setRefreshKey((prev) => prev + 1);
   };
 
-  const handleStartNewForm = async () => {
-    if (!regionDetected) {
-      await detectAndSetRegion();
-    }
+  const handleStartNewForm = () => {
+    // Simply navigate to the consent form - region detection will happen there
     navigate('/consent-form');
   };
 
@@ -106,25 +93,6 @@ const Index = () => {
           <WifiOff className="w-4 h-4 text-orange-600" />
           <span className="text-orange-600">Offline</span>
         </>
-      )}
-    </div>
-  );
-
-  const RegionIndicator = () => (
-    <div className="flex items-center gap-2 text-sm">
-      <MapPin className="w-4 h-4 text-blue-600" />
-      <span className="text-blue-600">
-        {currentRegion ? currentRegion.name : 'Detecting location...'}
-      </span>
-      {currentRegion && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={showRegionSelector}
-          className="text-xs h-6 px-2"
-        >
-          Change
-        </Button>
       )}
     </div>
   );
@@ -174,18 +142,14 @@ const Index = () => {
         {/* Show main form interface only after consent */}
         {hasConsented && (
           <>
-            {/* Status Bar */}
+            {/* Status Bar - simplified for landing page */}
             <div className="flex justify-between items-center mb-8 p-4 bg-white rounded-lg shadow-sm">
               <ConnectionIndicator />
-              <RegionIndicator />
+              <div className="flex items-center gap-2 text-sm">
+                <MapPin className="w-4 h-4 text-blue-600" />
+                <span className="text-blue-600">Location will be detected when you start</span>
+              </div>
             </div>
-
-            {/* Manual Region Selector */}
-            <RegionSelector
-              onRegionSelect={setRegionManually}
-              currentRegion={currentRegion}
-              isVisible={showManualSelector}
-            />
 
             {/* Pending Forms Section */}
             <PendingFormsSection onRefresh={refreshDrafts} />

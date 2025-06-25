@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useHybridStorage } from '../../hooks/useHybridStorage';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '../../hooks/use-toast';
 import { deleteMultipleFormsHybrid } from '../../utils/hybridStorage';
 
 export const useDraftOperations = (isOpen: boolean) => {

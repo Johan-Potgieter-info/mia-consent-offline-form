@@ -35,24 +35,39 @@ export const useFormData = () => {
   const [isDirty, setIsDirty] = useState(false);
 
   const handleInputChange = useCallback((field: keyof FormData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value,
-      // Preserve the original ID throughout the form lifecycle
-      id: prev.id || Date.now(),
-      lastModified: new Date().toISOString()
-    }));
+    setFormData(prev => {
+      // Check if the value actually changed to avoid unnecessary updates
+      if (prev[field] === value) {
+        return prev;
+      }
+      
+      return {
+        ...prev,
+        [field]: value,
+        // Preserve the original ID throughout the form lifecycle
+        id: prev.id || Date.now(),
+        // Only update lastModified for significant changes, not every keystroke
+        lastModified: new Date().toISOString()
+      };
+    });
     setIsDirty(true);
   }, []);
 
   const handleCheckboxChange = useCallback((field: keyof FormData, value: string, checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: checked,
-      // Preserve the original ID throughout the form lifecycle
-      id: prev.id || Date.now(),
-      lastModified: new Date().toISOString()
-    }));
+    setFormData(prev => {
+      // Check if the value actually changed to avoid unnecessary updates
+      if (prev[field] === checked) {
+        return prev;
+      }
+      
+      return {
+        ...prev,
+        [field]: checked,
+        // Preserve the original ID throughout the form lifecycle
+        id: prev.id || Date.now(),
+        lastModified: new Date().toISOString()
+      };
+    });
     setIsDirty(true);
   }, []);
 
@@ -63,7 +78,8 @@ export const useFormData = () => {
       setFormData({
         ...data,
         id: data.id || Date.now(),
-        lastModified: new Date().toISOString()
+        // Don't update lastModified when loading existing data
+        lastModified: data.lastModified || new Date().toISOString()
       });
       setIsDirty(false);
     }, []),

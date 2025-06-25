@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => {
       mode === 'development' && componentTagger(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico', 'terms.html', 'logo.png', 'manifest.json'],
+        includeAssets: ['favicon.ico', 'terms.html', 'logo.png'],
         manifest: {
           name: 'Mia Healthcare',
           short_name: 'Mia',
@@ -29,7 +29,8 @@ export default defineConfig(({ mode }) => {
               type: 'image/png'
             }
           ]
-        }
+        },
+        manifestFilename: 'manifest.json'
       }),
     ].filter(Boolean),
     base: basePath,

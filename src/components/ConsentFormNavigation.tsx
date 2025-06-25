@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Save, Send, ArrowLeft, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '../components/ui/button';
 
 interface ConsentFormNavigationProps {
   sections: Array<{ id: string; title: string; component: React.ComponentType<any> }>;

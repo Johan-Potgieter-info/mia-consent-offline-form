@@ -1,7 +1,8 @@
 
 import React, { useEffect } from 'react';
 import { CheckCircle, Cloud, HardDrive } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '../hooks/use-toast';
+
 
 interface SaveConfirmationProps {
   show: boolean;

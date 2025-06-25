@@ -2,7 +2,10 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-export default defineConfig(({ mode }) => ({
+const isPreview = process.env.LOVABLE_PREVIEW === 'true' || process.env.NODE_ENV === 'development';
+const basePath = isPreview ? '/' : '/mia-consent-offline-form/';
+
+export default defineConfig({
   plugins: [
     react(),
     VitePWA({
@@ -11,14 +14,14 @@ export default defineConfig(({ mode }) => ({
       manifest: {
         name: 'Mia Healthcare',
         short_name: 'Mia',
-        start_url: '/mia-consent-offline-form/',
-        scope: '/mia-consent-offline-form/',
+        start_url: basePath,
+        scope: basePath,
+        display: 'standalone',
         icons: [
-          { src: '/mia-consent-offline-form/logo.png', sizes: '192x192', type: 'image/png' }
-        ],
-        display: 'standalone'
+          { src: `${basePath}logo.png`, sizes: '192x192', type: 'image/png' }
+        ]
       }
     }),
   ],
-  base: mode === 'production' ? '/mia-consent-offline-form/' : '/',
-}));
+  base: basePath,
+});

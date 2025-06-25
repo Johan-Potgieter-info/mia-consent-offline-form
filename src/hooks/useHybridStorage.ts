@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { initializeStorage, getStorageCapabilities, saveFormHybrid, getFormsHybrid, deleteFormHybrid, syncToSupabase } from '../utils/hybridStorage';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from './use-toast';
 
 interface UseHybridStorageResult {
   isInitialized: boolean;

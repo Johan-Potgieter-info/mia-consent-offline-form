@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import ConsentForm from './components/ConsentForm';
@@ -11,7 +10,6 @@ const App: React.FC = () => (
     <Route path="/drafts" element={<DraftList />} />
     <Route path="/edit/:id" element={<DraftEditor />} />
   </Routes>
-=======
 
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
@@ -32,7 +30,6 @@ const App: React.FC = () => (
       <Route path="*" element={<NotFound />} />
     </Routes>
   </Router>
->>>>>>> a8cb6c8a367c1e95b8f75ed354c5492789feddab
 );
 
 export default App;

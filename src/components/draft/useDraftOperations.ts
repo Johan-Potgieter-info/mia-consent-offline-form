@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { useHybridStorage } from '../../hooks/useHybridStorage';
 import { FormData } from '../../types/formTypes';
 import { REGIONS } from '../../utils/regionDetection';
-import { updateDraftById } from '../../utils/indexedDB';
 
 export const useDraftOperations = (isOpen: boolean) => {
   const [drafts, setDrafts] = useState<FormData[]>([]);
@@ -37,6 +36,17 @@ export const useDraftOperations = (isOpen: boolean) => {
 
   const handleDeleteDraft = async (draftId: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    // Prevent deletion if currently saving
+    const isCurrentlySaving = drafts.some(draft => 
+      String(draft.id) === draftId && draft.autoSaved === true
+    );
+    
+    if (isCurrentlySaving) {
+      setError('Cannot delete draft while auto-save is in progress. Please wait a moment and try again.');
+      return;
+    }
+
     try {
       console.log('Deleting draft with ID:', draftId, typeof draftId);
       
@@ -46,9 +56,15 @@ export const useDraftOperations = (isOpen: boolean) => {
         throw new Error(`Invalid draft ID: ${draftId}`);
       }
       
+      // Force delete even if there are references
       await deleteForm(numericId, true);
       console.log('Draft deleted successfully');
-      await loadDrafts();
+      
+      // Remove from local state immediately
+      setDrafts(prevDrafts => prevDrafts.filter(draft => String(draft.id) !== draftId));
+      
+      // Reload to ensure consistency
+      setTimeout(() => loadDrafts(), 500);
     } catch (err) {
       console.error('Error deleting draft:', err);
       setError(`Failed to delete draft: ${err instanceof Error ? err.message : 'Unknown error'}`);
@@ -56,6 +72,8 @@ export const useDraftOperations = (isOpen: boolean) => {
   };
 
   const handleBulkDeleteDrafts = async (draftIds: string[]) => {
+    if (draftIds.length === 0) return;
+    
     setIsBulkDeleting(true);
     setError(null);
     let successCount = 0;
@@ -85,7 +103,13 @@ export const useDraftOperations = (isOpen: boolean) => {
         setError(`Deleted ${successCount} drafts, but ${failCount} failed`);
       }
       
-      await loadDrafts();
+      // Update local state immediately
+      setDrafts(prevDrafts => 
+        prevDrafts.filter(draft => !draftIds.includes(String(draft.id)))
+      );
+      
+      // Reload to ensure consistency
+      setTimeout(() => loadDrafts(), 1000);
     } catch (err) {
       console.error('Error in bulk delete:', err);
       setError('Bulk delete operation failed');
@@ -132,6 +156,40 @@ export const useDraftOperations = (isOpen: boolean) => {
     }
   };
 
+  // Emergency cleanup function for stuck drafts
+  const handleEmergencyCleanup = async () => {
+    try {
+      console.log('Starting emergency cleanup of all drafts');
+      setIsLoading(true);
+      
+      // Get all drafts
+      const allDrafts = await getForms(true);
+      let cleanedCount = 0;
+      
+      for (const draft of allDrafts) {
+        try {
+          const numericId = typeof draft.id === 'string' ? parseInt(draft.id, 10) : draft.id;
+          if (!isNaN(numericId)) {
+            await deleteForm(numericId, true);
+            cleanedCount++;
+          }
+        } catch (err) {
+          console.error(`Failed to clean draft ${draft.id}:`, err);
+        }
+      }
+      
+      console.log(`Emergency cleanup completed: ${cleanedCount} drafts removed`);
+      setDrafts([]);
+      await loadDrafts();
+      
+    } catch (err) {
+      console.error('Emergency cleanup failed:', err);
+      setError('Emergency cleanup failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     try {
       return new Date(dateString).toLocaleDateString('en-ZA', {
@@ -160,6 +218,7 @@ export const useDraftOperations = (isOpen: boolean) => {
     handleDeleteDraft,
     handleBulkDeleteDrafts,
     handleDoctorChange,
+    handleEmergencyCleanup,
     formatDate,
     getDoctorOptions
   };

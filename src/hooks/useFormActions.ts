@@ -44,14 +44,22 @@ export const useFormActions = ({
   } = useFormPersistence({ isOnline });
   const { submitForm: submitFormSubmission } = useFormSubmission({ isOnline });
 
-  // Refs to prevent excessive auto-saves on mobile
+  // Refs to prevent excessive auto-saves and loops
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastAutoSaveDataRef = useRef<string>('');
   const isAutoSavingRef = useRef(false);
+  const autoSaveCountRef = useRef(0);
+  const lastAutoSaveTimeRef = useRef<number>(0);
 
-  // Enhanced auto-save with better mobile optimization
+  // Enhanced auto-save with loop prevention
   useEffect(() => {
     if (!isInitialized || !isDirty || Object.keys(formData).length === 0) return;
+
+    // Prevent auto-save if currently saving
+    if (isAutoSavingRef.current || autoSaveStatus === 'saving') {
+      console.log('Auto-save skipped: already in progress');
+      return;
+    }
 
     // Clear existing timeout
     if (autoSaveTimeoutRef.current) {
@@ -60,24 +68,48 @@ export const useFormActions = ({
 
     // Check if form data actually changed to prevent duplicate saves
     const currentDataString = JSON.stringify(formData);
-    if (currentDataString === lastAutoSaveDataRef.current || isAutoSavingRef.current) {
+    if (currentDataString === lastAutoSaveDataRef.current) {
+      console.log('Auto-save skipped: no data changes');
       return;
     }
 
-    // Set a longer delay for mobile to prevent excessive saves
-    const autoSaveDelay = 45000; // 45 seconds instead of 30
+    // Prevent excessive auto-saves (max 1 per 30 seconds)
+    const now = Date.now();
+    if (now - lastAutoSaveTimeRef.current < 30000) {
+      console.log('Auto-save skipped: too frequent');
+      return;
+    }
+
+    // Reset counter if it's been more than 5 minutes
+    if (now - lastAutoSaveTimeRef.current > 300000) {
+      autoSaveCountRef.current = 0;
+    }
+
+    // Limit auto-saves to prevent loops (max 5 per session)
+    if (autoSaveCountRef.current >= 5) {
+      console.log('Auto-save limit reached for this session');
+      return;
+    }
+
+    // Check for minimum required data before auto-saving
+    if (!formData.patientName && !formData.idNumber && !formData.cellPhone) {
+      console.log('Auto-save skipped: insufficient data');
+      return;
+    }
+
+    const autoSaveDelay = 45000; // 45 seconds
 
     autoSaveTimeoutRef.current = setTimeout(async () => {
-      if (isDirty && !isAutoSavingRef.current) {
-        console.log('Auto-save triggered - saving as DRAFT', { 
-          capabilities, 
-          isDirty, 
-          hasData: Object.keys(formData).length > 0,
-          autoSaveStatus 
+      if (isDirty && !isAutoSavingRef.current && autoSaveStatus !== 'saving') {
+        console.log('Auto-save triggered', { 
+          count: autoSaveCountRef.current + 1,
+          hasMinData: !!(formData.patientName || formData.idNumber || formData.cellPhone)
         });
         
         isAutoSavingRef.current = true;
         lastAutoSaveDataRef.current = currentDataString;
+        lastAutoSaveTimeRef.current = now;
+        autoSaveCountRef.current++;
         
         try {
           await autoSave(formData);

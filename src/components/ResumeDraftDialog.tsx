@@ -31,6 +31,7 @@ const ResumeDraftDialog = ({ onDraftsChanged }: ResumeDraftDialogProps) => {
     handleDeleteDraft,
     handleBulkDeleteDrafts,
     handleDoctorChange,
+    handleEmergencyCleanup,
     formatDate,
     getDoctorOptions
   } = useDraftOperations(isOpen);
@@ -49,6 +50,13 @@ const ResumeDraftDialog = ({ onDraftsChanged }: ResumeDraftDialogProps) => {
 
   const handleBulkDelete = async (draftIds: string[]) => {
     await handleBulkDeleteDrafts(draftIds);
+    if (onDraftsChanged) {
+      onDraftsChanged();
+    }
+  };
+
+  const handleEmergencyCleanupWithCallback = async () => {
+    await handleEmergencyCleanup();
     if (onDraftsChanged) {
       onDraftsChanged();
     }
@@ -101,6 +109,7 @@ const ResumeDraftDialog = ({ onDraftsChanged }: ResumeDraftDialogProps) => {
             onDeleteDraft={handleDelete}
             onBulkDeleteDrafts={handleBulkDelete}
             onDoctorChange={handleDoctorChange}
+            onEmergencyCleanup={handleEmergencyCleanupWithCallback}
             formatDate={formatDate}
             getDoctorOptions={getDoctorOptions}
             onContinue={handleContinue}

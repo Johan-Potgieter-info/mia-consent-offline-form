@@ -2,13 +2,13 @@ import React from 'react';
 import { Progress } from './ui/progress';
 
 interface ConsentFormProgressProps {
-  sections: { id: string }[];
+  sections?: { id: string }[]; // <-- mark as optional to be safe
   currentSection: string;
 }
 
-const ConsentFormProgress: React.FC<ConsentFormProgressProps> = ({ sections, currentSection }) => {
+const ConsentFormProgress: React.FC<ConsentFormProgressProps> = ({ sections = [], currentSection }) => {
   const getProgressPercentage = () => {
-    if (!sections || sections.length === 0) return 0;
+    if (!sections.length) return 0;
     const currentIndex = sections.findIndex(s => s.id === currentSection);
     return ((currentIndex + 1) / sections.length) * 100;
   };

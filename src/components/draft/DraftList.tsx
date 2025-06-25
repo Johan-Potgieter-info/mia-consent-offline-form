@@ -16,7 +16,7 @@ interface DraftListProps {
   onDoctorChange: (draft: any, newRegionCode: string) => void;
   formatDate: (timestamp: string) => string;
   getDoctorOptions: () => { code: string; name: string; doctor: string }[];
-  onContinue: () => void;
+  onContinue: (draftId: string) => void;
   isBulkDeleting: boolean;
 }
 
@@ -115,7 +115,7 @@ const DraftList = ({
             onDoctorChange={onDoctorChange}
             formatDate={formatDate}
             getDoctorOptions={getDoctorOptions}
-            onContinue={onContinue}
+            onContinue={() => onContinue(draft.id)}
             isSelected={selectedDrafts.has(draft.id)}
             onToggleSelection={() => toggleDraftSelection(draft.id)}
             showCheckbox={true}

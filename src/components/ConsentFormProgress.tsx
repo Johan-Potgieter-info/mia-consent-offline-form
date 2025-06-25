@@ -8,10 +8,9 @@ interface ConsentFormProgressProps {
 
 const ConsentFormProgress: React.FC<ConsentFormProgressProps> = ({ sections, currentSection }) => {
   const getProgressPercentage = () => {
+    if (!sections || sections.length === 0) return 0;
     const currentIndex = sections.findIndex(s => s.id === currentSection);
-    return sections && sections.length > 0 ? ((currentIndex + 1) / sections.length) * 100 : 0;
-    return sections.length > 0 ? ((currentIndex + 1) / sections.length) * 100 : 0;
-
+    return ((currentIndex + 1) / sections.length) * 100;
   };
 
   return (

@@ -4,6 +4,7 @@ import { useFormSubmission } from './useFormSubmission';
 import { useRegionDetection } from './useRegionDetection';
 import { useHybridStorage } from './useHybridStorage';
 import { FormData } from '../types/formTypes';
+import { AutoSaveStatus } from '../types/autoSaveTypes';
 
 interface UseFormActionsProps {
   formData: FormData;
@@ -17,7 +18,7 @@ interface UseFormActionsResult {
   submitForm: () => Promise<void>;
   lastSaved: Date | null;
   formatLastSaved: () => string;
-  autoSaveStatus: 'idle' | 'saving' | 'success' | 'error';
+  autoSaveStatus: AutoSaveStatus;
   retryCount: number;
   justSaved: boolean;
   resetJustSaved: () => void;

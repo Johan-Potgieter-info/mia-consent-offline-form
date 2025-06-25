@@ -1,8 +1,8 @@
-
 import { useState } from 'react';
 import { useManualSave } from './persistence/useManualSave';
 import { useAutoSave } from './persistence/useAutoSave';
 import { FormData } from '../types/formTypes';
+import { AutoSaveStatus } from '../types/autoSaveTypes';
 
 interface UseFormPersistenceProps {
   isOnline: boolean;
@@ -15,7 +15,7 @@ interface UseFormPersistenceResult {
   saveForm: (formData: FormData) => Promise<string | number | undefined>;
   autoSave: (formData: FormData) => Promise<void>;
   formatLastSaved: () => string;
-  autoSaveStatus: 'idle' | 'saving' | 'success' | 'error';
+  autoSaveStatus: AutoSaveStatus;
   retryCount: number;
   justSaved: boolean;
   resetJustSaved: () => void;

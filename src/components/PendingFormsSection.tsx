@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Button } from './ui/button';
 import { useHybridStorage } from '../hooks/useHybridStorage';
 import { useConnectivity } from '../hooks/useConnectivity';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '../hooks/use-toast';
 import { FormData } from '../types/formTypes';
 import CacheRefreshButton from './CacheRefreshButton';
 

@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from './ui/alert-dialog';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '../hooks/use-toast';
 import { clearFormCaches, refreshIndexedDB, detectCacheIssues } from '../utils/cacheManager';
 
 interface CacheRefreshButtonProps {

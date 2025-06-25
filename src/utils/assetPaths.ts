@@ -2,7 +2,10 @@
 // Helper function to get correct asset paths for both environments
 export const getAssetPath = (path: string): string => {
   const isDev = import.meta.env.DEV;
-  const basePath = isDev ? '/' : '/mia-consent-offline-form/';
+  const isPreview = window.location.hostname.includes('lovable.app') || window.location.hostname.includes('lovableproject.com');
+  
+  // Only use the GitHub Pages base path in actual production builds
+  const basePath = (!isDev && !isPreview) ? '/mia-consent-offline-form/' : '/';
   
   // Remove leading slash if present to avoid double slashes
   const cleanPath = path.startsWith('/') ? path.slice(1) : path;

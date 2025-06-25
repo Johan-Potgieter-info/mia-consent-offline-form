@@ -7,6 +7,9 @@ import path from "path";
 
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
+  const isDev = mode === 'development';
+  
+  // Only use base path in production (GitHub Pages)
   const basePath = isProduction ? '/mia-consent-offline-form/' : '/';
   
   return {
@@ -46,12 +49,10 @@ export default defineConfig(({ mode }) => {
           ],
           display: 'standalone'
         },
-        // Fix service worker registration for both environments
-        filename: 'sw.js',
+        // Use generateSW strategy for better compatibility
         strategies: 'generateSW',
         devOptions: {
-          enabled: true,
-          type: 'module'
+          enabled: false // Disable in dev to avoid conflicts
         }
       }),
     ].filter(Boolean),

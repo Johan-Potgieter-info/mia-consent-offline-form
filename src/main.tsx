@@ -6,11 +6,18 @@ import './index.css'
 // Get the correct base path for current environment
 const getBasePath = () => {
   const isDev = import.meta.env.DEV;
-  return isDev ? '/' : '/mia-consent-offline-form/';
+  const isPreview = window.location.hostname.includes('lovable.app') || window.location.hostname.includes('lovableproject.com');
+  
+  // Only use the GitHub Pages path in actual production builds
+  if (!isDev && !isPreview) {
+    return '/mia-consent-offline-form/';
+  }
+  return '/';
 };
 
-// Unregister old service workers to prevent conflicts
-if ('serviceWorker' in navigator) {
+// Only register service worker in production
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  // Unregister old service workers to prevent conflicts
   navigator.serviceWorker.getRegistrations().then(function(registrations) {
     for(let registration of registrations) {
       // Unregister any old service workers
@@ -22,7 +29,6 @@ if ('serviceWorker' in navigator) {
     }
   });
 
-  // Register the new service worker with correct path for both environments
   window.addEventListener('load', () => {
     const basePath = getBasePath();
     const swUrl = `${basePath}sw.js`;
@@ -61,33 +67,3 @@ if ('serviceWorker' in navigator) {
 }
 
 createRoot(document.getElementById("root")!).render(<App />);
-
-// Register background and periodic sync events if supported
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.ready.then((reg) => {
-    // BACKGROUND SYNC
-    if ('sync' in reg) {
-      // Type assertion for sync functionality
-      const syncReg = reg as any;
-      if (syncReg.sync && typeof syncReg.sync.register === 'function') {
-        syncReg.sync.register('sync-consent')
-          .then(() => {
-            console.log('[SW] Background sync registered');
-          })
-          .catch(console.error);
-      }
-    }
-
-    // PERIODIC SYNC
-    if ('periodicSync' in reg) {
-      const periodicSyncReg = reg as any;
-      if (periodicSyncReg.periodicSync && typeof periodicSyncReg.periodicSync.register === 'function') {
-        periodicSyncReg.periodicSync.register('update-consent-data', {
-          minInterval: 24 * 60 * 60 * 1000
-        }).then(() => {
-          console.log('[SW] Periodic sync registered');
-        }).catch(console.error);
-      }
-    }
-  });
-}

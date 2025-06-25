@@ -18,7 +18,7 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
 // Use proper basename for GitHub Pages routing
 createRoot(document.getElementById('root')!).render(
   <BrowserRouter basename="/mia-consent-offline-form">
-    <App />
+    <ErrorBoundary><App /></ErrorBoundary>
   </BrowserRouter>
 );
 

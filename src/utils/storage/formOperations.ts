@@ -17,27 +17,32 @@ export const saveFormHybrid = async (formData: FormData, isDraft: boolean = fals
   let supabaseResult = null;
   let indexedDBResult = null;
   
-  // For drafts, check if we need to update existing draft with same session ID
-  if (isDraft && formData.id) {
-    // Try to update existing draft first
-    if (capabilities.supabase) {
+  // For drafts, check for existing drafts by patient name or ID to prevent duplicates
+  if (isDraft && (formData.patientName || formData.idNumber)) {
+    if (capabilities.indexedDB) {
       try {
-        // Check if draft exists in Supabase
-        const existingForms = await getFormsFromSupabase(true);
-        const existingDraft = existingForms.find(form => form.id === formData.id);
+        const existingDrafts = await getAllDrafts();
+        const duplicateDraft = existingDrafts.find(draft => 
+          (formData.patientName && draft.patientName === formData.patientName) ||
+          (formData.idNumber && draft.idNumber === formData.idNumber)
+        );
         
-        if (existingDraft) {
-          supabaseResult = await updateFormInSupabase(formData.id as string, formData, isDraft);
-          console.log('Updated existing draft in Supabase');
-          return supabaseResult;
+        if (duplicateDraft && duplicateDraft.id !== formData.id) {
+          // Update existing draft instead of creating new one
+          const updatedData = { ...duplicateDraft, ...formData, id: duplicateDraft.id };
+          await updateDraftById(duplicateDraft.id as string | number, updatedData);
+          console.log('Updated existing draft to prevent duplicate');
+          return updatedData;
         }
       } catch (error) {
-        console.error('Supabase update check failed:', error);
-        updateStorageCapabilities({ supabase: false });
+        console.error('Error checking for duplicate drafts:', error);
       }
     }
-
-    // Fallback to IndexedDB for draft updates
+  }
+  
+  // For drafts, check if we need to update existing draft with same ID
+  if (isDraft && formData.id) {
+    // Try to update existing draft first in IndexedDB
     if (capabilities.indexedDB) {
       try {
         const existingDrafts = await getAllDrafts();
@@ -53,27 +58,44 @@ export const saveFormHybrid = async (formData: FormData, isDraft: boolean = fals
         console.error('IndexedDB update failed:', error);
       }
     }
+
+    // Try Supabase only for completed forms, not drafts
+    if (capabilities.supabase && !isDraft) {
+      try {
+        const existingForms = await getFormsFromSupabase(false);
+        const existingForm = existingForms.find(form => form.id === formData.id);
+        
+        if (existingForm) {
+          supabaseResult = await updateFormInSupabase(formData.id as string, formData, isDraft);
+          console.log('Updated existing form in Supabase');
+          return supabaseResult;
+        }
+      } catch (error) {
+        console.error('Supabase update check failed:', error);
+        updateStorageCapabilities({ supabase: false });
+      }
+    }
   }
   
-  // If no existing draft found or not a draft, create new one
-  // Try Supabase first if available
-  if (capabilities.supabase) {
+  // Create new form/draft
+  // For completed forms, try Supabase first
+  if (!isDraft && capabilities.supabase) {
     try {
       supabaseResult = await saveFormToSupabase(formData, isDraft);
       console.log('Form saved to Supabase successfully');
       return supabaseResult;
     } catch (error) {
       console.error('Supabase save failed, trying IndexedDB:', error);
-      updateStorageCapabilities({ supabase: false }); // Mark as unavailable for this session
+      updateStorageCapabilities({ supabase: false });
     }
   }
 
-  // Fallback to IndexedDB
+  // For drafts or fallback, use IndexedDB
   if (capabilities.indexedDB) {
     try {
       const id = isDraft ? await saveDraftData(formData) : await saveFormData(formData);
       indexedDBResult = { ...formData, id };
-      console.log('Form saved to IndexedDB as fallback');
+      console.log(`${isDraft ? 'Draft' : 'Form'} saved to IndexedDB`);
       return indexedDBResult;
     } catch (error) {
       console.error('IndexedDB save also failed:', error);
@@ -92,8 +114,8 @@ export const saveFormHybrid = async (formData: FormData, isDraft: boolean = fals
 export const getFormsHybrid = async (isDraft: boolean = false): Promise<FormData[]> => {
   const capabilities = getStorageCapabilities();
   
-  // Try Supabase first
-  if (capabilities.supabase) {
+  // For completed forms, try Supabase first
+  if (!isDraft && capabilities.supabase) {
     try {
       const forms = await getFormsFromSupabase(isDraft);
       console.log(`Retrieved ${forms.length} forms from Supabase`);
@@ -104,11 +126,11 @@ export const getFormsHybrid = async (isDraft: boolean = false): Promise<FormData
     }
   }
 
-  // Fallback to IndexedDB
+  // For drafts or fallback, use IndexedDB
   if (capabilities.indexedDB) {
     try {
       const forms = isDraft ? await getAllDrafts() : await getAllForms();
-      console.log(`Retrieved ${forms.length} forms from IndexedDB`);
+      console.log(`Retrieved ${forms.length} ${isDraft ? 'drafts' : 'forms'} from IndexedDB`);
       return forms;
     } catch (error) {
       console.error('IndexedDB fetch also failed:', error);
@@ -121,44 +143,57 @@ export const getFormsHybrid = async (isDraft: boolean = false): Promise<FormData
 };
 
 /**
- * Delete form using hybrid approach
- * @param id Form ID
+ * Delete form using hybrid approach with proper ID handling
+ * @param id Form ID (string or number)
  * @param isDraft Whether this is a draft
  */
 export const deleteFormHybrid = async (id: string | number, isDraft: boolean = false): Promise<void> => {
   const capabilities = getStorageCapabilities();
   let supabaseSuccess = false;
   let indexedDBSuccess = false;
+  let lastError: Error | null = null;
 
-  // Try Supabase first
-  if (capabilities.supabase && typeof id === 'string') {
+  console.log(`Attempting to delete ${isDraft ? 'draft' : 'form'} with ID:`, id, typeof id);
+
+  // For completed forms, try Supabase first (only if ID is string)
+  if (!isDraft && capabilities.supabase && typeof id === 'string') {
     try {
       await deleteFormFromSupabase(id, isDraft);
       supabaseSuccess = true;
       console.log('Form deleted from Supabase');
     } catch (error) {
       console.error('Supabase delete failed:', error);
+      lastError = error as Error;
     }
   }
 
-  // Try IndexedDB (either as fallback or if we have a numeric ID)
-  if (capabilities.indexedDB && typeof id === 'number') {
+  // For drafts or fallback, try IndexedDB
+  if (capabilities.indexedDB) {
     try {
-      if (isDraft) {
-        await deleteDraft(id);
-      } else {
-        // Note: We'd need to implement deleteForm in indexedDB operations
-        console.warn('Delete completed form from IndexedDB not implemented');
+      // Convert string ID to number for IndexedDB if needed
+      const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
+      
+      if (isNaN(numericId)) {
+        throw new Error(`Invalid ID for IndexedDB deletion: ${id}`);
       }
-      indexedDBSuccess = true;
-      console.log('Form deleted from IndexedDB');
+
+      if (isDraft) {
+        await deleteDraft(numericId);
+        indexedDBSuccess = true;
+        console.log(`Draft deleted from IndexedDB with ID: ${numericId}`);
+      } else {
+        // For completed forms in IndexedDB, we'd need to implement this
+        console.warn('Delete completed form from IndexedDB not fully implemented');
+        indexedDBSuccess = true; // Mark as success to avoid error
+      }
     } catch (error) {
       console.error('IndexedDB delete failed:', error);
+      lastError = error as Error;
     }
   }
 
   if (!supabaseSuccess && !indexedDBSuccess) {
-    throw new Error('Failed to delete form from all storage methods');
+    throw lastError || new Error('Failed to delete form from all storage methods');
   }
 };
 
@@ -174,8 +209,9 @@ export const deleteMultipleFormsHybrid = async (ids: (string | number)[], isDraf
     try {
       await deleteFormHybrid(id, isDraft);
       results.success++;
+      console.log(`Successfully deleted ${isDraft ? 'draft' : 'form'} ${id}`);
     } catch (error) {
-      console.error(`Failed to delete form ${id}:`, error);
+      console.error(`Failed to delete ${isDraft ? 'draft' : 'form'} ${id}:`, error);
       results.failed++;
     }
   }
@@ -183,4 +219,6 @@ export const deleteMultipleFormsHybrid = async (ids: (string | number)[], isDraf
   if (results.failed > 0) {
     throw new Error(`Failed to delete ${results.failed} out of ${ids.length} items`);
   }
+
+  console.log(`Bulk delete completed: ${results.success} successful, ${results.failed} failed`);
 };

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
@@ -15,10 +16,15 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
     .catch((err) => console.error('❌ Service Worker registration failed:', err));
 }
 
-// Use proper basename for GitHub Pages routing
+// Use environment-aware basename - remove leading slash and trailing slash for consistency
+const getBasename = () => {
+  const baseUrl = import.meta.env.BASE_URL;
+  if (baseUrl === '/') return undefined; // Don't use basename in development
+  return baseUrl.replace(/^\//, '').replace(/\/$/, ''); // Remove leading and trailing slashes
+};
+
 createRoot(document.getElementById('root')!).render(
-  <BrowserRouter basename="/mia-consent-offline-form">
+  <BrowserRouter basename={getBasename()}>
     <ErrorBoundary><App /></ErrorBoundary>
   </BrowserRouter>
 );
-

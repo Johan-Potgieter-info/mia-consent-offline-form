@@ -7,6 +7,12 @@ export const getAssetPath = (path: string): string => {
   // Remove leading slash if present to avoid double slashes
   const cleanPath = path.startsWith('/') ? path.slice(1) : path;
   
+  // In development (BASE_URL = '/'), return path with single leading slash
+  // In production (BASE_URL = '/mia-consent-offline-form/'), return full path
+  if (basePath === '/') {
+    return `/${cleanPath}`;
+  }
+  
   return `${basePath}${cleanPath}`;
 };
 

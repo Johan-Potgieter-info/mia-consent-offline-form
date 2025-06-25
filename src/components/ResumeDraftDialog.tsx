@@ -106,7 +106,7 @@ const ResumeDraftDialog = ({ onDraftsChanged }: ResumeDraftDialogProps) => {
             onDoctorChange={handleDoctorChange}
             formatDate={formatDate}
             getDoctorOptions={getDoctorOptions}
-            onContinue={(id) => handleContinue(id)}
+            onContinue={handleContinue}
             isBulkDeleting={isBulkDeleting}
           />
         </div>

@@ -19,8 +19,18 @@ export const useConsentFormContainer = () => {
   const [justSaved, setJustSaved] = useState(false);
   const [activeSection, setActiveSection] = useState("patient");
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const [autoSaveStatus, setAutoSaveStatus] = useState<string>('idle');
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
   const [retryCount, setRetryCount] = useState(0);
+
+  // Dialog states
+  const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
+  const [showOfflineDialog, setShowOfflineDialog] = useState(false);
+  const [showOnlineSuccessDialog, setShowOnlineSuccessDialog] = useState(false);
+  const [showOfflineSummaryDialog, setShowOfflineSummaryDialog] = useState(false);
+  const [offlineFormData, setOfflineFormData] = useState<FormData | undefined>(undefined);
+  const [onlineFormData, setOnlineFormData] = useState<FormData | undefined>(undefined);
+  const [pendingForms, setPendingForms] = useState<FormData[]>([]);
 
   const loadDraftById = useCallback(async () => {
     if (!draftId || !isInitialized) return;
@@ -65,10 +75,10 @@ export const useConsentFormContainer = () => {
       setIsDirty(false);
       setJustSaved(true);
       setTimeout(() => setJustSaved(false), 2000);
-      setAutoSaveStatus('idle');
+      setAutoSaveStatus('success');
     } catch (error) {
       console.error('Save failed:', error);
-      setAutoSaveStatus('failed');
+      setAutoSaveStatus('error');
       setRetryCount((prev) => prev + 1);
     }
   };
@@ -119,6 +129,18 @@ export const useConsentFormContainer = () => {
     regionDetected: false,
     isResuming: !!draftId,
     resetJustSaved,
-    formatLastSaved
+    formatLastSaved,
+    // Dialog properties
+    showSaveConfirmation,
+    saveMessage,
+    showOfflineDialog,
+    setShowOfflineDialog,
+    showOnlineSuccessDialog,
+    setShowOnlineSuccessDialog,
+    showOfflineSummaryDialog,
+    setShowOfflineSummaryDialog,
+    offlineFormData,
+    onlineFormData,
+    pendingForms
   };
 };

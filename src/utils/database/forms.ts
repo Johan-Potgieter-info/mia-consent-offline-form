@@ -1,23 +1,30 @@
 
-// Form-specific database operations
-
-import { saveToIndexedDB, getAllFromIndexedDB } from './operations';
+import { initDB } from './initialization';
 import { FORMS_STORE } from './config';
 import { FormData } from '../../types/formTypes';
 
-/**
- * Save form data to IndexedDB
- * @param formData Form data to save
- * @returns Promise with the saved object ID
- */
 export const saveFormData = async (formData: FormData): Promise<number> => {
-  return await saveToIndexedDB(formData, FORMS_STORE);
+  const db = await initDB();
+  const transaction = db.transaction([FORMS_STORE], 'readwrite');
+  const store = transaction.objectStore(FORMS_STORE);
+  
+  const result = await new Promise<number>((resolve, reject) => {
+    const request = store.add(formData);
+    request.onsuccess = () => resolve(request.result as number);
+    request.onerror = () => reject(request.error);
+  });
+  
+  return result;
 };
 
-/**
- * Get all forms from IndexedDB
- * @returns Promise with all forms (decrypted)
- */
 export const getAllForms = async (): Promise<FormData[]> => {
-  return await getAllFromIndexedDB(FORMS_STORE) as FormData[];
+  const db = await initDB();
+  const transaction = db.transaction([FORMS_STORE], 'readonly');
+  const store = transaction.objectStore(FORMS_STORE);
+  
+  return new Promise((resolve, reject) => {
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
 };

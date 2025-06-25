@@ -1,13 +1,20 @@
-import React from "react";
+
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { Toaster } from "@/components/ui/toaster";
+import Index from './pages/Index';
+import ConsentForm from './components/ConsentForm';
 
 const App: React.FC = () => {
-  console.log("🧪 Simple render test working");
-
   return (
-    <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-      <h1>✅ App Rendered</h1>
-      <p>If you see this, the error is inside one of the routes.</p>
-    </div>
+    <>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/consent-form" element={<ConsentForm />} />
+        <Route path="/consent-form/:draftId" element={<ConsentForm />} />
+      </Routes>
+      <Toaster />
+    </>
   );
 };
 

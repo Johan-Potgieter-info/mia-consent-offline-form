@@ -2,10 +2,13 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import { componentTagger } from "lovable-tagger";
+import path from "path";
 
 export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
+    mode === 'development' && componentTagger(),
     VitePWA({
       registerType: 'autoUpdate',
       workbox: {
@@ -36,9 +39,15 @@ export default defineConfig(({ mode }) => ({
         display: 'standalone'
       }
     }),
-  ],
+  ].filter(Boolean),
   server: {
+    host: "::",
     port: 8080
+  },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
   },
   base: mode === 'production' ? '/mia-consent-offline-form/' : '/',
 }));

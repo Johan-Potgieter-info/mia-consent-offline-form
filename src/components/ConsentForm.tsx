@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useConsentFormContainer } from './ConsentFormContainer';
+import { useConsentFormContainer } from '../hooks/useConsentFormContainer';
 import ConsentFormLayout from './ConsentFormLayout';
 import ConsentFormDialogs from './ConsentFormDialogs';
 

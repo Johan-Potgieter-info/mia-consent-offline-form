@@ -9,7 +9,7 @@ interface ConsentFormProgressProps {
 const ConsentFormProgress = ({ currentSection, sections }: ConsentFormProgressProps) => {
   const getProgressPercentage = () => {
     const currentIndex = sections.findIndex(s => s.id === currentSection);
-    return ((currentIndex + 1) / (sections?.length || 1)) * 100;
+    return sections     return ((currentIndex + 1) / (sections?.length || 1)) * 100;    return ((currentIndex + 1) / (sections?.length || 1)) * 100; sections.length > 0 ? ((currentIndex + 1) / sections.length) * 100 : 0;
   };
 
   return (

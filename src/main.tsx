@@ -3,28 +3,35 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
+// Get the correct base path for current environment
+const getBasePath = () => {
+  const isDev = import.meta.env.DEV;
+  return isDev ? '/' : '/mia-consent-offline-form/';
+};
+
 // Unregister old service workers to prevent conflicts
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(function(registrations) {
     for(let registration of registrations) {
       // Unregister any old service workers
       if (registration.scope.includes('lovableproject.com') ||
-          !registration.scope.includes('mia-consent-offline-form')) {
+          (!registration.scope.includes('mia-consent-offline-form') && !import.meta.env.DEV)) {
         console.log('Unregistering old service worker:', registration.scope);
         registration.unregister();
       }
     }
   });
 
-  // Register the new service worker with cache busting and proper error handling
+  // Register the new service worker with correct path for both environments
   window.addEventListener('load', () => {
-    const swUrl = import.meta.env.PROD
-      ? '/mia-consent-offline-form/sw.js'
-      : '/sw.js';
+    const basePath = getBasePath();
+    const swUrl = `${basePath}sw.js`;
     
-    // Add timestamp for cache busting and better error handling
-    navigator.serviceWorker.register(`${swUrl}?v=${Date.now()}`, { 
-      scope: import.meta.env.PROD ? '/mia-consent-offline-form/' : '/'
+    console.log('Attempting to register SW at:', swUrl);
+    console.log('Current environment:', import.meta.env.DEV ? 'development' : 'production');
+    
+    navigator.serviceWorker.register(swUrl, { 
+      scope: basePath
     })
       .then((registration) => {
         console.log('✅ Mia Healthcare SW registered successfully:', registration.scope);

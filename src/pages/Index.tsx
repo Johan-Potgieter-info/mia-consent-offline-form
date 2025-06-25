@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, MapPin, Wifi, WifiOff, RefreshCw } from 'lucide-react';
@@ -10,6 +9,7 @@ import ResumeDraftDialog from '../components/ResumeDraftDialog';
 import PendingFormsSection from '../components/PendingFormsSection';
 import ConsentSection from '../components/ConsentSection';
 import { FormData } from '../types/formTypes';
+import { getIconPath } from '../utils/assetPaths';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -104,15 +104,15 @@ const Index = () => {
         <div className="max-w-4xl mx-auto">
           <div className="bg-white p-3 inline-block rounded-lg">
             <img
-              src="/mia-consent-offline-form/icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png"
+              src={getIconPath()}
               alt="Mia Healthcare"
               className="h-16 w-auto"
               onError={(e) => {
-                console.error('New Mia logo failed to load:', e);
+                console.error('Mia logo failed to load:', e);
                 console.log('Attempted path:', e.currentTarget.src);
               }}
               onLoad={() => {
-                console.log('New Mia logo loaded successfully');
+                console.log('Mia logo loaded successfully');
               }}
             />
           </div>

@@ -67,10 +67,27 @@ const ConsentFormLayout = ({
   setRegionManually,
   isRegionFromDraft,
   isRegionDetected,
-  validationErrors,
+  validationErrors = [],
   showValidationErrors
 }: ConsentFormLayoutProps) => {
   const { sections } = useFormSections();
+
+  // Check if user has consented before showing the form
+  const hasConsented = localStorage.getItem("consentAccepted") === "true" || formData?.consentAgreement === true;
+
+  if (!hasConsented) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-4">Consent Required</h2>
+          <p className="text-gray-600 mb-4">Please return to the home page to provide consent before proceeding.</p>
+          <a href="/" className="text-blue-600 hover:text-blue-800 underline">
+            Return to Home
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -99,7 +116,7 @@ const ConsentFormLayout = ({
 
         <ConsentFormProgress 
           currentSection={activeSection}
-          sections={sections}
+          sections={sections || []}
         />
 
         <ConsentFormStatusBar 
@@ -118,8 +135,8 @@ const ConsentFormLayout = ({
         />
 
         <FormValidationErrors 
-          errors={validationErrors}
-          isVisible={showValidationErrors}
+          errors={validationErrors || []}
+          isVisible={showValidationErrors && (validationErrors?.length || 0) > 0}
         />
 
         <FormSectionsContainer
@@ -128,7 +145,7 @@ const ConsentFormLayout = ({
           formData={formData}
           handleInputChange={handleInputChange}
           handleCheckboxChange={handleCheckboxChange}
-          validationErrors={validationErrors}
+          validationErrors={validationErrors || []}
         />
 
         <ConsentFormContent
@@ -137,7 +154,7 @@ const ConsentFormLayout = ({
           isResuming={isResuming}
         >
           <ConsentFormNavigation
-            sections={sections}
+            sections={sections || []}
             activeSection={activeSection}
             setActiveSection={setActiveSection}
             onSave={onSave}

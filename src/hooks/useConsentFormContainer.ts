@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useHybridStorage } from './useHybridStorage';
@@ -26,7 +27,7 @@ export const useConsentFormContainer = () => {
 
     try {
       const drafts = await getForms(true);
-      const matchingDraft = drafts.find((draft) => String(draft.id) === draftId);
+      const matchingDraft = (drafts || []).find((draft) => String(draft.id) === draftId);
       if (matchingDraft) {
         setFormData(matchingDraft);
         console.log(`Loaded draft ID ${draftId}`);
@@ -39,7 +40,9 @@ export const useConsentFormContainer = () => {
   }, [draftId, isInitialized, getForms]);
 
   useEffect(() => {
-    if (localStorage.getItem("consentAccepted") === "true") {
+    // Check consent state and set it in form data
+    const consentAccepted = localStorage.getItem("consentAccepted") === "true";
+    if (consentAccepted) {
       handleCheckboxChange("consentAgreement", "", true);
     }
     loadDraftById();
@@ -82,6 +85,14 @@ export const useConsentFormContainer = () => {
     }
   };
 
+  const resetJustSaved = useCallback(() => {
+    setJustSaved(false);
+  }, []);
+
+  const formatLastSaved = useCallback(() => {
+    return 'Just now'; // Simplified for now
+  }, []);
+
   return {
     formData,
     handleInputChange,
@@ -93,9 +104,10 @@ export const useConsentFormContainer = () => {
     justSaved,
     activeSection,
     setActiveSection,
-    validationErrors,
+    validationErrors: validationErrors || [],
     showValidationErrors: (validationErrors?.length || 0) > 0,
     isOnline,
+    lastSaved: null,
     dbInitialized: isInitialized,
     autoSaveStatus,
     retryCount,
@@ -104,6 +116,9 @@ export const useConsentFormContainer = () => {
     isRegionFromDraft: false,
     isRegionDetected: false,
     currentRegion: null,
-    regionDetected: false
+    regionDetected: false,
+    isResuming: !!draftId,
+    resetJustSaved,
+    formatLastSaved
   };
 };

@@ -60,11 +60,15 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.ready.then((reg) => {
     // BACKGROUND SYNC
     if ('sync' in reg) {
-      (reg as any).sync.register('sync-consent')
-        .then(() => {
-          console.log('[SW] Background sync registered');
-        })
-        .catch(console.error);
+      // Type assertion for sync functionality
+      const syncReg = reg as any;
+      if (syncReg.sync && typeof syncReg.sync.register === 'function') {
+        syncReg.sync.register('sync-consent')
+          .then(() => {
+            console.log('[SW] Background sync registered');
+          })
+          .catch(console.error);
+      }
     }
 
     // PERIODIC SYNC

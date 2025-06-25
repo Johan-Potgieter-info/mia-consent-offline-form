@@ -1,30 +1,24 @@
 import React from 'react';
 
-interface ErrorBoundaryState {
+interface State {
   hasError: boolean;
   error: any;
 }
 
-class ErrorBoundary extends React.Component<{ children: React.ReactNode }, ErrorBoundaryState> {
-  constructor(props: any) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-
-  static getDerivedStateFromError(error: any) {
-    return { hasError: true, error };
-  }
+class ErrorBoundary extends React.Component<React.PropsWithChildren, State> {
+  state: State = { hasError: false, error: null };
 
   componentDidCatch(error: any, info: any) {
-    console.error("❌ ErrorBoundary caught an error:", error, info);
+    console.error('❌ ErrorBoundary caught an error:', error, info);
+    this.setState({ hasError: true, error });
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ color: 'red', padding: '1rem' }}>
-          <h2>Something went wrong.</h2>
-          <pre>{this.state.error?.message || String(this.state.error)}</pre>
+        <div style={{ padding: 24, color: 'red', fontFamily: 'sans-serif' }}>
+          <h2>🚨 Something went wrong.</h2>
+          <pre>{String(this.state.error?.message || this.state.error || 'Unknown Error')}</pre>
         </div>
       );
     }

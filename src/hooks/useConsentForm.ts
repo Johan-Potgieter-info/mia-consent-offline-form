@@ -6,6 +6,7 @@ import { useHybridStorage } from './useHybridStorage';
 import { useFormData } from './useFormData';
 import { useFormInitialization } from './useFormInitialization';
 import { useFormActions } from './useFormActions';
+import { AutoSaveStatus } from '../types/autoSaveTypes';
 
 export const useConsentForm = () => {
   const [activeSection, setActiveSection] = useState('patientDetails');

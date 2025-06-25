@@ -1,4 +1,3 @@
-# or open in VS Code and save
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';

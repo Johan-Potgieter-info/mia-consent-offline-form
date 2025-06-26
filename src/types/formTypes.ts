@@ -46,3 +46,28 @@ export interface FormSubmissionResult {
   success: boolean;
   message: string;
 }
+
+// New interfaces for Phase 3
+export interface SubmissionEvent {
+  id: string;
+  event: 'submit.started' | 'submit.success' | 'submit.failed' | 'submit.queued' | 'validation.failed' | 'save.success' | 'save.failed';
+  formId?: string;
+  timestamp: string;
+  status: 'success' | 'error' | 'warning' | 'info';
+  message: string;
+  metadata?: {
+    formVersion?: number;
+    region?: string;
+    retryCount?: number;
+    errorCode?: string;
+    validationErrors?: string[];
+    [key: string]: any;
+  };
+}
+
+export interface VersionMigration {
+  fromVersion: number;
+  toVersion: number;
+  migrate: (data: FormData) => FormData;
+  description: string;
+}

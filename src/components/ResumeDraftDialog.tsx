@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Clock } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
@@ -17,6 +16,7 @@ import CacheRefreshButton from './CacheRefreshButton';
 import { useDraftOperations } from './draft/useDraftOperations';
 import { useStaleDataCleanup } from '../hooks/useStaleDataCleanup';
 import { useAutoRetry } from '../hooks/useAutoRetry';
+import { useHybridStorage } from '../hooks/useHybridStorage';
 import { getQueue, removeFromQueue, incrementRetry } from '../utils/submissionQueue';
 
 interface ResumeDraftDialogProps {
@@ -28,6 +28,7 @@ const ResumeDraftDialog = ({ onDraftsChanged }: ResumeDraftDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [pendingSubmissions, setPendingSubmissions] = useState<any[]>([]);
   const [loadingPending, setLoadingPending] = useState(false);
+  const { getForms, deleteForm } = useHybridStorage();
   
   const {
     drafts,
@@ -44,14 +45,8 @@ const ResumeDraftDialog = ({ onDraftsChanged }: ResumeDraftDialogProps) => {
   } = useDraftOperations(isOpen);
 
   const { manualCleanup } = useStaleDataCleanup({
-    getForms: async (isDraft) => {
-      const { getForms } = await import('../hooks/useHybridStorage');
-      return getForms(isDraft);
-    },
-    deleteForm: async (id, isDraft) => {
-      const { deleteForm } = await import('../hooks/useHybridStorage');
-      return deleteForm(id, isDraft);
-    },
+    getForms,
+    deleteForm,
     onCleanupComplete: () => {
       loadDrafts();
       if (onDraftsChanged) onDraftsChanged();
@@ -71,7 +66,6 @@ const ResumeDraftDialog = ({ onDraftsChanged }: ResumeDraftDialogProps) => {
   };
 
   const retrySubmissions = async () => {
-    // This would trigger the submission queue retry logic
     await loadPendingSubmissions();
   };
 
@@ -82,7 +76,6 @@ const ResumeDraftDialog = ({ onDraftsChanged }: ResumeDraftDialogProps) => {
 
   const handleRetrySubmission = async (id: string) => {
     try {
-      // Force retry by incrementing the retry count and updating next retry time
       await incrementRetry(id);
       await loadPendingSubmissions();
     } catch (error) {

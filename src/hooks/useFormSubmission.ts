@@ -6,6 +6,9 @@ import { useFormSession } from './useFormSession';
 import { FormData, FormSubmissionResult } from '../types/formTypes';
 import { Region } from '../utils/regionDetection';
 import { checkServerConnectivity } from '../utils/connectivity';
+import { migrateFormData, CURRENT_FORM_VERSION, shouldShowVersionWarning, getVersionWarningMessage } from '../utils/formVersioning';
+import { submissionLogger } from '../utils/submissionEventLogger';
+import { SensitiveDataEncryption } from '../utils/sensitiveDataEncryption';
 
 interface UseFormSubmissionProps {
   isOnline: boolean;
@@ -69,6 +72,8 @@ export const useFormSubmission = ({
     completeSubmission?: (status: 'submitted' | 'synced') => void,
     failSubmission?: () => void
   ): Promise<FormSubmissionResult> => {
+    const formId = String(formData.id || 'new');
+    
     try {
       console.log('Processing form submission...', {
         formData: {
@@ -80,11 +85,37 @@ export const useFormSubmission = ({
         isResuming,
         draftId: formData.id
       });
+
+      // Log submission start
+      await submissionLogger.logSubmissionStart(formId, {
+        formVersion: formData.formSchemaVersion || 1,
+        region: currentRegion?.code,
+        isResuming
+      });
+      
+      // Handle form versioning
+      const { migrated: migratedData, warnings } = migrateFormData(formData);
+      
+      // Show version warnings if needed
+      if (warnings.length > 0) {
+        warnings.forEach(warning => {
+          toast({
+            title: "Form Updated",
+            description: warning,
+            variant: "default",
+          });
+        });
+      }
       
       // Validate the form (this happens AFTER startSubmission is called)
-      const validation = validateForm(formData);
+      const validation = validateForm(migratedData);
       if (!validation.isValid) {
         console.log('Validation failed:', validation.errors);
+        
+        // Log validation failure
+        await submissionLogger.logValidationFailed(formId, validation.errors, {
+          formVersion: migratedData.formSchemaVersion
+        });
         
         if (failSubmission) failSubmission();
         
@@ -111,15 +142,18 @@ export const useFormSubmission = ({
       // Check real-time connectivity
       const actuallyOnline = await checkServerConnectivity();
       
+      // Prepare final data with encryption for sensitive fields
+      const encryptedData = SensitiveDataEncryption.encryptSensitiveFields(migratedData);
+      
       const finalData = { 
-        ...formData, 
+        ...encryptedData, 
         timestamp: new Date().toISOString(),
-        createdAt: formData.createdAt || new Date().toISOString(), 
+        createdAt: encryptedData.createdAt || new Date().toISOString(), 
         synced: capabilities.supabase && actuallyOnline,
-        submissionId: `${formData.regionCode || currentRegion?.code || 'UNK'}-${Date.now()}`,
+        submissionId: `${encryptedData.regionCode || currentRegion?.code || 'UNK'}-${Date.now()}`,
         submissionStatus: (actuallyOnline && capabilities.supabase ? 'submitted' : 'pending') as 'submitted' | 'pending',
         status: 'completed' as const,
-        formSchemaVersion: 1
+        formSchemaVersion: CURRENT_FORM_VERSION
       };
       
       console.log('Saving completed form...', { id: finalData.id, status: finalData.status, submissionStatus: finalData.submissionStatus });
@@ -127,6 +161,12 @@ export const useFormSubmission = ({
       // Save COMPLETED form (isDraft = false)
       const savedForm = await saveForm(finalData, false);
       console.log('Form saved successfully:', savedForm);
+      
+      // Log successful save
+      await submissionLogger.logSaveSuccess(formId, false, {
+        formVersion: finalData.formSchemaVersion,
+        encrypted: true
+      });
       
       // Delete the draft IMMEDIATELY after successful completion
       if (formData.id && isResuming) {
@@ -146,6 +186,12 @@ export const useFormSubmission = ({
       // Handle offline vs online submission
       if (!actuallyOnline || !capabilities.supabase) {
         console.log('Processing offline submission...');
+        
+        // Log queued submission
+        await submissionLogger.logSubmissionQueued(formId, {
+          formVersion: finalData.formSchemaVersion,
+          region: currentRegion?.code
+        });
         
         if (completeSubmission) completeSubmission('submitted');
         
@@ -185,9 +231,24 @@ export const useFormSubmission = ({
         try {
           await syncData();
           console.log('Post-submission sync completed');
+          
+          // Log successful submission
+          await submissionLogger.logSubmissionSuccess(formId, {
+            formVersion: finalData.formSchemaVersion,
+            region: currentRegion?.code,
+            synced: true
+          });
+          
           if (completeSubmission) completeSubmission('synced');
         } catch (error) {
           console.error('Post-submission sync failed:', error);
+          
+          // Log sync failure but submission was still successful
+          await submissionLogger.logSubmissionFailed(formId, `Sync failed: ${error}`, {
+            formVersion: finalData.formSchemaVersion,
+            submitted: true,
+            syncFailed: true
+          });
         }
         
         console.log('Triggering online success dialog...');
@@ -211,6 +272,13 @@ export const useFormSubmission = ({
       }
     } catch (error) {
       console.error('Form submission error:', error);
+      
+      // Log submission failure
+      await submissionLogger.logSubmissionFailed(formId, String(error), {
+        formVersion: formData.formSchemaVersion || 1,
+        region: currentRegion?.code
+      });
+      
       if (failSubmission) failSubmission();
       
       toast({

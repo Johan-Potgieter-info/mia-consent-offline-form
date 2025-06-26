@@ -53,7 +53,7 @@ export const useAutoSave = ({
       console.log('Auto-save skipped: No IndexedDB available, trying fallback');
       const fallbackSuccess = saveToFallbackStorage({
         ...formData,
-        status: 'draft',
+        status: 'draft' as const,
         id: sessionId
       });
       if (fallbackSuccess) {
@@ -74,7 +74,7 @@ export const useAutoSave = ({
         ...formData, 
         timestamp: new Date().toISOString(),
         autoSaved: true,
-        status: 'draft',
+        status: 'draft' as const,
         id: sessionId,
         lastModified: new Date().toISOString()
       };
@@ -94,7 +94,7 @@ export const useAutoSave = ({
       
       const fallbackSuccess = saveToFallbackStorage({
         ...formData,
-        status: 'draft',
+        status: 'draft' as const,
         id: sessionId
       });
       if (fallbackSuccess) {

@@ -52,7 +52,7 @@ export const useFormActions = ({
   const { submitForm: submitFormSubmission } = useFormSubmission({ isOnline });
 
   // Refs to prevent auto-save storms
-  const autoSaveIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastAutoSaveContentRef = useRef<string>('');
   const isAutoSaveActiveRef = useRef(false);
 
@@ -78,20 +78,20 @@ export const useFormActions = ({
       return; // Insufficient data
     }
 
-    // Clear any existing interval
-    if (autoSaveIntervalRef.current) {
-      clearInterval(autoSaveIntervalRef.current);
+    // Clear any existing timeout
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
     }
 
-    // Set up 30-second auto-save interval
-    autoSaveIntervalRef.current = setTimeout(async () => {
+    // Set up 30-second auto-save timeout
+    autoSaveTimeoutRef.current = setTimeout(async () => {
       // Double-check conditions before executing
       if (isDirty && autoSaveStatus !== 'saving' && !isAutoSaveActiveRef.current) {
         isAutoSaveActiveRef.current = true;
         lastAutoSaveContentRef.current = currentContentString;
         
         try {
-          console.log('Auto-save triggered (30s interval)');
+          console.log('Auto-save triggered (30s timeout)');
           await autoSave(formData);
         } catch (error) {
           console.error('Auto-save failed:', error);
@@ -106,11 +106,11 @@ export const useFormActions = ({
       if (isDirty && autoSaveStatus !== 'saving') {
         try {
           if (capabilities.indexedDB || window.localStorage) {
-            const emergencyData = {
+            const emergencyData: FormData = {
               ...formData,
               timestamp: new Date().toISOString(),
               emergency: true,
-              status: 'draft'
+              status: 'draft' as const
             };
             
             if (capabilities.indexedDB) {
@@ -132,8 +132,8 @@ export const useFormActions = ({
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      if (autoSaveIntervalRef.current) {
-        clearTimeout(autoSaveIntervalRef.current);
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
       }
     };
   }, [isDirty, formData, capabilities, autoSave, autoSaveStatus, isInitialized]);

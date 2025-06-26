@@ -122,7 +122,7 @@ export const useFormSubmission = ({
         createdAt: formData.createdAt || new Date().toISOString(), 
         synced: capabilities.supabase && actuallyOnline,
         submissionId: `${formData.regionCode || currentRegion?.code || 'UNK'}-${Date.now()}`,
-        submissionStatus: actuallyOnline && capabilities.supabase ? 'submitted' : 'pending',
+        submissionStatus: (actuallyOnline && capabilities.supabase ? 'submitted' : 'pending') as 'submitted' | 'pending',
         status: 'completed' as const,
         formSchemaVersion: 1 // Current schema version
       };
@@ -174,7 +174,7 @@ export const useFormSubmission = ({
       if (!actuallyOnline || !capabilities.supabase) {
         console.log('Processing offline submission...');
         
-        if (completeSubmission) completeSubmission('pending');
+        if (completeSubmission) completeSubmission('submitted');
         
         // Get all pending forms for the summary
         const pendingForms = await getForms(false);

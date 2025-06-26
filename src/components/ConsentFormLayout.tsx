@@ -150,7 +150,7 @@ const ConsentFormLayout = ({
             setActiveSection={setActiveSection}
             onSave={onSave}
             onSubmit={onSubmit}
-            isSubmitting={submitting}
+            submitting={submitting}
           />
         </ConsentFormContent>
       </div>

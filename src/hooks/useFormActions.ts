@@ -1,63 +1,112 @@
 
-import { useFormPersistence } from './useFormPersistence';
-import { useFormSubmission } from './useFormSubmission';
-import { useRegionDetection } from './useRegionDetection';
 import { FormData } from '../types/formTypes';
 
 interface UseFormActionsProps {
   formData: FormData;
-  isDirty: boolean;
-  setIsDirty: (isDirty: boolean) => void;
-  isOnline: boolean;
+  currentRegion: any;
+  draftId?: string;
+  saveForm: (data: FormData, isDraft?: boolean) => Promise<any>;
+  deleteForm: (id: string | number, isDraft?: boolean) => Promise<void>;
+  submitForm: (
+    data: FormData,
+    region: any,
+    isResuming: boolean,
+    startSubmission?: () => boolean,
+    completeSubmission?: (status: 'submitted' | 'synced') => void,
+    failSubmission?: () => void
+  ) => Promise<any>;
+  hasMeaningfulContent: (data: FormData) => boolean;
+  updateFormDataWithRegion: (region: any) => void;
+  setIsDirty: (dirty: boolean) => void;
+  setJustSaved: (saved: boolean) => void;
+  setRetryCount: (count: number | ((prev: number) => number)) => void;
+  startSubmission: () => boolean;
+  completeSubmission: (status: 'submitted' | 'synced') => void;
+  failSubmission: () => void;
 }
 
-interface UseFormActionsResult {
-  saveForm: () => Promise<void>;
-  submitForm: () => Promise<void>;
-  lastSaved: Date | null;
-  formatLastSaved: () => string;
-  retryCount: number;
-  justSaved: boolean;
-  resetJustSaved: () => void;
-}
+export const useFormActions = ({
+  formData,
+  currentRegion,
+  draftId,
+  saveForm,
+  deleteForm,
+  submitForm,
+  hasMeaningfulContent,
+  updateFormDataWithRegion,
+  setIsDirty,
+  setJustSaved,
+  setRetryCount,
+  startSubmission,
+  completeSubmission,
+  failSubmission
+}: UseFormActionsProps) => {
+  const handleSave = async (isDraft = true) => {
+    try {
+      // Only save if form has meaningful content
+      if (!hasMeaningfulContent(formData)) {
+        console.log('Form has no meaningful content, skipping save');
+        return;
+      }
 
-export const useFormActions = ({ 
-  formData, 
-  isDirty, 
-  setIsDirty, 
-  isOnline 
-}: UseFormActionsProps): UseFormActionsResult => {
-  const { currentRegion } = useRegionDetection();
-  const { 
-    lastSaved, 
-    saveForm: savePersistence, 
-    formatLastSaved,
-    retryCount,
-    justSaved,
-    resetJustSaved
-  } = useFormPersistence({ isOnline });
-  const { submitForm: submitFormSubmission } = useFormSubmission({ isOnline });
+      updateFormDataWithRegion(currentRegion);
+      
+      const dataToSave = {
+        ...formData,
+        regionCode: currentRegion?.code || formData.regionCode,
+        region: currentRegion?.name || formData.region,
+        doctor: currentRegion?.doctor || formData.doctor,
+        practiceNumber: currentRegion?.practiceNumber || formData.practiceNumber,
+        createdAt: formData.createdAt || new Date().toISOString(),
+        lastModified: new Date().toISOString(),
+        formSchemaVersion: 1
+      };
 
-  // Save button handler - ALWAYS saves as draft
-  const handleSaveForm = async () => {
-    const savedId = await savePersistence(formData);
-    if (savedId) {
-      console.log('Form saved as draft with ID:', savedId);
+      const savedId = await saveForm(dataToSave, isDraft);
+      
+      setIsDirty(false);
+      setJustSaved(true);
+      setTimeout(() => setJustSaved(false), 2000);
+    } catch (error) {
+      console.error('Save failed:', error);
+      setRetryCount((prev) => prev + 1);
     }
   };
 
-  // Submit button handler - saves as completed form to cloud
-  const handleSubmitForm = async () => {
-    await submitFormSubmission(formData, currentRegion, false);
+  const handleSubmit = async () => {
+    console.log('Submitting form...');
+    updateFormDataWithRegion(currentRegion);
+    
+    const dataToSave = {
+      ...formData,
+      regionCode: currentRegion?.code || formData.regionCode,
+      region: currentRegion?.name || formData.region,
+      doctor: currentRegion?.doctor || formData.doctor,
+      practiceNumber: currentRegion?.practiceNumber || formData.practiceNumber,
+      createdAt: formData.createdAt || new Date().toISOString(),
+      lastModified: new Date().toISOString(),
+      formSchemaVersion: 1
+    };
+    
+    await submitForm(
+      dataToSave, 
+      currentRegion, 
+      !!draftId,
+      startSubmission,
+      completeSubmission,
+      failSubmission
+    );
+  };
+
+  const handleDiscard = async () => {
+    if (formData.id) {
+      await deleteForm(formData.id, true);
+    }
   };
 
   return {
-    saveForm: handleSaveForm,
-    submitForm: handleSubmitForm,
-    lastSaved,
-    formatLastSaved,
-    retryCount,
-    justSaved,
-    resetJustSaved
+    handleSave,
+    handleSubmit,
+    handleDiscard
   };
 };

@@ -1,100 +1,84 @@
 
-import React, { useState } from 'react';
-import { Save, Send, ArrowLeft, ArrowRight } from 'lucide-react';
-import { Button } from '../components/ui/button';
+import React from 'react';
+import { Button } from './ui/button';
+import { ChevronLeft, ChevronRight, Save, Send } from 'lucide-react';
 
 interface ConsentFormNavigationProps {
-  sections: Array<{ id: string; title: string; component: React.ComponentType<any> }>;
+  sections: any[];
   activeSection: string;
-  setActiveSection: (sectionId: string) => void;
+  setActiveSection: (section: string) => void;
   onSave: () => Promise<void>;
   onSubmit: () => Promise<void>;
+  submitting?: boolean;
 }
 
-const ConsentFormNavigation = ({ 
-  sections, 
-  activeSection, 
-  setActiveSection, 
-  onSave, 
-  onSubmit 
+const ConsentFormNavigation = ({
+  sections,
+  activeSection,
+  setActiveSection,
+  onSave,
+  onSubmit,
+  submitting = false
 }: ConsentFormNavigationProps) => {
-  const [isSaving, setIsSaving] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const currentIndex = sections.findIndex(s => s.id === activeSection);
+  const currentIndex = sections.findIndex(section => section.id === activeSection);
+  const isFirstSection = currentIndex === 0;
+  const isLastSection = currentIndex === sections.length - 1;
 
-  const handleSave = async () => {
-    if (isSaving) return;
-    setIsSaving(true);
-    try {
-      await onSave();
-    } finally {
-      setIsSaving(false);
+  const handlePrevious = () => {
+    if (!isFirstSection) {
+      setActiveSection(sections[currentIndex - 1].id);
     }
   };
 
-  const handleSubmit = async () => {
-    if (isSubmitting) return;
-    console.log('Submit button clicked - calling onSubmit...');
-    setIsSubmitting(true);
-    try {
-      await onSubmit();
-    } finally {
-      setIsSubmitting(false);
+  const handleNext = () => {
+    if (!isLastSection) {
+      setActiveSection(sections[currentIndex + 1].id);
     }
   };
 
   return (
-    <div className="flex flex-col space-y-4 mt-8 pt-6 border-t border-gray-200">
-      {/* Mobile-first navigation */}
-      <div className="flex justify-between items-center">
+    <div className="flex justify-between items-center mt-8 pt-6 border-t">
+      <Button
+        variant="outline"
+        onClick={handlePrevious}
+        disabled={isFirstSection}
+        className="flex items-center gap-2"
+      >
+        <ChevronLeft className="w-4 h-4" />
+        Previous
+      </Button>
+
+      <div className="flex gap-3">
         <Button
-          onClick={() => {
-            if (currentIndex > 0) {
-              setActiveSection(sections[currentIndex - 1].id);
-            }
-          }}
-          disabled={currentIndex === 0}
           variant="outline"
-          className="flex items-center gap-2 h-12 px-6 text-base font-medium border-2 border-gray-300 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={onSave}
+          disabled={submitting}
+          className="flex items-center gap-2"
         >
-          <ArrowLeft className="w-5 h-5" />
-          Previous
+          <Save className="w-4 h-4" />
+          Save Draft
         </Button>
 
-        {currentIndex === sections.length - 1 ? (
+        {isLastSection ? (
           <Button
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="flex items-center gap-2 h-12 px-8 bg-[#ef4805] text-white text-base font-medium hover:bg-[#d63d04] transition-colors disabled:opacity-50"
+            onClick={onSubmit}
+            disabled={submitting}
+            className="flex items-center gap-2"
           >
-            <Send className="w-5 h-5" />
-            {isSubmitting ? 'Submitting...' : 'Submit Form'}
+            <Send className="w-4 h-4" />
+            {submitting ? 'Submitting...' : 'Submit Form'}
           </Button>
         ) : (
           <Button
-            onClick={() => {
-              if (currentIndex < sections.length - 1) {
-                setActiveSection(sections[currentIndex + 1].id);
-              }
-            }}
-            className="flex items-center gap-2 h-12 px-6 bg-[#ef4805] text-white text-base font-medium hover:bg-[#d63d04] transition-colors"
+            onClick={handleNext}
+            disabled={submitting}
+            className="flex items-center gap-2"
           >
             Next
-            <ArrowRight className="w-5 h-5" />
+            <ChevronRight className="w-4 h-4" />
           </Button>
         )}
       </div>
-
-      {/* Save button - saves as draft only */}
-      <Button
-        onClick={handleSave}
-        disabled={isSaving}
-        variant="outline"
-        className="w-full h-12 flex items-center justify-center gap-2 text-base font-medium border-2 border-blue-300 text-blue-700 hover:bg-blue-50 disabled:opacity-50"
-      >
-        <Save className="w-5 h-5" />
-        {isSaving ? 'Saving Draft...' : 'Save as Draft (Local Only)'}
-      </Button>
     </div>
   );
 };

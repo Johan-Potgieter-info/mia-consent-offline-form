@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useHybridStorage } from '../../hooks/useHybridStorage';
 import { FormData } from '../../types/formTypes';
@@ -206,7 +205,7 @@ export const useDraftOperations = (isOpen: boolean) => {
   };
 
   const getDoctorOptions = () => {
-    return Object.values(REGIONS);
+    return Object.values(REGIONS).map(region => region.doctor);
   };
 
   return {

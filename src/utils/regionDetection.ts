@@ -10,20 +10,20 @@ export const REGIONS: Record<string, Region> = {
   PTA: {
     code: 'PTA',
     name: 'Pretoria',
-    doctor: 'Dr. Vorster',
+    doctor: 'Dr Vorster',
     practiceNumber: '1227831'
   },
   JHB: {
     code: 'JHB',
     name: 'Johannesburg',
-    doctor: 'Dr. Smith',
-    practiceNumber: '1234567'
+    doctor: 'Dr Essop',
+    practiceNumber: '1182609'
   },
   CPT: {
     code: 'CPT',
     name: 'Cape Town',
-    doctor: 'Dr. Johnson',
-    practiceNumber: '7654321'
+    doctor: 'Dr Soni',
+    practiceNumber: '1030817'
   }
 };
 

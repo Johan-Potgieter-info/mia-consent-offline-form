@@ -34,11 +34,6 @@ export const useResumeDraftDialog = ({ isOpen, onDraftsChanged }: UseResumeDraft
     getDoctorOptions
   } = useDraftOperations(isOpen);
 
-  // Fix: Return string array of doctor names instead of Region objects
-  const getDoctorOptions = () => {
-    return Object.values(REGIONS).map(region => region.doctor);
-  };
-
   const { manualCleanup } = useStaleDataCleanup({
     getForms,
     deleteForm,

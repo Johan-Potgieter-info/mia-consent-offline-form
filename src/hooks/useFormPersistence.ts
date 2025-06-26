@@ -64,7 +64,7 @@ export const useFormPersistence = ({
     saveForm,
     autoSave,
     formatLastSaved,
-    autoSaveStatus,
+    autoSaveStatus: autoSaveStatus as AutoSaveStatus, // Explicit type assertion to preserve all states
     retryCount,
     justSaved,
     resetJustSaved,

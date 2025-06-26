@@ -139,7 +139,7 @@ export const useFormSubmission = ({
 
       console.log('Form validation passed, proceeding with submission...');
 
-      // FIXED: Do a fresh real-time connectivity check instead of relying on stale state
+      // CRITICAL FIX: Do a fresh real-time connectivity check instead of relying on stale state
       console.log('Checking real-time server connectivity...');
       const actuallyOnline = await checkServerConnectivity();
       console.log('Server connectivity result:', actuallyOnline);
@@ -191,50 +191,11 @@ export const useFormSubmission = ({
       clearSession();
       console.log('Form session cleared after successful submission');
       
-      // FIXED: Better logic for determining if we're truly offline or online
-      if (!actuallyOnline || !capabilities.supabase) {
-        console.log('Processing offline submission...', { 
-          actuallyOnline, 
-          supabaseCapability: capabilities.supabase 
-        });
-        
-        // Log queued submission
-        await submissionLogger.logSubmissionQueued(formId, {
-          formVersion: finalData.formSchemaVersion,
-          region: currentRegion?.code
-        });
-        
-        if (completeSubmission) completeSubmission('submitted');
-        
-        // Get all pending forms for the summary
-        const pendingForms = await getForms(false);
-        const allPending = pendingForms.filter(form => 
-          form.submissionStatus === 'pending' && form.status === 'completed'
-        );
-        
-        console.log('Triggering offline submission dialog...', { 
-          pendingCount: allPending.length,
-          currentForm: finalData.patientName 
-        });
-        
-        toast({
-          title: "Form Queued",
-          description: "Form queued for submission when online.",
-          variant: "default",
-        });
-        
-        if (onOfflineSubmission) {
-          setTimeout(() => {
-            onOfflineSubmission(finalData, allPending);
-          }, 100);
-        }
-        
-        return { 
-          success: true,
-          message: "Form queued for submission"
-        };
-      } else {
-        console.log('Processing online submission...', { 
+      // FIXED: Correct logic for determining online vs offline submission
+      const isActuallyOnline = actuallyOnline && capabilities.supabase;
+      
+      if (isActuallyOnline) {
+        console.log('Processing ONLINE submission...', { 
           actuallyOnline, 
           supabaseCapability: capabilities.supabase 
         });
@@ -265,7 +226,7 @@ export const useFormSubmission = ({
           });
         }
         
-        console.log('Triggering online success dialog...');
+        console.log('Triggering ONLINE success dialog...');
         
         toast({
           title: "Form Submitted",
@@ -283,7 +244,49 @@ export const useFormSubmission = ({
           success: true,
           message: "Form submitted successfully"
         };
+      } else {
+        console.log('Processing OFFLINE submission...', { 
+          actuallyOnline, 
+          supabaseCapability: capabilities.supabase 
+        });
+        
+        // Log queued submission
+        await submissionLogger.logSubmissionQueued(formId, {
+          formVersion: finalData.formSchemaVersion,
+          region: currentRegion?.code
+        });
+        
+        if (completeSubmission) completeSubmission('submitted');
+        
+        // Get all pending forms for the summary
+        const pendingForms = await getForms(false);
+        const allPending = pendingForms.filter(form => 
+          form.submissionStatus === 'pending' && form.status === 'completed'
+        );
+        
+        console.log('Triggering OFFLINE submission dialog...', { 
+          pendingCount: allPending.length,
+          currentForm: finalData.patientName 
+        });
+        
+        toast({
+          title: "Form Queued",
+          description: "Form queued for submission when online.",
+          variant: "default",
+        });
+        
+        if (onOfflineSubmission) {
+          setTimeout(() => {
+            onOfflineSubmission(finalData, allPending);
+          }, 100);
+        }
+        
+        return { 
+          success: true,
+          message: "Form queued for submission"
+        };
       }
+      
     } catch (error) {
       console.error('Form submission error:', error);
       

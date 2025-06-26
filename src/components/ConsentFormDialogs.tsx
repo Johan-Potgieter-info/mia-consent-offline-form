@@ -41,7 +41,6 @@ const ConsentFormDialogs = ({
         show={showSaveConfirmation}
         message={saveMessage}
         isOnline={isOnline}
-        isAutoSave={false}
       />
 
       <OfflineSubmissionDialog

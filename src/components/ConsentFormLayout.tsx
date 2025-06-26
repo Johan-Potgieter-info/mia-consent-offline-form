@@ -11,7 +11,6 @@ import FormValidationErrors from './FormValidationErrors';
 import FormSectionsContainer from './FormSectionsContainer';
 import { FormData } from '../types/formTypes';
 import { Region } from '../utils/regionDetection';
-import { AutoSaveStatus } from '../types/autoSaveTypes';
 import { useFormSections } from '../hooks/useFormSections';
 
 interface ConsentFormLayoutProps {
@@ -33,7 +32,6 @@ interface ConsentFormLayoutProps {
   lastSaved: Date | null;
   formatLastSaved: () => string;
   dbInitialized: boolean;
-  autoSaveStatus: AutoSaveStatus;
   retryCount: number;
   showManualSelector: boolean;
   setRegionManually: (region: Region) => void;
@@ -62,7 +60,6 @@ const ConsentFormLayout = ({
   lastSaved,
   formatLastSaved,
   dbInitialized,
-  autoSaveStatus,
   retryCount,
   showManualSelector,
   setRegionManually,
@@ -128,7 +125,6 @@ const ConsentFormLayout = ({
           formatLastSaved={formatLastSaved}
           onSave={onSave}
           dbInitialized={dbInitialized}
-          autoSaveStatus={autoSaveStatus}
           retryCount={retryCount}
           onRegionSelect={setRegionManually}
           isRegionFromDraft={isRegionFromDraft}

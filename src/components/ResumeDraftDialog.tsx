@@ -12,8 +12,12 @@ import {
 } from './ui/dialog';
 import { Button } from './ui/button';
 import DraftList from './draft/DraftList';
+import PendingSubmissionsList from './draft/PendingSubmissionsList';
 import CacheRefreshButton from './CacheRefreshButton';
 import { useDraftOperations } from './draft/useDraftOperations';
+import { useStaleDataCleanup } from '../hooks/useStaleDataCleanup';
+import { useAutoRetry } from '../hooks/useAutoRetry';
+import { getQueue, removeFromQueue, incrementRetry } from '../utils/submissionQueue';
 
 interface ResumeDraftDialogProps {
   onDraftsChanged?: () => void;
@@ -22,6 +26,9 @@ interface ResumeDraftDialogProps {
 const ResumeDraftDialog = ({ onDraftsChanged }: ResumeDraftDialogProps) => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const [pendingSubmissions, setPendingSubmissions] = useState<any[]>([]);
+  const [loadingPending, setLoadingPending] = useState(false);
+  
   const {
     drafts,
     isLoading,
@@ -35,6 +42,62 @@ const ResumeDraftDialog = ({ onDraftsChanged }: ResumeDraftDialogProps) => {
     formatDate,
     getDoctorOptions
   } = useDraftOperations(isOpen);
+
+  const { manualCleanup } = useStaleDataCleanup({
+    getForms: async (isDraft) => {
+      const { getForms } = await import('../hooks/useHybridStorage');
+      return getForms(isDraft);
+    },
+    deleteForm: async (id, isDraft) => {
+      const { deleteForm } = await import('../hooks/useHybridStorage');
+      return deleteForm(id, isDraft);
+    },
+    onCleanupComplete: () => {
+      loadDrafts();
+      if (onDraftsChanged) onDraftsChanged();
+    }
+  });
+
+  const loadPendingSubmissions = async () => {
+    setLoadingPending(true);
+    try {
+      const queue = await getQueue();
+      setPendingSubmissions(queue);
+    } catch (error) {
+      console.error('Failed to load pending submissions:', error);
+    } finally {
+      setLoadingPending(false);
+    }
+  };
+
+  const retrySubmissions = async () => {
+    // This would trigger the submission queue retry logic
+    await loadPendingSubmissions();
+  };
+
+  useAutoRetry({
+    onRetrySubmissions: retrySubmissions,
+    isEnabled: isOpen
+  });
+
+  const handleRetrySubmission = async (id: string) => {
+    try {
+      // Force retry by incrementing the retry count and updating next retry time
+      await incrementRetry(id);
+      await loadPendingSubmissions();
+    } catch (error) {
+      console.error('Failed to retry submission:', error);
+    }
+  };
+
+  const handleDeleteSubmission = async (id: string) => {
+    try {
+      await removeFromQueue(id);
+      await loadPendingSubmissions();
+    } catch (error) {
+      console.error('Failed to delete submission:', error);
+    }
+  };
 
   const handleContinue = (draftId: string) => {
     setIsOpen(false);
@@ -64,6 +127,9 @@ const ResumeDraftDialog = ({ onDraftsChanged }: ResumeDraftDialogProps) => {
 
   const handleDialogClose = (open: boolean) => {
     setIsOpen(open);
+    if (open) {
+      loadPendingSubmissions();
+    }
     if (!open && onDraftsChanged) {
       onDraftsChanged();
     }
@@ -71,6 +137,7 @@ const ResumeDraftDialog = ({ onDraftsChanged }: ResumeDraftDialogProps) => {
 
   const handleCacheRefresh = async () => {
     await loadDrafts();
+    await loadPendingSubmissions();
     if (onDraftsChanged) {
       onDraftsChanged();
     }
@@ -88,33 +155,48 @@ const ResumeDraftDialog = ({ onDraftsChanged }: ResumeDraftDialogProps) => {
           Resume Draft
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[80vh]">
+      <DialogContent className="max-w-6xl max-h-[80vh]">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div>
               <DialogTitle className="text-xl font-bold text-gray-900">Resume a Saved Form</DialogTitle>
               <DialogDescription className="text-sm text-gray-500">
-                Select a previously saved form to continue where you left off, or use bulk actions to manage multiple drafts
+                Select a previously saved form to continue where you left off, manage pending submissions, or clean up old data
               </DialogDescription>
             </div>
             <CacheRefreshButton onRefresh={handleCacheRefresh} size="sm" />
           </div>
         </DialogHeader>
-        <div className="overflow-y-auto max-h-[60vh]">
-          <DraftList
-            drafts={drafts}
-            isLoading={isLoading}
-            error={error}
-            onRetry={loadDrafts}
-            onDeleteDraft={handleDelete}
-            onBulkDeleteDrafts={handleBulkDelete}
-            onDoctorChange={handleDoctorChange}
-            onEmergencyCleanup={handleEmergencyCleanupWithCallback}
-            formatDate={formatDate}
-            getDoctorOptions={getDoctorOptions}
-            onContinue={handleContinue}
-            isBulkDeleting={isBulkDeleting}
-          />
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-y-auto max-h-[60vh]">
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Saved Drafts</h3>
+            <DraftList
+              drafts={drafts}
+              isLoading={isLoading}
+              error={error}
+              onRetry={loadDrafts}
+              onDeleteDraft={handleDelete}
+              onBulkDeleteDrafts={handleBulkDelete}
+              onDoctorChange={handleDoctorChange}
+              onEmergencyCleanup={handleEmergencyCleanupWithCallback}
+              onManualCleanup={manualCleanup}
+              formatDate={formatDate}
+              getDoctorOptions={getDoctorOptions}
+              onContinue={handleContinue}
+              isBulkDeleting={isBulkDeleting}
+            />
+          </div>
+          
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Pending Submissions</h3>
+            <PendingSubmissionsList
+              pendingSubmissions={pendingSubmissions}
+              onRetrySubmission={handleRetrySubmission}
+              onDeleteSubmission={handleDeleteSubmission}
+              isLoading={loadingPending}
+            />
+          </div>
         </div>
       </DialogContent>
     </Dialog>

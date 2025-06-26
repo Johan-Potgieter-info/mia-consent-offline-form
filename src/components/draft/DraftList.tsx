@@ -1,11 +1,12 @@
 
 import React from 'react';
-import { Trash2, User, Calendar, Phone, MapPin, AlertCircle, AlertTriangle } from 'lucide-react';
+import { User, Calendar, Phone, MapPin, AlertCircle, AlertTriangle } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { FormData } from '../../types/formTypes';
 import BulkDraftActions from './BulkDraftActions';
 import RegionDropdown from '../RegionDropdown';
+import DraftDeleteButton from './DraftDeleteButton';
 import { useBulkDraftOperations } from '../../hooks/useBulkDraftOperations';
 import { Alert, AlertDescription } from '../ui/alert';
 
@@ -22,6 +23,7 @@ interface DraftListProps {
   onContinue: (draftId: string) => void;
   isBulkDeleting: boolean;
   onEmergencyCleanup?: () => void;
+  onManualCleanup?: () => void;
 }
 
 const DraftList = ({
@@ -37,6 +39,7 @@ const DraftList = ({
   onContinue,
   isBulkDeleting,
   onEmergencyCleanup,
+  onManualCleanup,
 }: DraftListProps) => {
   const {
     selectedDrafts,
@@ -82,14 +85,19 @@ const DraftList = ({
     return (
       <div className="text-center py-8">
         <p className="text-gray-500">No saved drafts found</p>
-        {onEmergencyCleanup && (
-          <div className="mt-4">
+        <div className="mt-4 space-x-2">
+          {onManualCleanup && (
+            <Button onClick={onManualCleanup} variant="outline" size="sm">
+              Clean Up Old Drafts
+            </Button>
+          )}
+          {onEmergencyCleanup && (
             <Button onClick={onEmergencyCleanup} variant="outline" size="sm" className="text-red-600 border-red-300">
               <AlertTriangle className="w-4 h-4 mr-2" />
-              Clear All Data
+              Emergency Cleanup
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     );
   }
@@ -118,6 +126,11 @@ const DraftList = ({
     };
   };
 
+  const handleDeleteDraft = (draftId: string) => {
+    const fakeEvent = { preventDefault: () => {}, stopPropagation: () => {} } as React.MouseEvent;
+    onDeleteDraft(draftId, fakeEvent);
+  };
+
   return (
     <div className="space-y-0">
       <BulkDraftActions
@@ -130,24 +143,37 @@ const DraftList = ({
         onClearSelection={clearSelection}
       />
       
-      {/* Emergency cleanup warning */}
-      {drafts.length > 10 && (
-        <div className="p-4 bg-yellow-50 border-l-4 border-yellow-400">
-          <div className="flex items-center">
-            <AlertTriangle className="w-4 h-4 text-yellow-600 mr-2" />
-            <p className="text-sm text-yellow-800">
-              Large number of drafts detected. If delete buttons aren't working, use Emergency Cleanup.
-            </p>
-            {onEmergencyCleanup && (
-              <Button 
-                onClick={onEmergencyCleanup} 
-                variant="outline" 
-                size="sm" 
-                className="ml-auto text-red-600 border-red-300"
-              >
-                Emergency Cleanup
-              </Button>
-            )}
+      {/* Cleanup options */}
+      {drafts.length > 5 && (
+        <div className="p-4 bg-yellow-50 border-l-4 border-yellow-400 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <AlertTriangle className="w-4 h-4 text-yellow-600 mr-2" />
+              <p className="text-sm text-yellow-800">
+                Manage your drafts with cleanup options
+              </p>
+            </div>
+            <div className="space-x-2">
+              {onManualCleanup && (
+                <Button 
+                  onClick={onManualCleanup} 
+                  variant="outline" 
+                  size="sm"
+                >
+                  Clean Old Drafts
+                </Button>
+              )}
+              {onEmergencyCleanup && (
+                <Button 
+                  onClick={onEmergencyCleanup} 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-red-600 border-red-300"
+                >
+                  Emergency Cleanup
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -229,15 +255,11 @@ const DraftList = ({
                   >
                     Continue
                   </Button>
-                  <Button
-                    onClick={(e) => onDeleteDraft(String(draft.id), e)}
-                    variant="outline"
-                    size="sm"
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  <DraftDeleteButton
+                    onDelete={() => handleDeleteDraft(String(draft.id))}
                     disabled={isCurrentlySaving}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                    patientName={draft.patientName || 'this draft'}
+                  />
                 </div>
               </div>
             </div>

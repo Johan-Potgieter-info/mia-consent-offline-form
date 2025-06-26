@@ -6,7 +6,6 @@ import { useHybridStorage } from './useHybridStorage';
 import { useFormData } from './useFormData';
 import { useFormInitialization } from './useFormInitialization';
 import { useFormActions } from './useFormActions';
-import { AutoSaveStatus } from '../types/autoSaveTypes';
 
 export const useConsentForm = () => {
   const [activeSection, setActiveSection] = useState('patientDetails');
@@ -41,7 +40,6 @@ export const useConsentForm = () => {
     submitForm,
     lastSaved,
     formatLastSaved,
-    autoSaveStatus,
     retryCount,
     justSaved,
     resetJustSaved
@@ -67,7 +65,6 @@ export const useConsentForm = () => {
     isDirty,
     formatLastSaved,
     dbInitialized: capabilities.supabase || capabilities.indexedDB,
-    autoSaveStatus,
     retryCount,
     justSaved,
     resetJustSaved,

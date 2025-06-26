@@ -19,7 +19,6 @@ export const useConsentFormContainer = () => {
   const [justSaved, setJustSaved] = useState(false);
   const [activeSection, setActiveSection] = useState("patient");
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
   const [retryCount, setRetryCount] = useState(0);
 
   // Dialog states
@@ -70,15 +69,12 @@ export const useConsentFormContainer = () => {
 
   const handleSave = async (isDraft = true) => {
     try {
-      setAutoSaveStatus('saving');
       await saveForm(formData, isDraft);
       setIsDirty(false);
       setJustSaved(true);
       setTimeout(() => setJustSaved(false), 2000);
-      setAutoSaveStatus('success');
     } catch (error) {
       console.error('Save failed:', error);
-      setAutoSaveStatus('error');
       setRetryCount((prev) => prev + 1);
     }
   };
@@ -119,7 +115,6 @@ export const useConsentFormContainer = () => {
     isOnline,
     lastSaved: null,
     dbInitialized: isInitialized,
-    autoSaveStatus,
     retryCount,
     showManualSelector: false,
     setRegionManually: () => {},

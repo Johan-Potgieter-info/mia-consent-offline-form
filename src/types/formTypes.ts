@@ -33,7 +33,6 @@ export interface FormData {
   doctor?: string;
   practiceNumber?: string;
   lastModified?: string;
-  autoSaved?: boolean;
   synced?: boolean;
   submissionId?: string;
   [key: string]: any; // Index signature for database operations

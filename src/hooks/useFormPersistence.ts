@@ -1,9 +1,7 @@
 
 import { useState } from 'react';
 import { useManualSave } from './persistence/useManualSave';
-import { useAutoSave } from './persistence/useAutoSave';
 import { FormData } from '../types/formTypes';
-import { AutoSaveStatus } from '../types/autoSaveTypes';
 
 interface UseFormPersistenceProps {
   isOnline: boolean;
@@ -14,9 +12,7 @@ interface UseFormPersistenceResult {
   isDirty: boolean;
   setIsDirty: (isDirty: boolean) => void;
   saveForm: (formData: FormData) => Promise<string | number | undefined>;
-  autoSave: (formData: FormData) => Promise<void>;
   formatLastSaved: () => string;
-  autoSaveStatus: AutoSaveStatus;
   retryCount: number;
   justSaved: boolean;
   resetJustSaved: () => void;
@@ -42,13 +38,6 @@ export const useFormPersistence = ({
     setRetryCount
   });
 
-  const { autoSave, autoSaveStatus } = useAutoSave({
-    retryCount,
-    setLastSaved,
-    setIsDirty,
-    setRetryCount
-  });
-
   const formatLastSaved = (): string => {
     if (!lastSaved) return '';
     return lastSaved.toLocaleTimeString('en-ZA', { 
@@ -57,15 +46,12 @@ export const useFormPersistence = ({
     });
   };
 
-  // Explicitly type the return to ensure AutoSaveStatus is preserved
   return {
     lastSaved,
     isDirty,
     setIsDirty,
     saveForm,
-    autoSave,
     formatLastSaved,
-    autoSaveStatus: autoSaveStatus as AutoSaveStatus,
     retryCount,
     justSaved,
     resetJustSaved,

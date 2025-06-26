@@ -1,7 +1,7 @@
+
 import React from 'react';
-import { AlertCircle, Save, Database, CheckCircle, Loader2, X, Cloud, HardDrive } from 'lucide-react';
+import { AlertCircle, Save, Database, Cloud, HardDrive } from 'lucide-react';
 import { Region } from '../utils/regionDetection';
-import { AutoSaveStatus } from '../types/autoSaveTypes';
 import RegionDropdown from './RegionDropdown';
 
 interface ConsentFormStatusBarProps {
@@ -12,7 +12,6 @@ interface ConsentFormStatusBarProps {
   formatLastSaved: () => string;
   onSave: () => void;
   dbInitialized?: boolean;
-  autoSaveStatus?: AutoSaveStatus;
   retryCount?: number;
   onRegionSelect?: (region: Region) => void;
   isRegionFromDraft?: boolean;
@@ -27,40 +26,11 @@ const ConsentFormStatusBar = ({
   formatLastSaved, 
   onSave,
   dbInitialized = true,
-  autoSaveStatus = 'idle',
   retryCount = 0,
   onRegionSelect,
   isRegionFromDraft = false,
   isRegionDetected = false
 }: ConsentFormStatusBarProps) => {
-  const getAutoSaveIndicator = () => {
-    switch (autoSaveStatus) {
-      case 'saving':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-            Auto-saving...
-          </span>
-        );
-      case 'success':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-            <CheckCircle className="w-3 h-3 mr-1" />
-            {isOnline ? 'Synced to cloud' : 'Saved locally'}
-          </span>
-        );
-      case 'error':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-            <X className="w-3 h-3 mr-1" />
-            Auto-save failed {retryCount > 0 && `(${retryCount} retries)`}
-          </span>
-        );
-      default:
-        return null;
-    }
-  };
-
   const getStorageIndicator = () => {
     if (isOnline && dbInitialized) {
       return (
@@ -106,14 +76,12 @@ const ConsentFormStatusBar = ({
           />
         )}
         
-        {isDirty && autoSaveStatus !== 'saving' && (
+        {isDirty && (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
             <AlertCircle className="w-3 h-3 mr-1" />
             Unsaved changes
           </span>
         )}
-        
-        {getAutoSaveIndicator()}
         
         {lastSaved && (
           <span className="text-xs text-gray-500">
@@ -125,14 +93,10 @@ const ConsentFormStatusBar = ({
       <div className="flex space-x-2">
         <button
           onClick={onSave}
-          className={`flex items-center px-3 py-1.5 text-sm rounded-lg transition-colors ${
-            autoSaveStatus === 'error' || retryCount > 0
-            ? 'bg-red-100 text-red-700 hover:bg-red-200' 
-            : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-          }`}
+          className="flex items-center px-3 py-1.5 text-sm rounded-lg transition-colors bg-blue-100 text-blue-700 hover:bg-blue-200"
         >
           <Save className="w-4 h-4 mr-1" />
-          {autoSaveStatus === 'error' || retryCount > 0 ? 'Save Now' : 'Save'}
+          Save Progress
         </button>
       </div>
     </div>

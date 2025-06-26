@@ -1,41 +1,30 @@
 
 import React, { useEffect } from 'react';
-import { CheckCircle, Cloud, HardDrive } from 'lucide-react';
+import { Cloud, HardDrive } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
-import { AutoSaveStatus } from '../types/autoSaveTypes';
 
 interface SaveConfirmationProps {
   show: boolean;
   message: string;
   duration?: number;
   isOnline?: boolean;
-  isAutoSave?: boolean;
 }
 
 const SaveConfirmation = ({ 
   show, 
   message, 
   duration = 3000, 
-  isOnline = false,
-  isAutoSave = false 
+  isOnline = false
 }: SaveConfirmationProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
     if (show) {
       const getToastMessage = () => {
-        if (isAutoSave) {
-          return isOnline ? "Auto-saved to cloud" : "Auto-saved locally";
-        }
         return isOnline ? "Draft saved to cloud" : "Draft saved locally";
       };
 
       const getDescription = () => {
-        if (isAutoSave) {
-          return isOnline 
-            ? "Your changes have been automatically saved to the cloud database" 
-            : "Your changes have been automatically saved to local storage and will sync when online";
-        }
         return isOnline 
           ? "Your draft has been saved to the cloud database" 
           : "Your draft has been saved locally and will sync when online";
@@ -47,7 +36,7 @@ const SaveConfirmation = ({
         duration: duration,
       });
     }
-  }, [show, message, duration, isOnline, isAutoSave, toast]);
+  }, [show, message, duration, isOnline, toast]);
 
   if (!show) return null;
 
@@ -73,7 +62,7 @@ const SaveConfirmation = ({
         {getIcon()}
         <div>
           <p className={`font-medium ${getTextColor()}`}>
-            {isAutoSave ? (isOnline ? 'Auto-saved to Cloud' : 'Auto-saved Locally') : 'Draft Saved Successfully'}
+            Draft Saved Successfully
           </p>
           <p className={`text-sm ${getSecondaryColor()}`}>
             {isOnline ? 'Saved to cloud database' : 'Saved locally - will sync when online'}

@@ -1,17 +1,11 @@
-import React, { useEffect } from 'react';
+
+import React from 'react';
 import { useConsentFormContainer } from '../hooks/useConsentFormContainer';
 import ConsentFormLayout from './ConsentFormLayout';
 import ConsentFormDialogs from './ConsentFormDialogs';
 
 const ConsentForm = () => {
   const containerData = useConsentFormContainer();
-
-  // 🔁 Auto-save draft whenever formData changes
-  useEffect(() => {
-    if (containerData.isDirty) {
-      containerData.handleSave(true); // Save as draft
-    }
-  }, [containerData.formData]);
 
   return (
     <>
@@ -34,7 +28,6 @@ const ConsentForm = () => {
         lastSaved={containerData.lastSaved}
         formatLastSaved={containerData.formatLastSaved}
         dbInitialized={containerData.dbInitialized}
-        autoSaveStatus={containerData.autoSaveStatus}
         retryCount={containerData.retryCount}
         showManualSelector={containerData.showManualSelector}
         setRegionManually={containerData.setRegionManually}

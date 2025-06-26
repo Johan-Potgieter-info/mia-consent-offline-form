@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import { useToast } from '../../hooks/use-toast';
@@ -7,6 +6,7 @@ import { useStaleDataCleanup } from '../../hooks/useStaleDataCleanup';
 import { useAutoRetry } from '../../hooks/useAutoRetry';
 import { useHybridStorage } from '../../hooks/useHybridStorage';
 import { getQueue, removeFromQueue, incrementRetry, updateQueuedSubmission } from '../../utils/submissionQueue';
+import { REGIONS } from '../../utils/regionDetection';
 
 interface UseResumeDraftDialogProps {
   isOpen: boolean;
@@ -33,6 +33,11 @@ export const useResumeDraftDialog = ({ isOpen, onDraftsChanged }: UseResumeDraft
     formatDate,
     getDoctorOptions
   } = useDraftOperations(isOpen);
+
+  // Fix: Return string array of doctor names instead of Region objects
+  const getDoctorOptions = () => {
+    return Object.values(REGIONS).map(region => region.doctor);
+  };
 
   const { manualCleanup } = useStaleDataCleanup({
     getForms,

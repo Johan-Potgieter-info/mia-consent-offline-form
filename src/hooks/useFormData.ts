@@ -46,11 +46,13 @@ export const useFormData = () => {
         [field]: value,
         // Preserve the original ID throughout the form lifecycle
         id: prev.id || Date.now(),
-        // Only update lastModified for significant changes, not every keystroke
+        // Only update lastModified for significant changes, throttled
         lastModified: new Date().toISOString()
       };
     });
-    setIsDirty(true);
+    
+    // Throttle isDirty updates to prevent excessive re-renders
+    setTimeout(() => setIsDirty(true), 0);
   }, []);
 
   const handleCheckboxChange = useCallback((field: keyof FormData, value: string, checked: boolean) => {
@@ -68,7 +70,9 @@ export const useFormData = () => {
         lastModified: new Date().toISOString()
       };
     });
-    setIsDirty(true);
+    
+    // Throttle isDirty updates to prevent excessive re-renders
+    setTimeout(() => setIsDirty(true), 0);
   }, []);
 
   return {

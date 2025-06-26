@@ -51,100 +51,76 @@ export const useFormActions = ({
   } = useFormPersistence({ isOnline });
   const { submitForm: submitFormSubmission } = useFormSubmission({ isOnline });
 
-  // Refs to prevent excessive auto-saves and loops
-  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Refs to prevent auto-save storms
+  const autoSaveIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastAutoSaveContentRef = useRef<string>('');
-  const autoSaveCountRef = useRef(0);
-  const lastAutoSaveTimeRef = useRef<number>(0);
+  const isAutoSaveActiveRef = useRef(false);
 
-  // Enhanced auto-save with proper content comparison and loop prevention
+  // Auto-save every 30 seconds with proper content comparison
   useEffect(() => {
-    if (!isInitialized || !isDirty || Object.keys(formData).length === 0) return;
-
-    // Prevent auto-save if currently saving
-    if (autoSaveStatus === 'saving') {
-      console.log('Auto-save skipped: already in progress');
+    if (!isInitialized || !isDirty || Object.keys(formData).length === 0) {
       return;
     }
 
-    // Clear existing timeout
-    if (autoSaveTimeoutRef.current) {
-      clearTimeout(autoSaveTimeoutRef.current);
+    // Prevent auto-save if currently saving
+    if (autoSaveStatus === 'saving' || isAutoSaveActiveRef.current) {
+      return;
     }
 
     // Compare only content fields, not metadata
     const currentContentString = JSON.stringify(getContentFields(formData));
     if (currentContentString === lastAutoSaveContentRef.current) {
-      console.log('Auto-save skipped: no content changes detected');
-      return;
-    }
-
-    // Prevent excessive auto-saves (max 1 per 30 seconds)
-    const now = Date.now();
-    if (now - lastAutoSaveTimeRef.current < 30000) {
-      console.log('Auto-save skipped: too frequent (30s cooldown)');
-      return;
-    }
-
-    // Reset counter if it's been more than 5 minutes
-    if (now - lastAutoSaveTimeRef.current > 300000) {
-      autoSaveCountRef.current = 0;
-    }
-
-    // Limit auto-saves to prevent loops (max 3 per session)
-    if (autoSaveCountRef.current >= 3) {
-      console.log('Auto-save limit reached for this session (max 3)');
-      return;
+      return; // No content changes
     }
 
     // Check for minimum required data before auto-saving
     if (!formData.patientName && !formData.idNumber && !formData.cellPhone) {
-      console.log('Auto-save skipped: insufficient data');
-      return;
+      return; // Insufficient data
     }
 
-    const autoSaveDelay = 45000; // 45 seconds
+    // Clear any existing interval
+    if (autoSaveIntervalRef.current) {
+      clearInterval(autoSaveIntervalRef.current);
+    }
 
-    autoSaveTimeoutRef.current = setTimeout(async () => {
+    // Set up 30-second auto-save interval
+    autoSaveIntervalRef.current = setTimeout(async () => {
       // Double-check conditions before executing
-      if (isDirty && autoSaveStatus !== 'saving') {
-        console.log('Auto-save triggered', { 
-          count: autoSaveCountRef.current + 1,
-          hasMinData: !!(formData.patientName || formData.idNumber || formData.cellPhone)
-        });
-        
+      if (isDirty && autoSaveStatus !== 'saving' && !isAutoSaveActiveRef.current) {
+        isAutoSaveActiveRef.current = true;
         lastAutoSaveContentRef.current = currentContentString;
-        lastAutoSaveTimeRef.current = now;
-        autoSaveCountRef.current++;
         
         try {
+          console.log('Auto-save triggered (30s interval)');
           await autoSave(formData);
         } catch (error) {
           console.error('Auto-save failed:', error);
+        } finally {
+          isAutoSaveActiveRef.current = false;
         }
       }
-    }, autoSaveDelay);
+    }, 30000); // 30 seconds
 
+    // Emergency save on page unload
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (isDirty && autoSaveStatus !== 'saving') {
-        // Try emergency save as draft
-        if (capabilities.indexedDB || window.localStorage) {
-          try {
+        try {
+          if (capabilities.indexedDB || window.localStorage) {
+            const emergencyData = {
+              ...formData,
+              timestamp: new Date().toISOString(),
+              emergency: true,
+              status: 'draft'
+            };
+            
             if (capabilities.indexedDB) {
-              // Quick emergency save attempt as draft
-              autoSave(formData);
+              autoSave(emergencyData);
             } else {
-              // Emergency localStorage save as draft
-              localStorage.setItem('emergencyFormDraft', JSON.stringify({
-                ...formData,
-                timestamp: new Date().toISOString(),
-                emergency: true,
-                status: 'draft'
-              }));
+              localStorage.setItem('emergencyFormDraft', JSON.stringify(emergencyData));
             }
-          } catch (error) {
-            console.error('Emergency save failed:', error);
           }
+        } catch (error) {
+          console.error('Emergency save failed:', error);
         }
         
         e.preventDefault();
@@ -156,15 +132,15 @@ export const useFormActions = ({
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      if (autoSaveTimeoutRef.current) {
-        clearTimeout(autoSaveTimeoutRef.current);
+      if (autoSaveIntervalRef.current) {
+        clearTimeout(autoSaveIntervalRef.current);
       }
     };
   }, [isDirty, formData, capabilities, autoSave, autoSaveStatus, isInitialized]);
 
   // Save button handler - ALWAYS saves as draft
   const handleSaveForm = async () => {
-    if (autoSaveStatus === 'saving') {
+    if (autoSaveStatus === 'saving' || isAutoSaveActiveRef.current) {
       console.log('Manual save skipped - auto-save in progress');
       return;
     }

@@ -48,7 +48,6 @@ export const useFormSubmission = ({
     }
     
     console.log("🔍 [DEBUG] Consent Agreement value:", formData.consentAgreement);
-  console.log("🔍 [DEBUG] Consent Agreement value:", formData.consentAgreement);
     if (!formData.consentAgreement) {
       errors.push("You must agree to the consent form");
     }
@@ -64,9 +63,18 @@ export const useFormSubmission = ({
   const submitForm = async (
     formData: FormData, 
     currentRegion: Region | null, 
-    isResuming: boolean
+    isResuming: boolean,
+    startSubmission?: () => boolean,
+    completeSubmission?: (status: 'submitted' | 'synced') => void,
+    failSubmission?: () => void
   ): Promise<FormSubmissionResult> => {
     try {
+      // Prevent double submission
+      if (formData.submitting || (startSubmission && !startSubmission())) {
+        console.log('Submission already in progress, ignoring duplicate request');
+        return { success: false, message: "Submission already in progress" };
+      }
+
       console.log('Starting form submission process...', {
         formData: {
           patientName: formData.patientName,
@@ -82,6 +90,8 @@ export const useFormSubmission = ({
       const validation = validateForm(formData);
       if (!validation.isValid) {
         console.log('Validation failed:', validation.errors);
+        
+        if (failSubmission) failSubmission();
         
         // Trigger validation error callback to show errors in UI
         if (onValidationErrors) {
@@ -103,15 +113,21 @@ export const useFormSubmission = ({
 
       console.log('Form validation passed, proceeding with submission...');
 
+      // Check real-time connectivity
+      const actuallyOnline = navigator.onLine && isOnline;
+      
       const finalData = { 
         ...formData, 
-        timestamp: new Date().toISOString(), 
-        synced: capabilities.supabase && isOnline,
+        timestamp: new Date().toISOString(),
+        createdAt: formData.createdAt || new Date().toISOString(), 
+        synced: capabilities.supabase && actuallyOnline,
         submissionId: `${formData.regionCode || currentRegion?.code || 'UNK'}-${Date.now()}`,
-        status: 'completed' as const
+        submissionStatus: actuallyOnline && capabilities.supabase ? 'submitted' : 'pending',
+        status: 'completed' as const,
+        formSchemaVersion: 1 // Current schema version
       };
       
-      console.log('Saving completed form...', { id: finalData.id, status: finalData.status });
+      console.log('Saving completed form...', { id: finalData.id, status: finalData.status, submissionStatus: finalData.submissionStatus });
       
       // Save COMPLETED form (isDraft = false)
       const savedForm = await saveForm(finalData, false);
@@ -155,16 +171,27 @@ export const useFormSubmission = ({
       console.log('Form session cleared after successful submission');
       
       // Handle offline vs online submission
-      if (!isOnline || !capabilities.supabase) {
+      if (!actuallyOnline || !capabilities.supabase) {
         console.log('Processing offline submission...');
+        
+        if (completeSubmission) completeSubmission('pending');
         
         // Get all pending forms for the summary
         const pendingForms = await getForms(false);
-        const allPending = pendingForms.filter(form => !form.synced && form.status === 'completed');
+        const allPending = pendingForms.filter(form => 
+          form.submissionStatus === 'pending' && form.status === 'completed'
+        );
         
         console.log('Triggering offline submission dialog...', { 
           pendingCount: allPending.length,
           currentForm: finalData.patientName 
+        });
+        
+        // Show correct offline message
+        toast({
+          title: "Form Queued",
+          description: "Form queued for submission when online.",
+          variant: "default",
         });
         
         // Trigger offline submission dialog immediately
@@ -176,20 +203,30 @@ export const useFormSubmission = ({
         
         return { 
           success: true,
-          message: "Form captured offline"
+          message: "Form queued for submission"
         };
       } else {
         console.log('Processing online submission...');
+        
+        if (completeSubmission) completeSubmission('submitted');
         
         // Online submission - attempt sync
         try {
           await syncData();
           console.log('Post-submission sync completed');
+          if (completeSubmission) completeSubmission('synced');
         } catch (error) {
           console.error('Post-submission sync failed:', error);
         }
         
         console.log('Triggering online success dialog...');
+        
+        // Show correct online message
+        toast({
+          title: "Form Submitted",
+          description: "Form submitted successfully to cloud database.",
+          variant: "default",
+        });
         
         // Show online success dialog immediately
         if (onOnlineSubmission) {
@@ -205,6 +242,8 @@ export const useFormSubmission = ({
       }
     } catch (error) {
       console.error('Form submission error:', error);
+      if (failSubmission) failSubmission();
+      
       toast({
         title: "Submission Error",
         description: "Failed to submit form. Please try again.",

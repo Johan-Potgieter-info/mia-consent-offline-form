@@ -3,6 +3,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useHybridStorage } from './useHybridStorage';
 import { useRegionDetection } from './useRegionDetection';
+import { useSubmissionState } from './useSubmissionState';
+import { useFormSubmission } from './useFormSubmission';
 import { FormData } from '../types/formTypes';
 
 // Helper function to check if form has meaningful content
@@ -46,6 +48,33 @@ export const useConsentFormContainer = () => {
     setRegionManually
   } = useRegionDetection();
 
+  // Use new submission state management
+  const {
+    submitting,
+    submissionStatus,
+    startSubmission,
+    completeSubmission,
+    failSubmission,
+    setSubmissionStatus
+  } = useSubmissionState();
+
+  // Use updated form submission hook
+  const { submitForm } = useFormSubmission({
+    isOnline,
+    onOfflineSubmission: (formData, pendingForms) => {
+      setOfflineFormData(formData);
+      setPendingForms(pendingForms);
+      setShowOfflineSummaryDialog(true);
+    },
+    onOnlineSubmission: (formData) => {
+      setOnlineFormData(formData);
+      setShowOnlineSuccessDialog(true);
+    },
+    onValidationErrors: (errors) => {
+      setValidationErrors(errors);
+    }
+  });
+
   const [formData, setFormData] = useState<FormData>({} as FormData);
   const [isDirty, setIsDirty] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
@@ -70,7 +99,16 @@ export const useConsentFormContainer = () => {
       const drafts = await getForms(true);
       const matchingDraft = (drafts || []).find((draft) => String(draft.id) === draftId);
       if (matchingDraft) {
-        setFormData(matchingDraft);
+        // Ensure form data includes new fields with defaults
+        const enhancedDraft = {
+          ...matchingDraft,
+          createdAt: matchingDraft.createdAt || matchingDraft.timestamp || new Date().toISOString(),
+          submissionStatus: matchingDraft.submissionStatus || 'draft',
+          formSchemaVersion: matchingDraft.formSchemaVersion || 1
+        };
+        
+        setFormData(enhancedDraft);
+        setSubmissionStatus(enhancedDraft.submissionStatus as any);
         console.log(`Loaded draft ID ${draftId}`);
         
         // If draft has a region, set it manually to preserve it
@@ -89,7 +127,7 @@ export const useConsentFormContainer = () => {
     } catch (error) {
       console.error('Failed to load draft:', error);
     }
-  }, [draftId, isInitialized, getForms, detectAndSetRegion]);
+  }, [draftId, isInitialized, getForms, detectAndSetRegion, setSubmissionStatus]);
 
   useEffect(() => {
     loadDraftById();
@@ -109,7 +147,9 @@ export const useConsentFormContainer = () => {
       regionCode: currentRegion?.code || prev.regionCode,
       region: currentRegion?.name || prev.region,
       doctor: currentRegion?.doctor || prev.doctor,
-      practiceNumber: currentRegion?.practiceNumber || prev.practiceNumber
+      practiceNumber: currentRegion?.practiceNumber || prev.practiceNumber,
+      lastModified: new Date().toISOString(),
+      formSchemaVersion: 1 // Ensure schema version is set
     }));
     setIsDirty(true);
   };
@@ -121,7 +161,9 @@ export const useConsentFormContainer = () => {
       regionCode: currentRegion?.code || prev.regionCode,
       region: currentRegion?.name || prev.region,
       doctor: currentRegion?.doctor || prev.doctor,
-      practiceNumber: currentRegion?.practiceNumber || prev.practiceNumber
+      practiceNumber: currentRegion?.practiceNumber || prev.practiceNumber,
+      lastModified: new Date().toISOString(),
+      formSchemaVersion: 1 // Ensure schema version is set
     }));
     setIsDirty(true);
   };
@@ -139,7 +181,10 @@ export const useConsentFormContainer = () => {
         regionCode: currentRegion?.code || formData.regionCode,
         region: currentRegion?.name || formData.region,
         doctor: currentRegion?.doctor || formData.doctor,
-        practiceNumber: currentRegion?.practiceNumber || formData.practiceNumber
+        practiceNumber: currentRegion?.practiceNumber || formData.practiceNumber,
+        createdAt: formData.createdAt || new Date().toISOString(),
+        lastModified: new Date().toISOString(),
+        formSchemaVersion: 1
       };
 
       const savedId = await saveForm(dataToSave, isDraft);
@@ -165,9 +210,20 @@ export const useConsentFormContainer = () => {
       regionCode: currentRegion?.code || formData.regionCode,
       region: currentRegion?.name || formData.region,
       doctor: currentRegion?.doctor || formData.doctor,
-      practiceNumber: currentRegion?.practiceNumber || formData.practiceNumber
+      practiceNumber: currentRegion?.practiceNumber || formData.practiceNumber,
+      createdAt: formData.createdAt || new Date().toISOString(),
+      lastModified: new Date().toISOString(),
+      formSchemaVersion: 1
     };
-    await saveForm(dataToSave, false);
+    
+    await submitForm(
+      dataToSave, 
+      currentRegion, 
+      !!draftId,
+      startSubmission,
+      completeSubmission,
+      failSubmission
+    );
   };
 
   const handleDiscard = async () => {
@@ -211,6 +267,9 @@ export const useConsentFormContainer = () => {
     isResuming: !!draftId,
     resetJustSaved,
     formatLastSaved,
+    // New submission state properties
+    submitting,
+    submissionStatus,
     // Dialog properties
     showSaveConfirmation,
     saveMessage,

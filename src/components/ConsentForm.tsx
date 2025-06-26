@@ -35,6 +35,8 @@ const ConsentForm = () => {
         isRegionDetected={containerData.isRegionDetected}
         validationErrors={containerData.validationErrors}
         showValidationErrors={containerData.showValidationErrors}
+        submitting={containerData.submitting}
+        submissionStatus={containerData.submissionStatus}
       />
 
       <ConsentFormDialogs

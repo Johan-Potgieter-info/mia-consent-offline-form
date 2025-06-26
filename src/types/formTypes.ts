@@ -28,13 +28,17 @@ export interface FormData {
   consentAgreement?: boolean;
   timestamp?: string;
   regionCode?: string;
-  status?: 'draft' | 'completed';
+  status?: 'draft' | 'completed'; // Keep for backward compatibility
+  submissionStatus?: 'draft' | 'pending' | 'submitted' | 'synced'; // New status tracking
   region?: string;
   doctor?: string;
   practiceNumber?: string;
   lastModified?: string;
+  createdAt?: string; // New field for stale cleanup
   synced?: boolean;
   submissionId?: string;
+  formSchemaVersion?: number; // New field for version tracking
+  submitting?: boolean; // New field for double-submit prevention
   [key: string]: any; // Index signature for database operations
 }
 

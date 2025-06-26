@@ -14,6 +14,71 @@ interface UseManualSaveProps {
   setRetryCount: (count: number) => void;
 }
 
+// Helper function to check if form has meaningful content
+const hasMeaningfulContent = (formData: FormData): boolean => {
+  const meaningfulFields = [
+    'patientName',
+    'idNumber', 
+    'cellPhone',
+    'email',
+    'dateOfBirth',
+    'birthDate',
+    'address',
+    'emergencyContactName',
+    'emergencyContactNumber'
+  ];
+  
+  return meaningfulFields.some(field => {
+    const value = formData[field as keyof FormData];
+    return value && typeof value === 'string' && value.trim().length > 0;
+  });
+};
+
+// Fallback save function - consolidated logic
+const fallbackSave = (formData: FormData, saveToFallbackStorage: (data: FormData) => boolean): boolean => {
+  console.log('Using fallback storage for save...');
+  
+  // Add deduplication check for fallback storage
+  const existingFallbackData = localStorage.getItem('fallback_drafts');
+  let existingDrafts: FormData[] = [];
+  
+  try {
+    existingDrafts = existingFallbackData ? JSON.parse(existingFallbackData) : [];
+  } catch (error) {
+    console.error('Error parsing existing fallback drafts:', error);
+    existingDrafts = [];
+  }
+  
+  // Check for existing draft with same patient info to prevent duplicates
+  const existingDraftIndex = existingDrafts.findIndex(draft => 
+    (formData.patientName && draft.patientName === formData.patientName) ||
+    (formData.idNumber && draft.idNumber === formData.idNumber) ||
+    (formData.id && draft.id === formData.id)
+  );
+  
+  if (existingDraftIndex >= 0) {
+    // Update existing draft instead of creating new one
+    existingDrafts[existingDraftIndex] = {
+      ...existingDrafts[existingDraftIndex],
+      ...formData,
+      lastModified: new Date().toISOString(),
+      formSchemaVersion: 1
+    };
+    
+    try {
+      localStorage.setItem('fallback_drafts', JSON.stringify(existingDrafts));
+      console.log('Updated existing fallback draft to prevent duplicate');
+      return true;
+    } catch (error) {
+      console.error('Failed to update fallback draft:', error);
+      return false;
+    }
+  }
+  
+  // Use original fallback save for new drafts
+  return saveToFallbackStorage(formData);
+};
+
 export const useManualSave = ({
   isOnline,
   setLastSaved,
@@ -22,17 +87,26 @@ export const useManualSave = ({
   setRetryCount
 }: UseManualSaveProps) => {
   const { toast } = useToast();
-  const { saveForm: saveToHybridStorage, capabilities } = useHybridStorage();
+  const { saveForm: saveToHybridStorage, capabilities, getForms } = useHybridStorage();
   const { saveToFallbackStorage } = useFallbackStorage();
 
   const saveForm = async (formData: FormData): Promise<string | number | undefined> => {
     console.log('Manual save triggered - saving as DRAFT only', { id: formData.id });
     
+    // Check for meaningful content first
+    if (!hasMeaningfulContent(formData)) {
+      console.log('Form has no meaningful content, skipping save');
+      return;
+    }
+    
     const draftData: FormData = {
       ...formData,
       timestamp: new Date().toISOString(),
+      createdAt: formData.createdAt || new Date().toISOString(),
       status: 'draft' as const,
-      lastModified: new Date().toISOString()
+      submissionStatus: 'draft',
+      lastModified: new Date().toISOString(),
+      formSchemaVersion: 1 // Current schema version
     };
     
     // If form already has an ID, update existing draft instead of creating new one
@@ -40,7 +114,7 @@ export const useManualSave = ({
       console.log('Updating existing draft with ID:', formData.id);
       
       if (!capabilities.indexedDB) {
-        const fallbackSuccess = saveToFallbackStorage(draftData);
+        const fallbackSuccess = fallbackSave(draftData, saveToFallbackStorage);
         if (fallbackSuccess) {
           toast({
             title: "Draft Updated",
@@ -54,19 +128,46 @@ export const useManualSave = ({
         }
       } else {
         try {
-          await updateDraftById(formData.id, draftData);
-          setLastSaved(new Date());
-          setIsDirty(false);
-          setJustSaved(true);
-          setRetryCount(0);
+          // Check for existing drafts to prevent duplicates
+          const existingDrafts = await getForms(true);
+          const existingDraft = existingDrafts.find(draft => 
+            draft.id === formData.id ||
+            (formData.patientName && draft.patientName === formData.patientName) ||
+            (formData.idNumber && draft.idNumber === formData.idNumber)
+          );
           
-          toast({
-            title: "Draft Updated",
-            description: isOnline ? "Form updated as draft locally - not submitted to cloud" : "Form updated as draft locally (offline)",
-          });
-          
-          console.log('Draft updated successfully with ID:', formData.id);
-          return formData.id;
+          if (existingDraft && existingDraft.id !== formData.id) {
+            // Update the existing draft instead of creating a new one
+            console.log('Found duplicate draft, updating existing:', existingDraft.id);
+            await updateDraftById(existingDraft.id, { ...existingDraft, ...draftData, id: existingDraft.id });
+            
+            setLastSaved(new Date());
+            setIsDirty(false);
+            setJustSaved(true);
+            setRetryCount(0);
+            
+            toast({
+              title: "Draft Updated",
+              description: "Existing draft updated to prevent duplicates",
+            });
+            
+            return existingDraft.id;
+          } else {
+            // Update the current draft
+            await updateDraftById(formData.id, draftData);
+            setLastSaved(new Date());
+            setIsDirty(false);
+            setJustSaved(true);
+            setRetryCount(0);
+            
+            toast({
+              title: "Draft Updated",
+              description: isOnline ? "Form updated as draft locally - not submitted to cloud" : "Form updated as draft locally (offline)",
+            });
+            
+            console.log('Draft updated successfully with ID:', formData.id);
+            return formData.id;
+          }
         } catch (error) {
           console.error('Draft update error:', error);
           // Fall back to creating new draft if update fails
@@ -80,7 +181,7 @@ export const useManualSave = ({
     }
     
     if (!capabilities.indexedDB) {
-      const fallbackSuccess = saveToFallbackStorage(draftData);
+      const fallbackSuccess = fallbackSave(draftData, saveToFallbackStorage);
       if (fallbackSuccess) {
         toast({
           title: "Draft Saved",
@@ -118,7 +219,7 @@ export const useManualSave = ({
     } catch (error) {
       console.error('Manual save error:', error);
       
-      const fallbackSuccess = saveToFallbackStorage(draftData);
+      const fallbackSuccess = fallbackSave(draftData, saveToFallbackStorage);
       if (fallbackSuccess) {
         toast({
           title: "Draft Saved",

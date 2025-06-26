@@ -129,7 +129,7 @@ const ConsentSection: React.FC<ConsentSectionProps> = ({
 
         {consentGiven && isScrolledToBottom && (
           <p className="text-green-600 text-sm mt-2 font-medium">
-            ✓ Consent accepted. You can now proceed to the form.
+            ✓ Consent Accepted! You can now submit the form.
           </p>
         )}
       </div>

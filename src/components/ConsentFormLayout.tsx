@@ -1,3 +1,4 @@
+
 import React from 'react';
 import ConsentFormHeader from './ConsentFormHeader';
 import ConsentFormProgress from './ConsentFormProgress';
@@ -8,6 +9,7 @@ import BackToStartButton from './BackToStartButton';
 import RegionSelector from './RegionSelector';
 import FormValidationErrors from './FormValidationErrors';
 import FormSectionsContainer from './FormSectionsContainer';
+import FormStatusBadge from './FormStatusBadge';
 import { FormData } from '../types/formTypes';
 import { Region } from '../utils/regionDetection';
 import { useFormSections } from '../hooks/useFormSections';
@@ -38,6 +40,8 @@ interface ConsentFormLayoutProps {
   isRegionDetected: boolean;
   validationErrors: string[];
   showValidationErrors: boolean;
+  submitting?: boolean;
+  submissionStatus?: 'draft' | 'pending' | 'submitted' | 'synced';
 }
 
 const ConsentFormLayout = ({
@@ -65,7 +69,9 @@ const ConsentFormLayout = ({
   isRegionFromDraft,
   isRegionDetected,
   validationErrors = [],
-  showValidationErrors
+  showValidationErrors,
+  submitting = false,
+  submissionStatus = 'draft'
 }: ConsentFormLayoutProps) => {
   const { sections } = useFormSections();
 
@@ -78,7 +84,7 @@ const ConsentFormLayout = ({
       />
 
       <div className="max-w-4xl mx-auto p-4">
-        <div className="mb-6">
+        <div className="mb-6 flex justify-between items-center">
           <BackToStartButton
             isDirty={isDirty}
             justSaved={justSaved}
@@ -86,6 +92,11 @@ const ConsentFormLayout = ({
             onSave={onSave}
             onDiscard={onDiscard}
             onResetJustSaved={onResetJustSaved}
+          />
+          
+          <FormStatusBadge 
+            status={submissionStatus}
+            isSubmitting={submitting}
           />
         </div>
 
@@ -139,6 +150,7 @@ const ConsentFormLayout = ({
             setActiveSection={setActiveSection}
             onSave={onSave}
             onSubmit={onSubmit}
+            isSubmitting={submitting}
           />
         </ConsentFormContent>
       </div>

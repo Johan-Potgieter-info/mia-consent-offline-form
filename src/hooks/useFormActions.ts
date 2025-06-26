@@ -62,8 +62,9 @@ export const useFormActions = ({
       return;
     }
 
-    // Prevent auto-save if currently saving
-    if (autoSaveStatus === 'saving' || isAutoSaveActiveRef.current) {
+    // Prevent auto-save if currently saving - explicitly cast to ensure type recognition
+    const currentAutoSaveStatus = autoSaveStatus as AutoSaveStatus;
+    if (currentAutoSaveStatus === 'saving' || isAutoSaveActiveRef.current) {
       return;
     }
 
@@ -85,8 +86,9 @@ export const useFormActions = ({
 
     // Set up 30-second auto-save timeout
     autoSaveTimeoutRef.current = setTimeout(async () => {
-      // Double-check conditions before executing
-      if (isDirty && autoSaveStatus !== 'saving' && !isAutoSaveActiveRef.current) {
+      // Double-check conditions before executing - explicitly cast status
+      const statusCheck = autoSaveStatus as AutoSaveStatus;
+      if (isDirty && statusCheck !== 'saving' && !isAutoSaveActiveRef.current) {
         isAutoSaveActiveRef.current = true;
         lastAutoSaveContentRef.current = currentContentString;
         
@@ -103,7 +105,9 @@ export const useFormActions = ({
 
     // Emergency save on page unload
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (isDirty && autoSaveStatus !== 'saving') {
+      // Explicitly cast status for comparison
+      const emergencyStatusCheck = autoSaveStatus as AutoSaveStatus;
+      if (isDirty && emergencyStatusCheck !== 'saving') {
         try {
           if (capabilities.indexedDB || window.localStorage) {
             const emergencyData: FormData = {
@@ -140,7 +144,9 @@ export const useFormActions = ({
 
   // Save button handler - ALWAYS saves as draft
   const handleSaveForm = async () => {
-    if (autoSaveStatus === 'saving' || isAutoSaveActiveRef.current) {
+    // Explicitly cast for comparison
+    const saveStatusCheck = autoSaveStatus as AutoSaveStatus;
+    if (saveStatusCheck === 'saving' || isAutoSaveActiveRef.current) {
       console.log('Manual save skipped - auto-save in progress');
       return;
     }
@@ -162,7 +168,7 @@ export const useFormActions = ({
     submitForm: handleSubmitForm,
     lastSaved,
     formatLastSaved,
-    autoSaveStatus,
+    autoSaveStatus: autoSaveStatus as AutoSaveStatus,
     retryCount,
     justSaved,
     resetJustSaved

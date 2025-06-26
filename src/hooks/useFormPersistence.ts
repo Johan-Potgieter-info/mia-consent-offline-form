@@ -57,6 +57,7 @@ export const useFormPersistence = ({
     });
   };
 
+  // Explicitly type the return to ensure AutoSaveStatus is preserved
   return {
     lastSaved,
     isDirty,
@@ -64,7 +65,7 @@ export const useFormPersistence = ({
     saveForm,
     autoSave,
     formatLastSaved,
-    autoSaveStatus,
+    autoSaveStatus: autoSaveStatus as AutoSaveStatus,
     retryCount,
     justSaved,
     resetJustSaved,

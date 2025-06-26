@@ -25,6 +25,7 @@ export const useAutoSave = ({
   setIsDirty,
   setRetryCount
 }: UseAutoSaveProps): UseAutoSaveResult => {
+  // Explicitly type the state with the full AutoSaveStatus union
   const [autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveStatus>('idle');
   const { toast } = useToast();
   const { saveForm: saveToHybridStorage, capabilities } = useHybridStorage();
@@ -67,6 +68,7 @@ export const useAutoSave = ({
     }
     
     isAutoSavingRef.current = true;
+    // Explicitly set to 'saving' state
     setAutoSaveStatus('saving');
     
     try {
@@ -119,5 +121,9 @@ export const useAutoSave = ({
     }
   };
 
-  return { autoSave, autoSaveStatus };
+  // Explicitly return the typed result
+  return { 
+    autoSave, 
+    autoSaveStatus: autoSaveStatus as AutoSaveStatus 
+  };
 };

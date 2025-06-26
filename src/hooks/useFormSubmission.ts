@@ -139,8 +139,10 @@ export const useFormSubmission = ({
 
       console.log('Form validation passed, proceeding with submission...');
 
-      // Check real-time connectivity
+      // FIXED: Do a fresh real-time connectivity check instead of relying on stale state
+      console.log('Checking real-time server connectivity...');
       const actuallyOnline = await checkServerConnectivity();
+      console.log('Server connectivity result:', actuallyOnline);
       
       // Prepare final data with encryption for sensitive fields
       const encryptedData = SensitiveDataEncryption.encryptSensitiveFields(migratedData);
@@ -156,7 +158,13 @@ export const useFormSubmission = ({
         formSchemaVersion: CURRENT_FORM_VERSION
       };
       
-      console.log('Saving completed form...', { id: finalData.id, status: finalData.status, submissionStatus: finalData.submissionStatus });
+      console.log('Saving completed form...', { 
+        id: finalData.id, 
+        status: finalData.status, 
+        submissionStatus: finalData.submissionStatus,
+        actuallyOnline,
+        supabaseCapability: capabilities.supabase
+      });
       
       // Save COMPLETED form (isDraft = false)
       const savedForm = await saveForm(finalData, false);
@@ -183,9 +191,12 @@ export const useFormSubmission = ({
       clearSession();
       console.log('Form session cleared after successful submission');
       
-      // Handle offline vs online submission
+      // FIXED: Better logic for determining if we're truly offline or online
       if (!actuallyOnline || !capabilities.supabase) {
-        console.log('Processing offline submission...');
+        console.log('Processing offline submission...', { 
+          actuallyOnline, 
+          supabaseCapability: capabilities.supabase 
+        });
         
         // Log queued submission
         await submissionLogger.logSubmissionQueued(formId, {
@@ -223,7 +234,10 @@ export const useFormSubmission = ({
           message: "Form queued for submission"
         };
       } else {
-        console.log('Processing online submission...');
+        console.log('Processing online submission...', { 
+          actuallyOnline, 
+          supabaseCapability: capabilities.supabase 
+        });
         
         if (completeSubmission) completeSubmission('submitted');
         

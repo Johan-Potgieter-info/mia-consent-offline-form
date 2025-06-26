@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { FormData } from '../types/formTypes';
 import { migrateFormData, shouldShowVersionWarning, getVersionWarningMessage, CURRENT_FORM_VERSION } from '../utils/formVersioning';
 import { submissionLogger } from '../utils/submissionEventLogger';
@@ -31,8 +31,11 @@ export const useFormManagement = () => {
   const [activeSection, setActiveSection] = useState("patient");
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [retryCount, setRetryCount] = useState(0);
+  const isFirstLoadRef = useRef(true);
 
   const handleInputChange = (field: keyof FormData, value: string) => {
+    console.log(`Form field changed: ${field} = ${value}`);
+    
     setFormData((prev) => {
       const updated = { 
         ...prev, 
@@ -54,17 +57,30 @@ export const useFormManagement = () => {
       
       return updated;
     });
-    setIsDirty(true);
+    
+    // Only set dirty if this is not the first load
+    if (!isFirstLoadRef.current) {
+      setIsDirty(true);
+    }
   };
 
   const handleCheckboxChange = (field: keyof FormData, value: string, checked: boolean) => {
+    console.log(`Checkbox changed: ${field} = ${checked} (value: ${value})`);
+    
+    // Special handling for consent agreement to ensure boolean type
+    const finalValue = field === 'consentAgreement' ? checked : checked;
+    
     setFormData((prev) => ({ 
       ...prev, 
-      [field]: checked,
+      [field]: finalValue,
       lastModified: new Date().toISOString(),
       formSchemaVersion: CURRENT_FORM_VERSION
     }));
-    setIsDirty(true);
+    
+    // Only set dirty if this is not the first load  
+    if (!isFirstLoadRef.current) {
+      setIsDirty(true);
+    }
   };
 
   const updateFormDataWithRegion = useCallback((currentRegion: any) => {
@@ -81,6 +97,12 @@ export const useFormManagement = () => {
 
   // Enhanced setFormData that handles versioning and decryption
   const setFormDataWithMigration = useCallback((data: FormData) => {
+    console.log('Setting form data:', { 
+      patientName: data.patientName,
+      consentAgreement: data.consentAgreement,
+      hasId: !!data.id 
+    });
+    
     // First decrypt if needed
     const decryptedData = SensitiveDataEncryption.decryptSensitiveFields(data);
     
@@ -91,9 +113,6 @@ export const useFormManagement = () => {
     if (shouldShowVersionWarning(data.formSchemaVersion || 1)) {
       const warningMessage = getVersionWarningMessage(data.formSchemaVersion || 1);
       console.warn('Form version warning:', warningMessage);
-      
-      // You could show a toast here if needed
-      // toast({ title: "Form Version", description: warningMessage });
     }
     
     // Log any warnings
@@ -112,6 +131,11 @@ export const useFormManagement = () => {
     }
     
     setFormData(migrated);
+    
+    // Mark that first load is complete
+    if (isFirstLoadRef.current) {
+      isFirstLoadRef.current = false;
+    }
   }, []);
 
   const resetJustSaved = useCallback(() => {
@@ -121,6 +145,42 @@ export const useFormManagement = () => {
   const formatLastSaved = useCallback(() => {
     return 'Just now'; // Simplified for now
   }, []);
+
+  // Enhanced validation function
+  const validateForm = useCallback((data: FormData = formData): { isValid: boolean; errors: string[] } => {
+    const errors: string[] = [];
+    
+    console.log('Validating form:', {
+      patientName: data.patientName,
+      idNumber: data.idNumber,
+      cellPhone: data.cellPhone,
+      consentAgreement: data.consentAgreement,
+      consentType: typeof data.consentAgreement
+    });
+
+    // Check mandatory fields
+    if (!data.patientName?.trim()) {
+      errors.push("Patient name is required");
+    }
+    
+    if (!data.idNumber?.trim()) {
+      errors.push("ID number is required");
+    }
+    
+    if (!data.cellPhone?.trim()) {
+      errors.push("Cell phone number is required");
+    }
+    
+    // Ensure consent is explicitly checked (boolean true)
+    if (data.consentAgreement !== true) {
+      errors.push("You must agree to the consent form");
+    }
+
+    const isValid = errors.length === 0;
+    console.log('Validation result:', { isValid, errors });
+
+    return { isValid, errors };
+  }, [formData]);
 
   return {
     formData,
@@ -138,6 +198,7 @@ export const useFormManagement = () => {
     updateFormDataWithRegion,
     hasMeaningfulContent,
     resetJustSaved,
-    formatLastSaved
+    formatLastSaved,
+    validateForm
   };
 };

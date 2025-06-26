@@ -25,6 +25,8 @@ interface UseFormActionsProps {
   startSubmission: () => boolean;
   completeSubmission: (status: 'submitted' | 'synced') => void;
   failSubmission: () => void;
+  validateForm?: (data?: FormData) => { isValid: boolean; errors: string[] };
+  setValidationErrors?: (errors: string[]) => void;
 }
 
 export const useFormActions = ({
@@ -41,7 +43,9 @@ export const useFormActions = ({
   setRetryCount,
   startSubmission,
   completeSubmission,
-  failSubmission
+  failSubmission,
+  validateForm,
+  setValidationErrors
 }: UseFormActionsProps) => {
   const handleSave = async (isDraft = true) => {
     try {
@@ -65,6 +69,7 @@ export const useFormActions = ({
       };
 
       const savedId = await saveForm(dataToSave, isDraft);
+      console.log('Form saved successfully:', savedId);
       
       setIsDirty(false);
       setJustSaved(true);
@@ -81,7 +86,18 @@ export const useFormActions = ({
     try {
       console.log('Starting form submission process...');
       
-      // CRITICAL FIX: Start submission state BEFORE any validation or processing
+      // Validate form BEFORE starting submission
+      if (validateForm && setValidationErrors) {
+        const validation = validateForm(formData);
+        if (!validation.isValid) {
+          console.log('Form validation failed:', validation.errors);
+          setValidationErrors(validation.errors);
+          return;
+        }
+        setValidationErrors([]);
+      }
+      
+      // CRITICAL FIX: Start submission state AFTER validation passes
       submissionStarted = startSubmission();
       if (!submissionStarted) {
         console.log('Submission already in progress, aborting');

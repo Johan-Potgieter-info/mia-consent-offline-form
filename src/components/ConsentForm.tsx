@@ -37,6 +37,7 @@ const ConsentForm = () => {
         showValidationErrors={containerData.showValidationErrors}
         submitting={containerData.submitting}
         submissionStatus={containerData.submissionStatus}
+        isFormComplete={containerData.isFormComplete}
       />
 
       <ConsentFormDialogs

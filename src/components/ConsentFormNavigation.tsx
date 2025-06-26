@@ -1,15 +1,16 @@
 
 import React from 'react';
 import { Button } from './ui/button';
-import { ChevronLeft, ChevronRight, Save, Send } from 'lucide-react';
+import { Save, Send, Loader2 } from 'lucide-react';
 
 interface ConsentFormNavigationProps {
-  sections: any[];
+  sections: Array<{ id: string; title: string; }>;
   activeSection: string;
   setActiveSection: (section: string) => void;
   onSave: () => Promise<void>;
   onSubmit: () => Promise<void>;
   submitting?: boolean;
+  isFormComplete?: boolean;
 }
 
 const ConsentFormNavigation = ({
@@ -18,17 +19,12 @@ const ConsentFormNavigation = ({
   setActiveSection,
   onSave,
   onSubmit,
-  submitting = false
+  submitting = false,
+  isFormComplete = false
 }: ConsentFormNavigationProps) => {
   const currentIndex = sections.findIndex(section => section.id === activeSection);
   const isFirstSection = currentIndex === 0;
   const isLastSection = currentIndex === sections.length - 1;
-
-  const handlePrevious = () => {
-    if (!isFirstSection) {
-      setActiveSection(sections[currentIndex - 1].id);
-    }
-  };
 
   const handleNext = () => {
     if (!isLastSection) {
@@ -36,46 +32,73 @@ const ConsentFormNavigation = ({
     }
   };
 
-  return (
-    <div className="flex justify-between items-center mt-8 pt-6 border-t">
-      <Button
-        variant="outline"
-        onClick={handlePrevious}
-        disabled={isFirstSection}
-        className="flex items-center gap-2"
-      >
-        <ChevronLeft className="w-4 h-4" />
-        Previous
-      </Button>
+  const handlePrevious = () => {
+    if (!isFirstSection) {
+      setActiveSection(sections[currentIndex - 1].id);
+    }
+  };
 
-      <div className="flex gap-3">
+  return (
+    <div className="flex flex-col sm:flex-row gap-4 justify-between items-center p-6 bg-white border-t">
+      {/* Previous Button */}
+      <div className="w-full sm:w-auto">
+        {!isFirstSection && (
+          <Button
+            onClick={handlePrevious}
+            variant="outline"
+            size="lg"
+            className="w-full sm:w-auto"
+          >
+            Previous
+          </Button>
+        )}
+      </div>
+
+      {/* Center Actions */}
+      <div className="flex gap-3 w-full sm:w-auto justify-center">
+        {/* Save Button */}
         <Button
-          variant="outline"
           onClick={onSave}
-          disabled={submitting}
+          variant="outline"
+          size="lg"
           className="flex items-center gap-2"
         >
           <Save className="w-4 h-4" />
           Save Draft
         </Button>
 
-        {isLastSection ? (
+        {/* Submit Button - Show if form is complete OR on last section */}
+        {(isFormComplete || isLastSection) && (
           <Button
             onClick={onSubmit}
-            disabled={submitting}
-            className="flex items-center gap-2"
+            disabled={submitting || !isFormComplete}
+            size="lg"
+            className="bg-[#ef4805] hover:bg-[#d63d04] text-white flex items-center gap-2"
           >
-            <Send className="w-4 h-4" />
-            {submitting ? 'Submitting...' : 'Submit Form'}
+            {submitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                <Send className="w-4 h-4" />
+                Submit Form
+              </>
+            )}
           </Button>
-        ) : (
+        )}
+      </div>
+
+      {/* Next Button */}
+      <div className="w-full sm:w-auto">
+        {!isLastSection && (
           <Button
             onClick={handleNext}
-            disabled={submitting}
-            className="flex items-center gap-2"
+            size="lg"
+            className="w-full sm:w-auto bg-[#ef4805] hover:bg-[#d63d04] text-white"
           >
             Next
-            <ChevronRight className="w-4 h-4" />
           </Button>
         )}
       </div>

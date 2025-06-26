@@ -1,5 +1,5 @@
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormData } from '../types/formTypes';
 
@@ -19,13 +19,23 @@ export const useDraftLoader = ({
   detectAndSetRegion
 }: UseDraftLoaderProps) => {
   const { draftId } = useParams();
+  const hasLoadedDraftRef = useRef(false);
+  const loadedDraftIdRef = useRef<string | null>(null);
 
   const loadDraftById = useCallback(async () => {
     if (!draftId || !isInitialized) return;
+    
+    // Prevent infinite loop - don't reload the same draft
+    if (hasLoadedDraftRef.current && loadedDraftIdRef.current === draftId) {
+      console.log(`Draft ${draftId} already loaded, skipping reload`);
+      return;
+    }
 
     try {
+      console.log(`Loading draft ID: ${draftId}`);
       const drafts = await getForms(true);
       const matchingDraft = (drafts || []).find((draft) => String(draft.id) === draftId);
+      
       if (matchingDraft) {
         // Ensure form data includes new fields with defaults
         const enhancedDraft = {
@@ -37,7 +47,12 @@ export const useDraftLoader = ({
         
         setFormData(enhancedDraft);
         setSubmissionStatus(enhancedDraft.submissionStatus as any);
-        console.log(`Loaded draft ID ${draftId}`);
+        
+        // Mark as loaded to prevent reload
+        hasLoadedDraftRef.current = true;
+        loadedDraftIdRef.current = draftId;
+        
+        console.log(`Successfully loaded draft ID ${draftId}`);
         
         // If draft has a region, set it manually to preserve it
         if (matchingDraft.regionCode) {

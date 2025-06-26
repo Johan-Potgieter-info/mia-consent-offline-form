@@ -42,6 +42,7 @@ interface ConsentFormLayoutProps {
   showValidationErrors: boolean;
   submitting?: boolean;
   submissionStatus?: 'draft' | 'pending' | 'submitted' | 'synced';
+  isFormComplete?: boolean;
 }
 
 const ConsentFormLayout = ({
@@ -71,7 +72,8 @@ const ConsentFormLayout = ({
   validationErrors = [],
   showValidationErrors,
   submitting = false,
-  submissionStatus = 'draft'
+  submissionStatus = 'draft',
+  isFormComplete = false
 }: ConsentFormLayoutProps) => {
   const { sections } = useFormSections();
 
@@ -151,6 +153,7 @@ const ConsentFormLayout = ({
             onSave={onSave}
             onSubmit={onSubmit}
             submitting={submitting}
+            isFormComplete={isFormComplete}
           />
         </ConsentFormContent>
       </div>

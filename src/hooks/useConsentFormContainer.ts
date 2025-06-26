@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useHybridStorage } from './useHybridStorage';
 import { useRegionDetection } from './useRegionDetection';
 import { useSubmissionState } from './useSubmissionState';
@@ -49,7 +49,7 @@ export const useConsentFormContainer = () => {
     setSubmissionStatus
   } = useSubmissionState();
 
-  // Form management hook
+  // Form management hook with enhanced validation
   const {
     formData,
     setFormData,
@@ -66,13 +66,14 @@ export const useConsentFormContainer = () => {
     updateFormDataWithRegion,
     hasMeaningfulContent,
     resetJustSaved,
-    formatLastSaved
+    formatLastSaved,
+    validateForm
   } = useFormManagement();
 
   // Dialog states hook
   const dialogStates = useDialogStates();
 
-  // Draft loader hook
+  // Draft loader hook with fixed loop prevention
   const { isResuming } = useDraftLoader({
     isInitialized,
     getForms,
@@ -98,7 +99,7 @@ export const useConsentFormContainer = () => {
     }
   });
 
-  // Form actions hook
+  // Form actions hook with enhanced validation
   const { handleSave, handleSubmit, handleDiscard } = useFormActions({
     formData,
     currentRegion,
@@ -113,8 +114,16 @@ export const useConsentFormContainer = () => {
     setRetryCount,
     startSubmission,
     completeSubmission,
-    failSubmission
+    failSubmission,
+    validateForm,
+    setValidationErrors
   });
+
+  // Check if form is complete (for submit button availability)
+  const isFormComplete = useCallback(() => {
+    const validation = validateForm(formData);
+    return validation.isValid;
+  }, [formData, validateForm]);
 
   // Detect region for new forms (not resuming drafts)
   useEffect(() => {
@@ -152,6 +161,8 @@ export const useConsentFormContainer = () => {
     // New submission state properties
     submitting,
     submissionStatus,
+    // Form completion status
+    isFormComplete: isFormComplete(),
     // Dialog properties
     ...dialogStates
   };

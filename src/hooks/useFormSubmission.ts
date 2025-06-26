@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useFormSession } from './useFormSession';
 import { FormData, FormSubmissionResult } from '../types/formTypes';
 import { Region } from '../utils/regionDetection';
+import { checkServerConnectivity } from '../utils/connectivity';
 
 interface UseFormSubmissionProps {
   isOnline: boolean;
@@ -69,13 +70,7 @@ export const useFormSubmission = ({
     failSubmission?: () => void
   ): Promise<FormSubmissionResult> => {
     try {
-      // Prevent double submission
-      if (formData.submitting || (startSubmission && !startSubmission())) {
-        console.log('Submission already in progress, ignoring duplicate request');
-        return { success: false, message: "Submission already in progress" };
-      }
-
-      console.log('Starting form submission process...', {
+      console.log('Processing form submission...', {
         formData: {
           patientName: formData.patientName,
           idNumber: formData.idNumber,
@@ -86,7 +81,7 @@ export const useFormSubmission = ({
         draftId: formData.id
       });
       
-      // Validate the form first
+      // Validate the form (this happens AFTER startSubmission is called)
       const validation = validateForm(formData);
       if (!validation.isValid) {
         console.log('Validation failed:', validation.errors);
@@ -114,7 +109,7 @@ export const useFormSubmission = ({
       console.log('Form validation passed, proceeding with submission...');
 
       // Check real-time connectivity
-      const actuallyOnline = navigator.onLine && isOnline;
+      const actuallyOnline = await checkServerConnectivity();
       
       const finalData = { 
         ...formData, 
@@ -124,7 +119,7 @@ export const useFormSubmission = ({
         submissionId: `${formData.regionCode || currentRegion?.code || 'UNK'}-${Date.now()}`,
         submissionStatus: (actuallyOnline && capabilities.supabase ? 'submitted' : 'pending') as 'submitted' | 'pending',
         status: 'completed' as const,
-        formSchemaVersion: 1 // Current schema version
+        formSchemaVersion: 1
       };
       
       console.log('Saving completed form...', { id: finalData.id, status: finalData.status, submissionStatus: finalData.submissionStatus });
@@ -133,36 +128,14 @@ export const useFormSubmission = ({
       const savedForm = await saveForm(finalData, false);
       console.log('Form saved successfully:', savedForm);
       
-      // IMPORTANT: Delete the draft IMMEDIATELY after successful completion
+      // Delete the draft IMMEDIATELY after successful completion
       if (formData.id && isResuming) {
         try {
           console.log('Deleting draft form after successful submission...', formData.id);
-          await deleteForm(formData.id, true); // true = isDraft
+          await deleteForm(formData.id, true);
           console.log('Draft deleted successfully after submission');
         } catch (error) {
           console.error('Draft deletion failed after submission (may not exist):', error);
-        }
-      }
-      
-      // Also try to delete any draft with the same session ID to ensure cleanup
-      if (formData.id) {
-        try {
-          const allDrafts = await getForms(true);
-          const matchingDrafts = allDrafts.filter(draft => 
-            draft.id === formData.id || 
-            (draft.patientName === formData.patientName && draft.idNumber === formData.idNumber)
-          );
-          
-          for (const draft of matchingDrafts) {
-            try {
-              console.log('Cleaning up related draft:', draft.id);
-              await deleteForm(draft.id, true);
-            } catch (cleanupError) {
-              console.error('Cleanup error for draft:', draft.id, cleanupError);
-            }
-          }
-        } catch (error) {
-          console.error('Error during draft cleanup:', error);
         }
       }
       
@@ -187,14 +160,12 @@ export const useFormSubmission = ({
           currentForm: finalData.patientName 
         });
         
-        // Show correct offline message
         toast({
           title: "Form Queued",
           description: "Form queued for submission when online.",
           variant: "default",
         });
         
-        // Trigger offline submission dialog immediately
         if (onOfflineSubmission) {
           setTimeout(() => {
             onOfflineSubmission(finalData, allPending);
@@ -221,14 +192,12 @@ export const useFormSubmission = ({
         
         console.log('Triggering online success dialog...');
         
-        // Show correct online message
         toast({
           title: "Form Submitted",
           description: "Form submitted successfully to cloud database.",
           variant: "default",
         });
         
-        // Show online success dialog immediately
         if (onOnlineSubmission) {
           setTimeout(() => {
             onOnlineSubmission(finalData);

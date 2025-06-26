@@ -8,6 +8,8 @@ import { useFormManagement } from './useFormManagement';
 import { useDialogStates } from './useDialogStates';
 import { useDraftLoader } from './useDraftLoader';
 import { useFormActions } from './useFormActions';
+import { initConnectivityMonitoring } from '../utils/connectivity';
+import { cleanupOldSubmissions } from '../utils/submissionQueue';
 
 export const useConsentFormContainer = () => {
   const [justSaved, setJustSaved] = useState(false);
@@ -19,6 +21,12 @@ export const useConsentFormContainer = () => {
     isInitialized,
     isOnline
   } = useHybridStorage();
+
+  // Initialize connectivity monitoring on app start
+  useEffect(() => {
+    initConnectivityMonitoring();
+    cleanupOldSubmissions(); // Clean up old failed submissions
+  }, []);
 
   // Restore region detection
   const {

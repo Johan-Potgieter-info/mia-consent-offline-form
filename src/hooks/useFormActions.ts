@@ -1,5 +1,7 @@
 
 import { FormData } from '../types/formTypes';
+import { checkServerConnectivity } from '../utils/connectivity';
+import { addToQueue } from '../utils/submissionQueue';
 
 interface UseFormActionsProps {
   formData: FormData;
@@ -74,28 +76,59 @@ export const useFormActions = ({
   };
 
   const handleSubmit = async () => {
-    console.log('Submitting form...');
-    updateFormDataWithRegion(currentRegion);
+    let submissionStarted = false;
     
-    const dataToSave = {
-      ...formData,
-      regionCode: currentRegion?.code || formData.regionCode,
-      region: currentRegion?.name || formData.region,
-      doctor: currentRegion?.doctor || formData.doctor,
-      practiceNumber: currentRegion?.practiceNumber || formData.practiceNumber,
-      createdAt: formData.createdAt || new Date().toISOString(),
-      lastModified: new Date().toISOString(),
-      formSchemaVersion: 1
-    };
-    
-    await submitForm(
-      dataToSave, 
-      currentRegion, 
-      !!draftId,
-      startSubmission,
-      completeSubmission,
-      failSubmission
-    );
+    try {
+      console.log('Starting form submission process...');
+      
+      // CRITICAL FIX: Start submission state BEFORE any validation or processing
+      submissionStarted = startSubmission();
+      if (!submissionStarted) {
+        console.log('Submission already in progress, aborting');
+        return;
+      }
+      
+      // Check connectivity before proceeding
+      const isOnline = await checkServerConnectivity();
+      console.log('Connectivity check result:', isOnline);
+      
+      updateFormDataWithRegion(currentRegion);
+      
+      const dataToSubmit = {
+        ...formData,
+        regionCode: currentRegion?.code || formData.regionCode,
+        region: currentRegion?.name || formData.region,
+        doctor: currentRegion?.doctor || formData.doctor,
+        practiceNumber: currentRegion?.practiceNumber || formData.practiceNumber,
+        createdAt: formData.createdAt || new Date().toISOString(),
+        lastModified: new Date().toISOString(),
+        formSchemaVersion: 1
+      };
+      
+      if (isOnline) {
+        console.log('Online submission attempt');
+        await submitForm(
+          dataToSubmit, 
+          currentRegion, 
+          !!draftId,
+          () => true, // Submission already started
+          completeSubmission,
+          failSubmission
+        );
+      } else {
+        console.log('Offline - adding to submission queue');
+        // Add to queue for later processing
+        const queueId = await addToQueue(dataToSubmit);
+        console.log('Added to queue with ID:', queueId);
+        completeSubmission('submitted'); // Mark as submitted (queued)
+      }
+      
+    } catch (error) {
+      console.error('Form submission error:', error);
+      if (submissionStarted) {
+        failSubmission();
+      }
+    }
   };
 
   const handleDiscard = async () => {

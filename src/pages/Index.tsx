@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, MapPin, Wifi, WifiOff, RefreshCw } from 'lucide-react';
@@ -7,7 +8,6 @@ import { useConnectivity } from '../hooks/useConnectivity';
 import { useHybridStorage } from '../hooks/useHybridStorage';
 import ResumeDraftDialog from '../components/ResumeDraftDialog';
 import PendingFormsSection from '../components/PendingFormsSection';
-import ConsentSection from '../components/ConsentSection';
 import { FormData } from '../types/formTypes';
 import { getIconPath } from '../utils/assetPaths';
 
@@ -16,46 +16,15 @@ const Index = () => {
   const [drafts, setDrafts] = useState<FormData[]>([]);
   const [isLoadingDrafts, setIsLoadingDrafts] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [hasConsented, setHasConsented] = useState(false);
-
-  const [formData, setFormData] = useState<FormData>({
-    consentAgreement: false,
-  });
-
-  // Check consent state on app start
-  useEffect(() => {
-    const consentAccepted = localStorage.getItem("consentAccepted") === "true";
-    setHasConsented(consentAccepted);
-    if (consentAccepted) {
-      setFormData(prev => ({ ...prev, consentAgreement: true }));
-    }
-  }, []);
-
-  const handleCheckboxChange = (
-    field: keyof FormData,
-    value: string,
-    checked: boolean
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: checked,
-    }));
-
-    // When consent is given, update hasConsented state
-    if (field === 'consentAgreement' && checked) {
-      localStorage.setItem("consentAccepted", "true");
-      setHasConsented(true);
-    }
-  };
 
   const { isOnline } = useConnectivity();
   const { getForms, capabilities, isInitialized } = useHybridStorage();
 
   useEffect(() => {
-    if (isInitialized && hasConsented) {
+    if (isInitialized) {
       loadDrafts();
     }
-  }, [isInitialized, refreshKey, hasConsented]);
+  }, [isInitialized, refreshKey]);
 
   const loadDrafts = async () => {
     if (!isInitialized) return;
@@ -131,93 +100,80 @@ const Index = () => {
           </p>
         </div>
 
-        {/* Show consent section if not consented yet */}
-        {!hasConsented && (
-          <ConsentSection
-            formData={formData}
-            onCheckboxChange={handleCheckboxChange}
-          />
+        {/* Status Bar - simplified for landing page */}
+        <div className="flex justify-between items-center mb-8 p-4 bg-white rounded-lg shadow-sm">
+          <ConnectionIndicator />
+          <div className="flex items-center gap-2 text-sm">
+            <MapPin className="w-4 h-4 text-blue-600" />
+            <span className="text-blue-600">Location will be detected when you start</span>
+          </div>
+        </div>
+
+        {/* Pending Forms Section */}
+        <PendingFormsSection onRefresh={refreshDrafts} />
+
+        {/* Show draft count if we have drafts */}
+        {(drafts?.length || 0) > 0 && (
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-blue-800 font-medium">
+              You have {drafts?.length || 0} unfinished form{(drafts?.length || 0) !== 1 ? 's' : ''} saved as drafts
+            </p>
+            <p className="text-blue-600 text-sm mt-1">
+              Use "Resume Draft" below to continue where you left off
+            </p>
+          </div>
         )}
 
-        {/* Show main form interface only after consent */}
-        {hasConsented && (
-          <>
-            {/* Status Bar - simplified for landing page */}
-            <div className="flex justify-between items-center mb-8 p-4 bg-white rounded-lg shadow-sm">
-              <ConnectionIndicator />
-              <div className="flex items-center gap-2 text-sm">
-                <MapPin className="w-4 h-4 text-blue-600" />
-                <span className="text-blue-600">Location will be detected when you start</span>
+        {/* Main Actions */}
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          {/* Start New Form */}
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="w-6 h-6 text-[#ef4805]" />
+                Start New Form
+              </CardTitle>
+              <CardDescription>
+                Begin a new dental consent form for a patient
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                onClick={handleStartNewForm}
+                className="w-full h-14 text-lg bg-[#ef4805] hover:bg-[#d63d04] text-white font-semibold"
+                size="lg"
+              >
+                Start New Form
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Resume Draft */}
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <RefreshCw className="w-6 h-6 text-blue-600" />
+                Resume Draft ({drafts?.length || 0})
+              </CardTitle>
+              <CardDescription>
+                Continue working on a previously saved draft form
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="w-full h-14 flex items-center">
+                <ResumeDraftDialog onDraftsChanged={refreshDrafts} />
               </div>
-            </div>
+            </CardContent>
+          </Card>
+        </div>
 
-            {/* Pending Forms Section */}
-            <PendingFormsSection onRefresh={refreshDrafts} />
-
-            {/* Show draft count if we have drafts */}
-            {(drafts?.length || 0) > 0 && (
-              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-blue-800 font-medium">
-                  You have {drafts?.length || 0} unfinished form{(drafts?.length || 0) !== 1 ? 's' : ''} saved as drafts
-                </p>
-                <p className="text-blue-600 text-sm mt-1">
-                  Use "Resume Draft" below to continue where you left off
-                </p>
-              </div>
-            )}
-
-            {/* Main Actions */}
-            <div className="grid md:grid-cols-2 gap-6 mb-8">
-              {/* Start New Form */}
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="w-6 h-6 text-[#ef4805]" />
-                    Start New Form
-                  </CardTitle>
-                  <CardDescription>
-                    Begin a new dental consent form for a patient
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button
-                    onClick={handleStartNewForm}
-                    className="w-full h-14 text-lg bg-[#ef4805] hover:bg-[#d63d04] text-white font-semibold"
-                    size="lg"
-                  >
-                    Start New Form
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Resume Draft */}
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <RefreshCw className="w-6 h-6 text-blue-600" />
-                    Resume Draft ({drafts?.length || 0})
-                  </CardTitle>
-                  <CardDescription>
-                    Continue working on a previously saved draft form
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="w-full h-14 flex items-center">
-                    <ResumeDraftDialog onDraftsChanged={refreshDrafts} />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Storage Status */}
-            {isInitialized && (
-              <div className="mt-4 text-center text-sm text-gray-500">
-                Storage: {capabilities.supabase ? 'Cloud + Local' : capabilities.indexedDB ? 'Local (IndexedDB)' : 'None'}
-                <br />
-                <span className="text-xs">Drafts saved locally • Completed forms go to cloud database</span>
-              </div>
-            )}
-          </>
+        {/* Storage Status */}
+        {isInitialized && (
+          <div className="mt-4 text-center text-sm text-gray-500">
+            Storage: {capabilities.supabase ? 'Cloud + Local' : capabilities.indexedDB ? 'Local (IndexedDB)' : 'None'}
+            <br />
+            <span className="text-xs">Drafts saved locally • Completed forms go to cloud database</span>
+          </div>
         )}
       </div>
     </div>

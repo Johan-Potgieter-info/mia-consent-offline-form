@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useHybridStorage } from '../useHybridStorage';
 import { useFallbackStorage } from './useFallbackStorage';
+import { updateDraftById } from '../../utils/database/drafts';
 import { FormData } from '../../types/formTypes';
 
 interface UseManualSaveProps {
@@ -30,9 +31,53 @@ export const useManualSave = ({
     const draftData: FormData = {
       ...formData,
       timestamp: new Date().toISOString(),
-      status: 'draft' as const, // Properly typed as literal
-      id: formData.id || Date.now()
+      status: 'draft' as const,
+      lastModified: new Date().toISOString()
     };
+    
+    // If form already has an ID, update existing draft instead of creating new one
+    if (formData.id) {
+      console.log('Updating existing draft with ID:', formData.id);
+      
+      if (!capabilities.indexedDB) {
+        const fallbackSuccess = saveToFallbackStorage(draftData);
+        if (fallbackSuccess) {
+          toast({
+            title: "Draft Updated",
+            description: isOnline ? "Form saved as draft to browser storage" : "Form saved as draft locally (offline)",
+            variant: "default",
+          });
+          setLastSaved(new Date());
+          setIsDirty(false);
+          setJustSaved(true);
+          return formData.id;
+        }
+      } else {
+        try {
+          await updateDraftById(formData.id, draftData);
+          setLastSaved(new Date());
+          setIsDirty(false);
+          setJustSaved(true);
+          setRetryCount(0);
+          
+          toast({
+            title: "Draft Updated",
+            description: isOnline ? "Form updated as draft locally - not submitted to cloud" : "Form updated as draft locally (offline)",
+          });
+          
+          console.log('Draft updated successfully with ID:', formData.id);
+          return formData.id;
+        } catch (error) {
+          console.error('Draft update error:', error);
+          // Fall back to creating new draft if update fails
+        }
+      }
+    }
+    
+    // Create new draft if no ID exists or update failed
+    if (!formData.id) {
+      draftData.id = Date.now();
+    }
     
     if (!capabilities.indexedDB) {
       const fallbackSuccess = saveToFallbackStorage(draftData);

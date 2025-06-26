@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ConsentFormHeader from './ConsentFormHeader';
 import ConsentFormProgress from './ConsentFormProgress';
@@ -70,23 +69,6 @@ const ConsentFormLayout = ({
 }: ConsentFormLayoutProps) => {
   const { sections } = useFormSections();
 
-  // Check if user has consented before showing the form
-  const hasConsented = localStorage.getItem("consentAccepted") === "true" || formData?.consentAgreement === true;
-
-  if (!hasConsented) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold mb-4">Consent Required</h2>
-          <p className="text-gray-600 mb-4">Please return to the home page to provide consent before proceeding.</p>
-          <a href="/" className="text-blue-600 hover:text-blue-800 underline">
-            Return to Home
-          </a>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
       <ConsentFormHeader 
@@ -100,6 +82,7 @@ const ConsentFormLayout = ({
           <BackToStartButton
             isDirty={isDirty}
             justSaved={justSaved}
+            formData={formData}
             onSave={onSave}
             onDiscard={onDiscard}
             onResetJustSaved={onResetJustSaved}

@@ -1,27 +1,32 @@
+
 /**
  * Connectivity utility for real-time online/offline detection
  * Uses server ping to validate actual backend availability
  */
 
-let isOnlineCache = navigator.onLine;
+// Browser API guards
+const isBrowser = typeof window !== 'undefined';
+const hasNavigator = typeof navigator !== 'undefined';
+
+let isOnlineCache = hasNavigator ? navigator.onLine : false;
 let lastPingTime = 0;
-const PING_INTERVAL = 5000; // Reduced to 5 seconds for better responsiveness
-const PING_TIMEOUT = 3000; // Reduced to 3 seconds
+const PING_INTERVAL = 5000;
+const PING_TIMEOUT = 3000;
 
 /**
  * Check if we're truly online by pinging Supabase
  */
 export const checkServerConnectivity = async (): Promise<boolean> => {
+  if (!isBrowser) return false;
+  
   const now = Date.now();
   
-  // Always do a fresh check for critical operations (form submission)
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), PING_TIMEOUT);
     
     console.log('🌐 Checking server connectivity...');
     
-    // Use Supabase health check endpoint
     const response = await fetch('https://jofuqlexuxzamltxxzuq.supabase.co/rest/v1/', {
       method: 'HEAD',
       signal: controller.signal,
@@ -38,7 +43,7 @@ export const checkServerConnectivity = async (): Promise<boolean> => {
     console.log('🌐 Server connectivity check result:', isOnlineCache ? 'ONLINE ✅' : 'OFFLINE ❌');
     return isOnlineCache;
   } catch (error) {
-    console.log('🌐 Server ping failed:', error.message || error);
+    console.log('🌐 Server ping failed:', error?.message || error);
     isOnlineCache = false;
     lastPingTime = now;
     return false;
@@ -49,14 +54,14 @@ export const checkServerConnectivity = async (): Promise<boolean> => {
  * Get current connectivity status (uses cached result if recent)
  */
 export const getCurrentConnectivity = (): boolean => {
+  if (!hasNavigator) return false;
+  
   const now = Date.now();
   
-  // Use cached result if recent and successful
   if (isOnlineCache && (now - lastPingTime < PING_INTERVAL)) {
     return isOnlineCache && navigator.onLine;
   }
   
-  // Otherwise return browser state only (will trigger fresh check soon)
   return navigator.onLine;
 };
 
@@ -64,7 +69,8 @@ export const getCurrentConnectivity = (): boolean => {
  * Initialize connectivity monitoring
  */
 export const initConnectivityMonitoring = () => {
-  // Listen to browser online/offline events
+  if (!isBrowser) return;
+  
   window.addEventListener('online', () => {
     console.log('🌐 Browser came online');
     checkServerConnectivity();
@@ -75,6 +81,5 @@ export const initConnectivityMonitoring = () => {
     isOnlineCache = false;
   });
   
-  // Initial connectivity check
   checkServerConnectivity();
 };

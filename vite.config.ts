@@ -15,16 +15,25 @@ export default defineConfig(({ mode }) => {
       mode === 'development' && componentTagger(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico', 'terms.html', 'logo.png'],
+        strategies: 'injectManifest',
+        srcDir: 'public',
+        filename: 'sw.js',
+        injectManifest: {
+          swSrc: 'public/sw.js',
+          swDest: 'sw.js',
+          globPatterns: ['**/*.{js,css,html,ico,png,svg}']
+        },
+        includeAssets: ['favicon.ico', 'terms.html', 'logo.png', 'icon-uploads/*.png'],
         manifest: {
           name: 'Mia Healthcare',
           short_name: 'Mia',
           start_url: basePath,
           scope: basePath,
           display: 'standalone',
+          theme_color: '#ef4805',
           icons: [
             {
-              src: `${basePath}logo.png`,
+              src: `${basePath}icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png`,
               sizes: '192x192',
               type: 'image/png'
             }
@@ -41,6 +50,13 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
+      },
+    },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: undefined,
+        },
       },
     },
   };

@@ -1,10 +1,17 @@
 
 // Cache management utilities for offline forms
 
+// Browser API guards
+const isBrowser = typeof window !== 'undefined';
+const hasLocalStorage = typeof localStorage !== 'undefined';
+const hasSessionStorage = typeof sessionStorage !== 'undefined';
+
 /**
  * Clear all application caches including service worker caches
  */
 export const clearAllCaches = async (): Promise<void> => {
+  if (!isBrowser) return;
+
   try {
     // Clear service worker caches
     if ('caches' in window) {
@@ -16,12 +23,16 @@ export const clearAllCaches = async (): Promise<void> => {
     }
 
     // Clear localStorage
-    localStorage.clear();
-    console.log('localStorage cleared');
+    if (hasLocalStorage) {
+      localStorage.clear();
+      console.log('localStorage cleared');
+    }
 
     // Clear sessionStorage
-    sessionStorage.clear();
-    console.log('sessionStorage cleared');
+    if (hasSessionStorage) {
+      sessionStorage.clear();
+      console.log('sessionStorage cleared');
+    }
 
     // Force reload to reinitialize everything
     window.location.reload();
@@ -34,10 +45,14 @@ export const clearAllCaches = async (): Promise<void> => {
  * Clear only form-related caches and data
  */
 export const clearFormCaches = async (): Promise<void> => {
+  if (!isBrowser) return;
+
   try {
     // Clear form-related localStorage items
-    const formKeys = ['emergencyFormDraft', 'formSession'];
-    formKeys.forEach(key => localStorage.removeItem(key));
+    if (hasLocalStorage) {
+      const formKeys = ['emergencyFormDraft', 'formSession'];
+      formKeys.forEach(key => localStorage.removeItem(key));
+    }
 
     // Clear form-related caches
     if ('caches' in window) {
@@ -60,6 +75,8 @@ export const clearFormCaches = async (): Promise<void> => {
  * Force refresh of IndexedDB connection
  */
 export const refreshIndexedDB = async (): Promise<void> => {
+  if (!isBrowser) return;
+
   try {
     // Close any existing database connections
     const { initDB } = await import('./database/initialization');
@@ -76,6 +93,8 @@ export const refreshIndexedDB = async (): Promise<void> => {
  * Check if the application is experiencing cache issues
  */
 export const detectCacheIssues = (): boolean => {
+  if (!isBrowser) return false;
+
   try {
     // Check if IndexedDB is available
     if (!window.indexedDB) {
@@ -83,11 +102,13 @@ export const detectCacheIssues = (): boolean => {
     }
 
     // Check if localStorage is corrupted
-    try {
-      localStorage.setItem('test', 'test');
-      localStorage.removeItem('test');
-    } catch {
-      return true;
+    if (hasLocalStorage) {
+      try {
+        localStorage.setItem('test', 'test');
+        localStorage.removeItem('test');
+      } catch {
+        return true;
+      }
     }
 
     return false;

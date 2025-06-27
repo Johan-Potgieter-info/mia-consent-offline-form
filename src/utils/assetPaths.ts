@@ -7,23 +7,13 @@ export const getAssetPath = (path: string): string => {
   // Remove leading slash if present to avoid double slashes
   const cleanPath = path.startsWith('/') ? path.slice(1) : path;
   
-  // In development (BASE_URL = '/'), return path with single leading slash
-  // In production (BASE_URL = '/mia-consent-offline-form/'), return full path
-  if (basePath === '/') {
-    return `/${cleanPath}`;
-  }
+  // Ensure we always have a trailing slash on basePath for consistency
+  const normalizedBasePath = basePath.endsWith('/') ? basePath : `${basePath}/`;
   
-  return `${basePath}${cleanPath}`;
+  return `${normalizedBasePath}${cleanPath}`;
 };
 
 // Specific helper for icon uploads - handle both environments
 export const getIconPath = (): string => {
-  // In development, check if the file exists at the root level first
-  const isDev = import.meta.env.DEV;
-  if (isDev) {
-    // Try the public folder path first for development
-    return '/icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png';
-  }
-  
   return getAssetPath('icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png');
 };

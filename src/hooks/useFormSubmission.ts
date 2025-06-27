@@ -6,9 +6,10 @@ import { useFormSession } from './useFormSession';
 import { FormData, FormSubmissionResult } from '../types/formTypes';
 import { Region } from '../utils/regionDetection';
 import { checkServerConnectivity } from '../utils/connectivity';
-import { migrateFormData, CURRENT_FORM_VERSION, shouldShowVersionWarning, getVersionWarningMessage } from '../utils/formVersioning';
 import { submissionLogger } from '../utils/submissionEventLogger';
-import { SensitiveDataEncryption } from '../utils/sensitiveDataEncryption';
+import { validateForm } from '../utils/formValidation';
+import { prepareFormData } from '../utils/formDataPreparation';
+import { processSubmission } from '../utils/submissionProcessor';
 
 interface UseFormSubmissionProps {
   isOnline: boolean;
@@ -27,42 +28,6 @@ export const useFormSubmission = ({
   const { toast } = useToast();
   const { saveForm, deleteForm, syncData, capabilities, getForms } = useHybridStorage();
   const { clearSession } = useFormSession();
-
-  const validateForm = (formData: FormData): { isValid: boolean; errors: string[] } => {
-    const errors: string[] = [];
-
-    console.log('Validating form data:', {
-      patientName: formData.patientName,
-      idNumber: formData.idNumber,
-      cellPhone: formData.cellPhone,
-      consentAgreement: formData.consentAgreement
-    });
-
-    // Check mandatory fields
-    if (!formData.patientName?.trim()) {
-      errors.push("Patient name is required");
-    }
-    
-    if (!formData.idNumber?.trim()) {
-      errors.push("ID number is required");
-    }
-    
-    if (!formData.cellPhone?.trim()) {
-      errors.push("Cell phone number is required");
-    }
-    
-    console.log("🔍 [DEBUG] Consent Agreement value:", formData.consentAgreement);
-    if (!formData.consentAgreement) {
-      errors.push("You must agree to the consent form");
-    }
-
-    console.log('Validation result:', { isValid: errors.length === 0, errors });
-
-    return {
-      isValid: errors.length === 0,
-      errors
-    };
-  };
 
   const submitForm = async (
     formData: FormData, 
@@ -93,8 +58,8 @@ export const useFormSubmission = ({
         isResuming
       });
       
-      // Handle form versioning
-      const { migrated: migratedData, warnings } = migrateFormData(formData);
+      // Prepare form data and handle versioning
+      const { preparedData, warnings } = prepareFormData(formData, currentRegion, false);
       
       // Show version warnings if needed
       if (warnings.length > 0) {
@@ -108,13 +73,13 @@ export const useFormSubmission = ({
       }
       
       // Validate the form (this happens AFTER startSubmission is called)
-      const validation = validateForm(migratedData);
+      const validation = validateForm(preparedData);
       if (!validation.isValid) {
         console.log('Validation failed:', validation.errors);
         
         // Log validation failure
         await submissionLogger.logValidationFailed(formId, validation.errors, {
-          formVersion: migratedData.formSchemaVersion
+          formVersion: preparedData.formSchemaVersion
         });
         
         if (failSubmission) failSubmission();
@@ -144,156 +109,33 @@ export const useFormSubmission = ({
       const actuallyOnline = await checkServerConnectivity();
       console.log('Server connectivity result:', actuallyOnline);
       
-      // Prepare final data with encryption for sensitive fields
-      const encryptedData = SensitiveDataEncryption.encryptSensitiveFields(migratedData);
+      // Update prepared data with actual connectivity
+      const finalPreparedData = { ...preparedData, synced: actuallyOnline };
       
-      const finalData = { 
-        ...encryptedData, 
-        timestamp: new Date().toISOString(),
-        createdAt: encryptedData.createdAt || new Date().toISOString(), 
-        synced: actuallyOnline, // Use actual connectivity instead of capabilities.supabase
-        submissionId: `${encryptedData.regionCode || currentRegion?.code || 'UNK'}-${Date.now()}`,
-        submissionStatus: (actuallyOnline ? 'submitted' : 'pending') as 'submitted' | 'pending',
-        status: 'completed' as const,
-        formSchemaVersion: CURRENT_FORM_VERSION
-      };
-      
-      console.log('Saving completed form...', { 
-        id: finalData.id, 
-        status: finalData.status, 
-        submissionStatus: finalData.submissionStatus,
+      // Process the submission using the new modular approach
+      return await processSubmission(
+        finalPreparedData,
+        formData,
+        currentRegion,
+        isResuming,
         actuallyOnline,
-        supabaseCapability: capabilities.supabase
-      });
-      
-      // Save COMPLETED form (isDraft = false)
-      const savedForm = await saveForm(finalData, false);
-      console.log('Form saved successfully:', savedForm);
-      
-      // Log successful save
-      await submissionLogger.logSaveSuccess(formId, false, {
-        formVersion: finalData.formSchemaVersion,
-        encrypted: true
-      });
-      
-      // Delete the draft IMMEDIATELY after successful completion
-      if (formData.id && isResuming) {
-        try {
-          console.log('Deleting draft form after successful submission...', formData.id);
-          await deleteForm(formData.id, true);
-          console.log('Draft deleted successfully after submission');
-        } catch (error) {
-          console.error('Draft deletion failed after submission (may not exist):', error);
+        {
+          startSubmission,
+          completeSubmission,
+          failSubmission,
+          onOfflineSubmission,
+          onOnlineSubmission
+        },
+        {
+          saveForm,
+          deleteForm,
+          syncData,
+          getForms,
+          clearSession,
+          capabilities,
+          toast
         }
-      }
-      
-      // Clear the form session since we successfully submitted
-      clearSession();
-      console.log('Form session cleared after successful submission');
-      
-      // FIXED: Use actual connectivity instead of capabilities check
-      // If we can reach the server, treat it as online regardless of capabilities
-      if (actuallyOnline) {
-        console.log('Processing ONLINE submission...', { 
-          actuallyOnline, 
-          supabaseCapability: capabilities.supabase 
-        });
-        
-        if (completeSubmission) completeSubmission('submitted');
-        
-        // Online submission - attempt sync if we have Supabase capabilities
-        if (capabilities.supabase) {
-          try {
-            await syncData();
-            console.log('Post-submission sync completed');
-            
-            // Log successful submission
-            await submissionLogger.logSubmissionSuccess(formId, {
-              formVersion: finalData.formSchemaVersion,
-              region: currentRegion?.code,
-              synced: true
-            });
-            
-            if (completeSubmission) completeSubmission('synced');
-          } catch (error) {
-            console.error('Post-submission sync failed:', error);
-            
-            // Log sync failure but submission was still successful
-            await submissionLogger.logSubmissionFailed(formId, `Sync failed: ${error}`, {
-              formVersion: finalData.formSchemaVersion,
-              submitted: true,
-              syncFailed: true
-            });
-          }
-        } else {
-          // Log successful submission without sync
-          await submissionLogger.logSubmissionSuccess(formId, {
-            formVersion: finalData.formSchemaVersion,
-            region: currentRegion?.code,
-            synced: false
-          });
-        }
-        
-        console.log('Triggering ONLINE success dialog...');
-        
-        toast({
-          title: "Form Submitted",
-          description: "Form submitted successfully to cloud database.",
-          variant: "default",
-        });
-        
-        if (onOnlineSubmission) {
-          setTimeout(() => {
-            onOnlineSubmission(finalData);
-          }, 100);
-        }
-        
-        return { 
-          success: true,
-          message: "Form submitted successfully"
-        };
-      } else {
-        console.log('Processing OFFLINE submission...', { 
-          actuallyOnline, 
-          supabaseCapability: capabilities.supabase 
-        });
-        
-        // Log queued submission
-        await submissionLogger.logSubmissionQueued(formId, {
-          formVersion: finalData.formSchemaVersion,
-          region: currentRegion?.code
-        });
-        
-        if (completeSubmission) completeSubmission('submitted');
-        
-        // Get all pending forms for the summary
-        const pendingForms = await getForms(false);
-        const allPending = pendingForms.filter(form => 
-          form.submissionStatus === 'pending' && form.status === 'completed'
-        );
-        
-        console.log('Triggering OFFLINE submission dialog...', { 
-          pendingCount: allPending.length,
-          currentForm: finalData.patientName 
-        });
-        
-        toast({
-          title: "Form Queued",
-          description: "Form queued for submission when online.",
-          variant: "default",
-        });
-        
-        if (onOfflineSubmission) {
-          setTimeout(() => {
-            onOfflineSubmission(finalData, allPending);
-          }, 100);
-        }
-        
-        return { 
-          success: true,
-          message: "Form queued for submission"
-        };
-      }
+      );
       
     } catch (error) {
       console.error('Form submission error:', error);

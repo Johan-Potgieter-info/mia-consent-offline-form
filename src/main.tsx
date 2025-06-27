@@ -37,14 +37,32 @@ if (!rootElement) {
 
 console.log('main.tsx: Root element found, creating React root');
 
+// Add global error handler
+window.addEventListener('error', (event) => {
+  console.error('❌ Global error caught:', event.error);
+  console.error('Error details:', {
+    message: event.message,
+    filename: event.filename,
+    lineno: event.lineno,
+    colno: event.colno,
+    error: event.error
+  });
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('❌ Unhandled promise rejection:', event.reason);
+});
+
 try {
   const root = createRoot(rootElement);
   console.log('main.tsx: React root created, rendering app');
   
   root.render(
-    <BrowserRouter basename={basename}>
-      <App />
-    </BrowserRouter>
+    <React.StrictMode>
+      <BrowserRouter basename={basename}>
+        <App />
+      </BrowserRouter>
+    </React.StrictMode>
   );
   
   console.log('✅ App rendered successfully');
@@ -56,6 +74,7 @@ try {
       <h2>🚨 Application Failed to Load</h2>
       <p>There was an error initializing the application.</p>
       <p><strong>Error:</strong> ${error}</p>
+      <p><strong>Please check the console for more details.</strong></p>
       <button onclick="window.location.reload()" style="padding: 8px 16px; background: #ef4805; color: white; border: none; border-radius: 4px; cursor: pointer;">
         Reload Page
       </button>

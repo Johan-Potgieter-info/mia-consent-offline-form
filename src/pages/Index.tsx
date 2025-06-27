@@ -12,43 +12,90 @@ import { FormData } from '../types/formTypes';
 import { getIconPath } from '../utils/assetPaths';
 
 const Index = () => {
+  console.log('Index: Component rendering started');
+  
   const navigate = useNavigate();
   const [drafts, setDrafts] = useState<FormData[]>([]);
   const [isLoadingDrafts, setIsLoadingDrafts] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [hasError, setHasError] = useState(false);
 
-  const { isOnline } = useConnectivity();
-  const { getForms, capabilities, isInitialized } = useHybridStorage();
+  let isOnline = false;
+  let getForms: any = () => Promise.resolve([]);
+  let capabilities: any = { supabase: false, indexedDB: false };
+  let isInitialized = false;
+
+  try {
+    console.log('Index: Initializing hooks');
+    const connectivityResult = useConnectivity();
+    const storageResult = useHybridStorage();
+    
+    isOnline = connectivityResult.isOnline;
+    getForms = storageResult.getForms;
+    capabilities = storageResult.capabilities;
+    isInitialized = storageResult.isInitialized;
+    
+    console.log('Index: Hooks initialized successfully', {
+      isOnline,
+      capabilities,
+      isInitialized
+    });
+  } catch (error) {
+    console.error('Index: Error initializing hooks:', error);
+    setHasError(true);
+  }
 
   useEffect(() => {
-    if (isInitialized) {
+    if (isInitialized && !hasError) {
       loadDrafts();
     }
-  }, [isInitialized, refreshKey]);
+  }, [isInitialized, refreshKey, hasError]);
 
   const loadDrafts = async () => {
     if (!isInitialized) return;
 
     setIsLoadingDrafts(true);
     try {
+      console.log('Index: Loading drafts');
       const savedDrafts = await getForms(true);
       setDrafts(savedDrafts || []);
-      console.log(`Loaded ${(savedDrafts || []).length} draft forms`);
+      console.log(`Index: Loaded ${(savedDrafts || []).length} draft forms`);
     } catch (error) {
-      console.error('Failed to load drafts:', error);
+      console.error('Index: Failed to load drafts:', error);
+      setHasError(true);
     } finally {
       setIsLoadingDrafts(false);
     }
   };
 
   const refreshDrafts = () => {
+    console.log('Index: Refreshing drafts');
     setRefreshKey((prev) => prev + 1);
   };
 
   const handleStartNewForm = () => {
-    // Simply navigate to the consent form - region detection will happen there
-    navigate('/consent-form');
+    console.log('Index: Starting new form');
+    try {
+      navigate('/consent-form');
+    } catch (error) {
+      console.error('Index: Navigation error:', error);
+      setHasError(true);
+    }
   };
+
+  if (hasError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center p-8">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Something went wrong</h1>
+          <p className="text-gray-600 mb-4">There was an error loading the application.</p>
+          <Button onClick={() => window.location.reload()}>
+            Reload Page
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const ConnectionIndicator = () => (
     <div className="flex items-center gap-2 text-sm">
@@ -66,6 +113,8 @@ const Index = () => {
     </div>
   );
 
+  console.log('Index: Rendering component');
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Orange Header with Mia Healthcare Logo */}
@@ -77,11 +126,11 @@ const Index = () => {
               alt="Mia Healthcare"
               className="h-16 w-auto"
               onError={(e) => {
-                console.error('Mia logo failed to load:', e);
-                console.log('Attempted path:', e.currentTarget.src);
+                console.error('Index: Mia logo failed to load:', e);
+                console.log('Index: Attempted path:', e.currentTarget.src);
               }}
               onLoad={() => {
-                console.log('Mia logo loaded successfully');
+                console.log('Index: Mia logo loaded successfully');
               }}
             />
           </div>
@@ -110,7 +159,9 @@ const Index = () => {
         </div>
 
         {/* Pending Forms Section */}
-        <PendingFormsSection onRefresh={refreshDrafts} />
+        {!hasError && (
+          <PendingFormsSection onRefresh={refreshDrafts} />
+        )}
 
         {/* Show draft count if we have drafts */}
         {(drafts?.length || 0) > 0 && (
@@ -161,14 +212,14 @@ const Index = () => {
             </CardHeader>
             <CardContent>
               <div className="w-full h-14 flex items-center">
-                <ResumeDraftDialog onDraftsChanged={refreshDrafts} />
+                {!hasError && <ResumeDraftDialog onDraftsChanged={refreshDrafts} />}
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Storage Status */}
-        {isInitialized && (
+        {isInitialized && !hasError && (
           <div className="mt-4 text-center text-sm text-gray-500">
             Storage: {capabilities.supabase ? 'Cloud + Local' : capabilities.indexedDB ? 'Local (IndexedDB)' : 'None'}
             <br />

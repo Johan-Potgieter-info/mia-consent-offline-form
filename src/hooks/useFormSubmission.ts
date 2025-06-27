@@ -151,9 +151,9 @@ export const useFormSubmission = ({
         ...encryptedData, 
         timestamp: new Date().toISOString(),
         createdAt: encryptedData.createdAt || new Date().toISOString(), 
-        synced: capabilities.supabase && actuallyOnline,
+        synced: actuallyOnline, // Use actual connectivity instead of capabilities.supabase
         submissionId: `${encryptedData.regionCode || currentRegion?.code || 'UNK'}-${Date.now()}`,
-        submissionStatus: (actuallyOnline && capabilities.supabase ? 'submitted' : 'pending') as 'submitted' | 'pending',
+        submissionStatus: (actuallyOnline ? 'submitted' : 'pending') as 'submitted' | 'pending',
         status: 'completed' as const,
         formSchemaVersion: CURRENT_FORM_VERSION
       };
@@ -191,10 +191,9 @@ export const useFormSubmission = ({
       clearSession();
       console.log('Form session cleared after successful submission');
       
-      // FIXED: Correct logic for determining online vs offline submission
-      const isActuallyOnline = actuallyOnline && capabilities.supabase;
-      
-      if (isActuallyOnline) {
+      // FIXED: Use actual connectivity instead of capabilities check
+      // If we can reach the server, treat it as online regardless of capabilities
+      if (actuallyOnline) {
         console.log('Processing ONLINE submission...', { 
           actuallyOnline, 
           supabaseCapability: capabilities.supabase 
@@ -202,27 +201,36 @@ export const useFormSubmission = ({
         
         if (completeSubmission) completeSubmission('submitted');
         
-        // Online submission - attempt sync
-        try {
-          await syncData();
-          console.log('Post-submission sync completed');
-          
-          // Log successful submission
+        // Online submission - attempt sync if we have Supabase capabilities
+        if (capabilities.supabase) {
+          try {
+            await syncData();
+            console.log('Post-submission sync completed');
+            
+            // Log successful submission
+            await submissionLogger.logSubmissionSuccess(formId, {
+              formVersion: finalData.formSchemaVersion,
+              region: currentRegion?.code,
+              synced: true
+            });
+            
+            if (completeSubmission) completeSubmission('synced');
+          } catch (error) {
+            console.error('Post-submission sync failed:', error);
+            
+            // Log sync failure but submission was still successful
+            await submissionLogger.logSubmissionFailed(formId, `Sync failed: ${error}`, {
+              formVersion: finalData.formSchemaVersion,
+              submitted: true,
+              syncFailed: true
+            });
+          }
+        } else {
+          // Log successful submission without sync
           await submissionLogger.logSubmissionSuccess(formId, {
             formVersion: finalData.formSchemaVersion,
             region: currentRegion?.code,
-            synced: true
-          });
-          
-          if (completeSubmission) completeSubmission('synced');
-        } catch (error) {
-          console.error('Post-submission sync failed:', error);
-          
-          // Log sync failure but submission was still successful
-          await submissionLogger.logSubmissionFailed(formId, `Sync failed: ${error}`, {
-            formVersion: finalData.formSchemaVersion,
-            submitted: true,
-            syncFailed: true
+            synced: false
           });
         }
         

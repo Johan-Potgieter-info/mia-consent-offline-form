@@ -37,6 +37,7 @@ self.addEventListener('install', (event) => {
       console.error('[SW] Precache failed:', err);
     })
   );
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
@@ -46,6 +47,7 @@ self.addEventListener('activate', (event) => {
       Promise.all(keys.map((key) => key !== CACHE_NAME && caches.delete(key)))
     )
   );
+  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {

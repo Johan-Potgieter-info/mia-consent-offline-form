@@ -16,7 +16,6 @@ export default defineConfig(({ mode }) => {
       VitePWA({
         registerType: 'autoUpdate',
         strategies: 'injectManifest',
-        filename: 'sw.js',
         injectManifest: {
           swSrc: 'src/sw.js',
           globPatterns: ['**/*.{js,css,html,ico,png,svg}']

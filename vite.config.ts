@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => {
         filename: 'sw.js',
         injectManifest: {
           swSrc: 'public/sw.js',
-          swDest: 'dist/sw.js',
+          swDest: 'sw.js',
           globPatterns: ['**/*.{js,css,html,ico,png,svg}']
         },
         includeAssets: ['favicon.ico', 'terms.html', 'logo.png', 'icon-uploads/*.png'],
@@ -34,37 +34,37 @@ export default defineConfig(({ mode }) => {
           background_color: '#ffffff',
           icons: [
             {
-              src: `${basePath}icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png`,
+              src: 'icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png',
               sizes: '48x48',
               type: 'image/png'
             },
             {
-              src: `${basePath}icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png`,
+              src: 'icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png',
               sizes: '72x72',
               type: 'image/png'
             },
             {
-              src: `${basePath}icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png`,
+              src: 'icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png',
               sizes: '96x96',
               type: 'image/png'
             },
             {
-              src: `${basePath}icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png`,
+              src: 'icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png',
               sizes: '144x144',
               type: 'image/png'
             },
             {
-              src: `${basePath}icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png`,
+              src: 'icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png',
               sizes: '192x192',
               type: 'image/png'
             },
             {
-              src: `${basePath}icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png`,
+              src: 'icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png',
               sizes: '384x384',
               type: 'image/png'
             },
             {
-              src: `${basePath}icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png`,
+              src: 'icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png',
               sizes: '512x512',
               type: 'image/png'
             }

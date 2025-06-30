@@ -1,8 +1,10 @@
-
 const CACHE_NAME = 'mia-consent-cache-v6';
 const BASE_PATH = self.location.pathname.includes('/mia-consent-offline-form/') 
   ? '/mia-consent-offline-form/' 
   : '/';
+
+// Workbox will inject the precache manifest here
+self.__WB_MANIFEST;
 
 const OFFLINE_FILES = [
   BASE_PATH,

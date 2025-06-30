@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => {
         strategies: 'injectManifest',
         injectManifest: {
           swSrc: 'src/sw.js',
+          swDest: 'sw.js',
           globPatterns: ['**/*.{js,css,html,ico,png,svg}']
         },
         includeAssets: ['favicon.ico', 'terms.html', 'logo.png', 'icon-uploads/*.png'],

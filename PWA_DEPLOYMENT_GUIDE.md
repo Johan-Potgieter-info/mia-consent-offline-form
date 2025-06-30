@@ -23,21 +23,12 @@
 npm run build
 ```
 
-### 2. Copy Critical Files (REQUIRED for GitHub Pages)
-```bash
-# Copy service worker to root of dist
-cp public/sw.js dist/sw.js
-
-# Copy offline page to root of dist  
-cp public/offline.html dist/offline.html
-
-# Verify files are in place
-ls -la dist/sw.js dist/offline.html dist/manifest.json
-```
+### 2. Service Worker Configuration
+The service worker is now built automatically from `src/sw.js` using VitePWA's `injectManifest` strategy. No manual copying is required.
 
 ### 3. One-Line Deployment Command
 ```bash
-npm run build && cp public/sw.js dist/sw.js && cp public/offline.html dist/offline.html
+npm run build
 ```
 
 ### 4. GitHub Pages Configuration
@@ -62,7 +53,7 @@ curl -I https://username.github.io/mia-consent-offline-form/manifest.json
 ### Browser DevTools Verification
 1. **Application Tab**:
    - ✅ Service Worker registered without errors
-   - ✅ Cache Storage shows "mia-consent-offline-page-v3"
+   - ✅ Cache Storage shows "mia-consent-cache-v6"
    - ✅ offline.html cached successfully
 
 2. **Network Tab**:
@@ -101,11 +92,11 @@ curl -I https://username.github.io/mia-consent-offline-form/manifest.json
 ## 🔧 Technical Implementation
 
 ### Service Worker Features
-- **Workbox 5.1.2**: Google's PWA library
+- **VitePWA with injectManifest**: Workbox integration
 - **Cache Strategy**: Stale-While-Revalidate
 - **Offline Fallback**: Custom branded offline.html
 - **Auto-Update**: Checks for updates every 5 minutes
-- **Old SW Cleanup**: Prevents conflicts
+- **Source Location**: `src/sw.js` (built to `dist/sw.js`)
 
 ### Build Optimizations
 - **Manual Chunks**: Vendor, router, UI, database, forms
@@ -128,8 +119,8 @@ curl -I https://username.github.io/mia-consent-offline-form/manifest.json
 
 ## 🚨 Common Issues & Solutions
 
-### Issue: SW 404 Error
-**Solution**: Ensure `cp public/sw.js dist/sw.js` after build
+### Issue: SW Build Error
+**Solution**: Ensure `src/sw.js` exists and contains `self.__WB_MANIFEST;`
 
 ### Issue: Assets Not Loading
 **Solution**: All paths use `./` relative syntax
@@ -153,12 +144,12 @@ curl -I https://username.github.io/mia-consent-offline-form/manifest.json
 
 **Deployment Status**: ✅ Production Ready  
 **PWA Builder Score**: 🎯 15/30 → 30/30  
-**Service Worker**: ✅ Workbox v5.1.2  
+**Service Worker**: ✅ VitePWA injectManifest  
 **Desktop Icon**: ✅ Mia Healthcare Logo  
 **Developer**: Johan Potgieter  
 **Owner**: Mia Healthcare
 
 ### 🚀 Final Command
 ```bash
-npm run build && cp public/sw.js dist/sw.js && cp public/offline.html dist/offline.html && echo "✅ Mia Healthcare PWA ready for deployment!"
+npm run build && echo "✅ Mia Healthcare PWA ready for deployment!"
 ```

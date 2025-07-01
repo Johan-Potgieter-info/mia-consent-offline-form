@@ -19,7 +19,11 @@ export default defineConfig(({ mode }) => {
         injectManifest: {
           swSrc: 'src/sw.js',
           swDest: 'sw.js',
-          globPatterns: ['**/*.{js,css,html,ico,png,svg}']
+          globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+          maximumFileSizeToCacheInBytes: 3000000
+        },
+        devOptions: {
+          enabled: false
         },
         includeAssets: ['favicon.ico', 'terms.html', 'logo.png', 'icon-uploads/*.png'],
         manifest: {
@@ -67,8 +71,7 @@ export default defineConfig(({ mode }) => {
               type: 'image/png'
             }
           ]
-        },
-        manifestFilename: 'manifest.json'
+        }
       }),
     ].filter(Boolean),
     base: basePath,

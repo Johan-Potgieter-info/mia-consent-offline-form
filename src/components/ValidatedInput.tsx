@@ -13,6 +13,7 @@ interface ValidatedInputProps {
   className?: string;
   label?: string;
   onValidationChange?: (isValid: boolean) => void;
+  hasError?: boolean;
 }
 
 const ValidatedInput = ({ 
@@ -23,7 +24,8 @@ const ValidatedInput = ({
   required = false,
   className = '',
   label,
-  onValidationChange
+  onValidationChange,
+  hasError = false
 }: ValidatedInputProps) => {
   const [error, setError] = useState<string>('');
   const [touched, setTouched] = useState(false);
@@ -81,6 +83,10 @@ const ValidatedInput = ({
 
   const inputType = type === 'phone' || type === 'tel' ? 'tel' : type === 'email' ? 'email' : type === 'date' ? 'date' : 'text';
 
+  // Show error if there's a validation error OR if hasError prop is passed
+  const showError = (error && touched) || (hasError && required && !value.trim());
+  const errorMessage = error || (hasError && required && !value.trim() ? 'This field is required.' : '');
+
   return (
     <div className="space-y-2">
       {label && (
@@ -95,10 +101,10 @@ const ValidatedInput = ({
         onChange={handleChange}
         onBlur={handleBlur}
         placeholder={placeholder}
-        className={`${className} ${error && touched ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+        className={`${className} ${showError ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
       />
-      {error && touched && (
-        <p className="text-sm text-red-600">{error}</p>
+      {showError && (
+        <p className="text-sm text-red-600">{errorMessage}</p>
       )}
     </div>
   );

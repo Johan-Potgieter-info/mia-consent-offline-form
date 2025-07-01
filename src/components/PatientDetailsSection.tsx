@@ -31,7 +31,7 @@ const PatientDetailsSection = ({
 
   return (
     <div className="space-y-6 p-6">
-      <h2 className="text-xl font-semibold text-[#ef4805] border-b pb-2">1. Patient Details</h2>
+      <h2 className="text-xl font-semibold text-[#ef4805] border-b pb-2">1. Patient Details (Fields 1-12)</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <ValidatedInput

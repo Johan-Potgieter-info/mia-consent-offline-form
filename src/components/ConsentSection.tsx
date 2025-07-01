@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { FormData } from "../types/formTypes";
+import ValidatedInput from "./ValidatedInput";
 
 interface ConsentSectionProps {
   formData?: FormData;
@@ -12,23 +13,12 @@ interface ConsentSectionProps {
 
 const ConsentSection: React.FC<ConsentSectionProps> = ({
   formData,
-  onCheckboxChange,
+  onInputChange,
+  updateFormData = () => {},
   validationErrors
 }) => {
   const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
-  const [consentGiven, setConsentGiven] = useState(false);
-
   const termsRef = useRef<HTMLDivElement>(null);
-
-  // Reset consent state on component mount - don't auto-tick
-  useEffect(() => {
-    // Only check formData, don't auto-load from localStorage
-    if (formData?.consentAgreement === true) {
-      setConsentGiven(true);
-    } else {
-      setConsentGiven(false);
-    }
-  }, [formData?.consentAgreement]);
 
   useEffect(() => {
     const node = termsRef.current;
@@ -52,18 +42,13 @@ const ConsentSection: React.FC<ConsentSectionProps> = ({
     return () => node.removeEventListener("scroll", checkScroll);
   }, []);
 
-  const handleConsent = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const checked = e.target.checked;
-    
-    // Update localStorage (preserve existing behavior)
-    localStorage.setItem("consentAccepted", checked.toString());
-    
-    // Update local state (preserve existing behavior)
-    setConsentGiven(checked);
-    
-    // Update main form data (fix the issue)
-    if (onCheckboxChange) {
-      onCheckboxChange('consentAgreement', checked.toString(), checked);
+  const handleRadioChange = (fieldName: keyof FormData, value: string) => {
+    if (onInputChange) {
+      onInputChange(fieldName, value);
+    }
+    // Update legacy consent field for backward compatibility
+    if (fieldName === 'terms' && value === 'Agree') {
+      updateFormData({ consentAgreement: true });
     }
   };
 
@@ -71,68 +56,248 @@ const ConsentSection: React.FC<ConsentSectionProps> = ({
   const hasValidationErrors = validationErrors && validationErrors.length > 0;
 
   return (
-    <div className="max-w-2xl mx-auto p-4 text-left">
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <h2 className="text-2xl font-semibold mb-4">Consent and Agreement</h2>
+    <div className="space-y-6 p-6">
+      <h2 className="text-xl font-semibold text-[#ef4805] border-b pb-2">5. Consent</h2>
 
-        {hasValidationErrors && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-800 font-medium">Please complete the following:</p>
-            <ul className="list-disc list-inside text-red-700 text-sm mt-2">
-              {validationErrors?.map((error, index) => (
-                <li key={index}>{error}</li>
-              ))}
-            </ul>
+      {hasValidationErrors && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-800 font-medium">Please complete the following:</p>
+          <ul className="list-disc list-inside text-red-700 text-sm mt-2">
+            {validationErrors?.map((error, index) => (
+              <li key={index}>{error}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <details className="mb-4 border border-gray-300 rounded">
+        <summary className="cursor-pointer p-3 bg-gray-100 font-medium">
+          View MIA Consent Form
+        </summary>
+        <div
+          ref={termsRef}
+          className="max-h-72 overflow-y-scroll p-4 border-t border-gray-300 text-sm space-y-4"
+        >
+          <h3 className="text-lg font-semibold text-orange-600">MIA Consent Form Contents</h3>
+          <p>1. I, the undersigned, hereby give my voluntary consent for dental examination, diagnosis and treatment as deemed necessary by the dental professional in attendance.</p>
+          <p>2. I understand that dental treatment may involve procedures such as cleaning, scaling, polishing, and the use of diagnostic tools including X-rays or photos.</p>
+          <p>3. I understand the nature and purpose of the treatment and acknowledge that no guarantees or assurances have been made to me concerning the results of the procedure.</p>
+          <p>4. I understand that there may be risks and complications associated with dental treatment, including but not limited to sensitivity, discomfort, and allergic reactions.</p>
+          <p>5. I confirm that I have disclosed all relevant medical history and current medications.</p>
+          <p>6. I understand that the dental provider may refer me for further treatment if necessary, and that this referral may incur additional costs not covered during the screening.</p>
+          <p>7. I acknowledge that I have the right to ask questions and that I may withdraw my consent at any time before or during the treatment.</p>
+          <p>8. I give consent for my dental records to be shared with other healthcare professionals if needed for further treatment or referral.</p>
+          <p>9. I understand the confidentiality of my health information and consent to the collection and use of this information for medical and administrative purposes.</p>
+          <p>10. I confirm that I have read and understood the information above, and that I am signing this consent voluntarily and without coercion.</p>
+        </div>
+      </details>
+
+      <div className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            44. I have read and agree with terms and conditions provided in the document
+          </label>
+          <div className="space-y-2">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="terms"
+                value="Agree"
+                checked={formData?.terms === 'Agree'}
+                onChange={(e) => handleRadioChange('terms', e.target.value)}
+                className="mr-2"
+                disabled={!isScrolledToBottom}
+              />
+              <span className="text-sm">Agree</span>
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="terms"
+                value="Disagree"
+                checked={formData?.terms === 'Disagree'}
+                onChange={(e) => handleRadioChange('terms', e.target.value)}
+                className="mr-2"
+                disabled={!isScrolledToBottom}
+              />
+              <span className="text-sm">Disagree</span>
+            </label>
           </div>
-        )}
+        </div>
 
-        <details className="mb-4 border border-gray-300 rounded">
-          <summary className="cursor-pointer p-3 bg-gray-100 font-medium">
-            View Consent and Agreement Form
-          </summary>
-          <div
-            ref={termsRef}
-            className="max-h-72 overflow-y-scroll p-4 border-t border-gray-300 text-sm space-y-4"
-          >
-            <h3 className="text-lg font-semibold text-orange-600">Consent Form Contents</h3>
-            <p>1. I, the undersigned, hereby give my voluntary consent for dental examination, diagnosis and treatment as deemed necessary by the dental professional in attendance.</p>
-            <p>2. I understand that dental treatment may involve procedures such as cleaning, scaling, polishing, and the use of diagnostic tools including X-rays or photos.</p>
-            <p>3. I understand the nature and purpose of the treatment and acknowledge that no guarantees or assurances have been made to me concerning the results of the procedure.</p>
-            <p>4. I understand that there may be risks and complications associated with dental treatment, including but not limited to sensitivity, discomfort, and allergic reactions.</p>
-            <p>5. I confirm that I have disclosed all relevant medical history and current medications.</p>
-            <p>6. I understand that the dental provider may refer me for further treatment if necessary, and that this referral may incur additional costs not covered during the screening.</p>
-            <p>7. I acknowledge that I have the right to ask questions and that I may withdraw my consent at any time before or during the treatment.</p>
-            <p>8. I give consent for my dental records to be shared with other healthcare professionals if needed for further treatment or referral.</p>
-            <p>9. I understand the confidentiality of my health information and consent to the collection and use of this information for medical and administrative purposes.</p>
-            <p>10. I confirm that I have read and understood the information above, and that I am signing this consent voluntarily and without coercion.</p>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            45. My consent is provided of my own free will without any undue influence from any person whatsoever. I confirm that I have permission of my dependant(s) to give their consent, where such consent has been provided, and I indemnify the practice against this.
+          </label>
+          <div className="space-y-2">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="consentFreeWill"
+                value="Agree"
+                checked={formData?.consentFreeWill === 'Agree'}
+                onChange={(e) => handleRadioChange('consentFreeWill', e.target.value)}
+                className="mr-2"
+              />
+              <span className="text-sm">Agree</span>
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="consentFreeWill"
+                value="Disagree"
+                checked={formData?.consentFreeWill === 'Disagree'}
+                onChange={(e) => handleRadioChange('consentFreeWill', e.target.value)}
+                className="mr-2"
+              />
+              <span className="text-sm">Disagree</span>
+            </label>
           </div>
-        </details>
+        </div>
 
-        <label className="flex items-start space-x-2 mt-4 cursor-pointer">
-          <input
-            type="checkbox"
-            disabled={!isScrolledToBottom}
-            checked={consentGiven}
-            onChange={handleConsent}
-            className="mt-1 h-4 w-4"
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            46. I acknowledge that I have been informed that this practice does not charge the rates that the Department of Health has unilaterally determined for dentists
+          </label>
+          <div className="space-y-2">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="rates"
+                value="Agree"
+                checked={formData?.rates === 'Agree'}
+                onChange={(e) => handleRadioChange('rates', e.target.value)}
+                className="mr-2"
+              />
+              <span className="text-sm">Agree</span>
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="rates"
+                value="Disagree"
+                checked={formData?.rates === 'Disagree'}
+                onChange={(e) => handleRadioChange('rates', e.target.value)}
+                className="mr-2"
+              />
+              <span className="text-sm">Disagree</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            47. I accept that I am fully responsible for the payment for services rendered and should I not pay timeously, understand that I will be liable for debt recovery cost on an attorney and own client scale.
+          </label>
+          <div className="space-y-2">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="paymentResponsibility"
+                value="Agree"
+                checked={formData?.paymentResponsibility === 'Agree'}
+                onChange={(e) => handleRadioChange('paymentResponsibility', e.target.value)}
+                className="mr-2"
+              />
+              <span className="text-sm">Agree</span>
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="paymentResponsibility"
+                value="Disagree"
+                checked={formData?.paymentResponsibility === 'Disagree'}
+                onChange={(e) => handleRadioChange('paymentResponsibility', e.target.value)}
+                className="mr-2"
+              />
+              <span className="text-sm">Disagree</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            48. Do we have your permission to place our positive commentary and non-treatment related photographs on our website/social media? (Optional)
+          </label>
+          <div className="space-y-2">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="mediaPermission"
+                value="Yes"
+                checked={formData?.mediaPermission === 'Yes'}
+                onChange={(e) => handleRadioChange('mediaPermission', e.target.value)}
+                className="mr-2"
+              />
+              <span className="text-sm">Yes</span>
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="mediaPermission"
+                value="No"
+                checked={formData?.mediaPermission === 'No'}
+                onChange={(e) => handleRadioChange('mediaPermission', e.target.value)}
+                className="mr-2"
+              />
+              <span className="text-sm">No</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            49. Cancellation Policy Acknowledgment
+          </label>
+          <p className="text-sm text-gray-600 mb-2">
+            Please note that Mia Healthcare charges a cancellation fee of R200.00 for appointments canceled less than 12 hours before the scheduled time. For cancellations made less than 2 hours before the appointment, the fee will be up to 50% of the consultation or service fee. Cancellations can be made by calling our offices or using the cancellation links provided in our communications. Late cancellations are reviewed according to ethical guidelines, and reasonable cancellations may be honored without charge.
+          </p>
+          <label className="flex items-center">
+            <input
+              type="radio"
+              name="cancellationPolicy"
+              value="Acknowledge cancellation policy"
+              checked={formData?.cancellationPolicy === 'Acknowledge cancellation policy'}
+              onChange={(e) => handleRadioChange('cancellationPolicy', e.target.value)}
+              className="mr-2"
+            />
+            <span className="text-sm">Acknowledge cancellation policy</span>
+          </label>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            50. Background Music Preference (Optional)
+          </label>
+          <textarea
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ef4805] focus:border-transparent"
+            value={formData?.musicPreference || ''}
+            onChange={(e) => onInputChange && onInputChange('musicPreference', e.target.value)}
+            placeholder="Let us know your favourite artist/song or attach a link to your favourite playlist"
+            rows={3}
           />
-          <span className="text-sm">
-            I have read and agree to the Consent and Agreement terms above.
-          </span>
-        </label>
+        </div>
 
-        {!isScrolledToBottom && (
-          <p className="text-red-500 text-sm mt-2">
-            Please scroll to the bottom of the consent form to enable the checkbox.
-          </p>
-        )}
-
-        {consentGiven && isScrolledToBottom && (
-          <p className="text-green-600 text-sm mt-2 font-medium">
-            ✓ Consent Accepted! You can now submit the form.
-          </p>
-        )}
+        <ValidatedInput
+          type="text"
+          label="51. Please enter your full name and surname followed by the date"
+          value={formData?.signature || ''}
+          onChange={(value) => onInputChange && onInputChange('signature', value)}
+          placeholder="Enter your full name and date"
+        />
       </div>
+
+      {!isScrolledToBottom && (
+        <p className="text-red-500 text-sm mt-2">
+          Please scroll to the bottom of the consent form to enable the agreement options.
+        </p>
+      )}
+
+      {formData?.terms === 'Agree' && isScrolledToBottom && (
+        <p className="text-green-600 text-sm mt-2 font-medium">
+          ✓ Consent terms accepted! Please complete all other required consent questions.
+        </p>
+      )}
     </div>
   );
 };

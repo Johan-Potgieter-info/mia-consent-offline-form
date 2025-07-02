@@ -47,7 +47,7 @@ const Index = () => {
 
   useEffect(() => {
     if (isInitialized && !hasError) {
-      loadDrafts();
+      useEffect(() => { loadDrafts(); }, []);
     }
   }, [isInitialized, refreshKey, hasError]);
 

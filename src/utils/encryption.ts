@@ -13,7 +13,7 @@ export const encrypt = (text: string): string => {
 
 export const decrypt = (encryptedText: string): string => {
   try {
-    return decodeURIComponent(atob(encryptedText));
+    if (!encryptedText) return ""; try { return decodeURIComponent(atob(encryptedText)); } catch (e) { console.warn("Decryption failed:", e); return encryptedText; }
   } catch (error) {
     // If decryption fails, assume it's plain text
     return encryptedText;

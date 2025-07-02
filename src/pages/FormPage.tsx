@@ -1,13 +1,8 @@
-import React from "react";
-import ConsentFormContainer from "../components/ConsentFormContainer";
+import React from 'react';
+import FormContainer from '../components/form/FormContainer';
 
 const FormPage: React.FC = () => {
-  return (
-    <div className="p-6">
-      <ConsentFormContainer />
-    </div>
-  );
+  return <FormContainer />;
 };
 
 export default FormPage;
-

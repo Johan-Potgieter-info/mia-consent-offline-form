@@ -92,3 +92,4 @@ if (isBrowser && rootElement) {
     `;
   }
 }
+console.log('✅ main.tsx loaded');

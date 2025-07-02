@@ -1,7 +1,7 @@
 
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { VitePWA } from 'vite-plugin-pwa';
+// import { VitePWA } from 'vite-plugin-pwa'; // Temporarily disabled
 import { componentTagger } from "lovable-tagger";
 import path from "path";
 
@@ -13,66 +13,67 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       mode === 'development' && componentTagger(),
-      VitePWA({
-        registerType: 'autoUpdate',
-        strategies: 'injectManifest',
-        injectManifest: {
-          swSrc: 'src/sw.js',
-          swDest: 'sw.js',
-          globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-          maximumFileSizeToCacheInBytes: 3000000
-        },
-        devOptions: {
-          enabled: false
-        },
-        includeAssets: ['favicon.ico', 'terms.html', 'logo.png', 'icon-uploads/*.png'],
-        manifest: {
-          name: 'Mia Healthcare',
-          short_name: 'Mia',
-          start_url: basePath,
-          scope: basePath,
-          display: 'standalone',
-          theme_color: '#ef4805',
-          background_color: '#ffffff',
-          icons: [
-            {
-              src: 'icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png',
-              sizes: '48x48',
-              type: 'image/png'
-            },
-            {
-              src: 'icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png',
-              sizes: '72x72',
-              type: 'image/png'
-            },
-            {
-              src: 'icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png',
-              sizes: '96x96',
-              type: 'image/png'
-            },
-            {
-              src: 'icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png',
-              sizes: '144x144',
-              type: 'image/png'
-            },
-            {
-              src: 'icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png',
-              sizes: '192x192',
-              type: 'image/png'
-            },
-            {
-              src: 'icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png',
-              sizes: '384x384',
-              type: 'image/png'
-            },
-            {
-              src: 'icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png',
-              sizes: '512x512',
-              type: 'image/png'
-            }
-          ]
-        }
-      }),
+      // VitePWA temporarily disabled to fix build error
+      // VitePWA({
+      //   registerType: 'autoUpdate',
+      //   strategies: 'injectManifest',
+      //   injectManifest: {
+      //     swSrc: 'src/sw.js',
+      //     swDest: 'sw.js',
+      //     globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+      //     maximumFileSizeToCacheInBytes: 3000000
+      //   },
+      //   devOptions: {
+      //     enabled: false
+      //   },
+      //   includeAssets: ['favicon.ico', 'terms.html', 'logo.png', 'icon-uploads/*.png'],
+      //   manifest: {
+      //     name: 'Mia Healthcare',
+      //     short_name: 'Mia',
+      //     start_url: basePath,
+      //     scope: basePath,
+      //     display: 'standalone',
+      //     theme_color: '#ef4805',
+      //     background_color: '#ffffff',
+      //     icons: [
+      //       {
+      //         src: 'icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png',
+      //         sizes: '48x48',
+      //         type: 'image/png'
+      //       },
+      //       {
+      //         src: 'icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png',
+      //         sizes: '72x72',
+      //         type: 'image/png'
+      //       },
+      //       {
+      //         src: 'icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png',
+      //         sizes: '96x96',
+      //         type: 'image/png'
+      //       },
+      //       {
+      //         src: 'icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png',
+      //         sizes: '144x144',
+      //         type: 'image/png'
+      //       },
+      //       {
+      //         src: 'icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png',
+      //         sizes: '192x192',
+      //         type: 'image/png'
+      //       },
+      //       {
+      //         src: 'icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png',
+      //         sizes: '384x384',
+      //         type: 'image/png'
+      //       },
+      //       {
+      //         src: 'icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png',
+      //         sizes: '512x512',
+      //         type: 'image/png'
+      //       }
+      //     ]
+      //   }
+      // }),
     ].filter(Boolean),
     base: basePath,
     server: {

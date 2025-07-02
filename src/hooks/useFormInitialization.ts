@@ -42,7 +42,7 @@ export const useFormInitialization = ({
       const emergencyDraft = localStorage.getItem('emergencyFormDraft');
       if (emergencyDraft) {
         try {
-          const parsedEmergency = JSON.parse(emergencyDraft);
+          const parsedEmergency = JSON.parse(emergencyDraft || "{}");
           console.log('Found emergency draft, recovering...');
           setFormData(parsedEmergency);
           localStorage.removeItem('emergencyFormDraft');
@@ -61,7 +61,7 @@ export const useFormInitialization = ({
       const draftParam = searchParams.get('draft');
       if (draftParam) {
         try {
-          const parsedDraft = JSON.parse(decodeURIComponent(draftParam));
+          const parsedDraft = JSON.parse(decodeURIComponent(draftParam || "%7B%7D"));
           await resumeDraftHandler(parsedDraft);
           return;
         } catch (error) {

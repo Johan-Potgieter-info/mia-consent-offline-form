@@ -4,6 +4,7 @@ import { FormData } from '../types/formTypes';
 import { migrateFormData, shouldShowVersionWarning, getVersionWarningMessage, CURRENT_FORM_VERSION } from '../utils/formVersioning';
 import { submissionLogger } from '../utils/submissionEventLogger';
 import { SensitiveDataEncryption } from '../utils/sensitiveDataEncryption';
+import { validateForm as validateFormComprehensive } from '../utils/formValidation';
 
 // Helper function to check if form has meaningful content
 const hasMeaningfulContent = (formData: FormData): boolean => {
@@ -28,7 +29,7 @@ const hasMeaningfulContent = (formData: FormData): boolean => {
 export const useFormManagement = () => {
   const [formData, setFormData] = useState<FormData>({} as FormData);
   const [isDirty, setIsDirty] = useState(false);
-  const [activeSection, setActiveSection] = useState("patient");
+  const [activeSection, setActiveSection] = useState("patientDetails");
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [retryCount, setRetryCount] = useState(0);
   const isFirstLoadRef = useRef(true);
@@ -146,40 +147,10 @@ export const useFormManagement = () => {
     return 'Just now'; // Simplified for now
   }, []);
 
-  // Enhanced validation function
+  // Use comprehensive validation function
   const validateForm = useCallback((data: FormData = formData): { isValid: boolean; errors: string[] } => {
-    const errors: string[] = [];
-    
-    console.log('Validating form:', {
-      patientName: data.patientName,
-      idNumber: data.idNumber,
-      cellPhone: data.cellPhone,
-      consentAgreement: data.consentAgreement,
-      consentType: typeof data.consentAgreement
-    });
-
-    // Check mandatory fields
-    if (!data.patientName?.trim()) {
-      errors.push("Patient name is required");
-    }
-    
-    if (!data.idNumber?.trim()) {
-      errors.push("ID number is required");
-    }
-    
-    if (!data.cellPhone?.trim()) {
-      errors.push("Cell phone number is required");
-    }
-    
-    // Ensure consent is explicitly checked (boolean true)
-    if (data.consentAgreement !== true) {
-      errors.push("You must agree to the consent form");
-    }
-
-    const isValid = errors.length === 0;
-    console.log('Validation result:', { isValid, errors });
-
-    return { isValid, errors };
+    console.log('Using comprehensive validation for form data');
+    return validateFormComprehensive(data);
   }, [formData]);
 
   return {

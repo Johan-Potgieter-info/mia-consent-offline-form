@@ -1,3 +1,4 @@
+console.log('🧠 main.tsx: beginning render');
 
 import React from 'react';
 import { createRoot } from 'react-dom/client';
@@ -70,6 +71,7 @@ if (isBrowser && rootElement) {
     root.render(
       <React.StrictMode>
         <BrowserRouter basename={basename}>
+console.log('🚀 Rendering <App />');
           <App />
         </BrowserRouter>
       </React.StrictMode>
@@ -93,3 +95,4 @@ if (isBrowser && rootElement) {
   }
 }
 console.log('✅ main.tsx loaded');
+console.log('✅ main.tsx: render complete');

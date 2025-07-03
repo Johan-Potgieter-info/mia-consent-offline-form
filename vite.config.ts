@@ -15,6 +15,9 @@ export default defineConfig(({ mode }) => {
       mode === 'development' && componentTagger(),
       // VitePWA temporarily disabled to fix build error
       // VitePWA({
+    workbox: {
+      cleanupOutdatedCaches: true
+    },
       //   registerType: 'autoUpdate',
       //   strategies: 'injectManifest',
       //   injectManifest: {

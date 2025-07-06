@@ -51,6 +51,7 @@ export default defineConfig(({ mode }) => {
     build: {
       sourcemap: true,
       rollupOptions: {
+         input: "index.html",
         output: {
           manualChunks: {
             vendor: ['react', 'react-dom'],

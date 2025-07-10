@@ -10,7 +10,7 @@ interface ConsentFormHeaderProps {
 }
 
 const ConsentFormHeader = ({ currentRegion, regionDetected, isResuming }: ConsentFormHeaderProps) => {
-  const iconPath = getIconPath();
+  const iconPath = '/mia-consent-offline-form/icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png';
   console.log('ConsentFormHeader - Using dynamic icon path:', iconPath);
   
   return (

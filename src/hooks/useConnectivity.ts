@@ -1,9 +1,9 @@
 
 import { useState, useEffect } from 'react';
-import { getCurrentConnectivity, checkServerConnectivity } from '../utils/connectivity';
+import { checkServerConnectivity } from '../utils/connectivity';
 
 export const useConnectivity = () => {
-  const [isOnline, setIsOnline] = useState(getCurrentConnectivity());
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   useEffect(() => {
     const handleOnline = async () => {

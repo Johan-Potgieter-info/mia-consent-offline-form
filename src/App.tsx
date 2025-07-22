@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Index from './pages/Index';
 import ConsentPage from './pages/ConsentPage';
 import FormPage from './pages/FormPage';
 import DraftList from './pages/DraftList';
@@ -9,7 +10,8 @@ const App: React.FC = () => {
   return (
     <Router basename="/mia-consent-offline-form">
       <Routes>
-        <Route path="/" element={<ConsentPage />} />
+        <Route path="/" element={<Index />} />
+        <Route path="/consent-form" element={<ConsentPage />} />
         <Route path="/form" element={<FormPage />} />
         <Route path="/drafts" element={<DraftList />} />
         <Route path="/drafts/:id" element={<DraftEditor />} />

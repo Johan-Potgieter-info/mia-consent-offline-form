@@ -15,5 +15,5 @@ export const getAssetPath = (path: string): string => {
 
 // Specific helper for icon uploads - handle both environments
 export const getIconPath = (): string => {
-  return getAssetPath('icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png');
+  return getAssetPath('icon-192.png');
 };

@@ -5,6 +5,7 @@ import ConsentPage from './pages/ConsentPage';
 import FormPage from './pages/FormPage';
 import DraftList from './pages/DraftList';
 import DraftEditor from './pages/DraftEditor';
+import NotFound from './pages/NotFound';
 
 const App: React.FC = () => {
   return (
@@ -15,6 +16,7 @@ const App: React.FC = () => {
         <Route path="/form" element={<FormPage />} />
         <Route path="/drafts" element={<DraftList />} />
         <Route path="/drafts/:id" element={<DraftEditor />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );

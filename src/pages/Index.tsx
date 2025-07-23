@@ -20,34 +20,19 @@ const Index = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [hasError, setHasError] = useState(false);
 
-  let isOnline = false;
-  let getForms: any = () => Promise.resolve([]);
-  let capabilities: any = { supabase: false, indexedDB: false };
-  let isInitialized = false;
+  // Move all hooks to top level - no conditional usage
+  const { isOnline } = useConnectivity();
+  const { getForms, capabilities, isInitialized } = useHybridStorage();
 
-  try {
-    console.log('Index: Initializing hooks');
-    const connectivityResult = useConnectivity();
-    const storageResult = useHybridStorage();
-    
-    isOnline = connectivityResult.isOnline;
-    getForms = storageResult.getForms;
-    capabilities = storageResult.capabilities;
-    isInitialized = storageResult.isInitialized;
-    
-    console.log('Index: Hooks initialized successfully', {
-      isOnline,
-      capabilities,
-      isInitialized
-    });
-  } catch (error) {
-    console.error('Index: Error initializing hooks:', error);
-    setHasError(true);
-  }
+  console.log('Index: Hooks initialized successfully', {
+    isOnline,
+    capabilities,
+    isInitialized
+  });
 
   useEffect(() => {
     if (isInitialized && !hasError) {
-      useEffect(() => { loadDrafts(); }, []);
+      loadDrafts();
     }
   }, [isInitialized, refreshKey, hasError]);
 

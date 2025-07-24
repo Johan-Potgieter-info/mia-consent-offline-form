@@ -2,7 +2,7 @@
 // Required for Workbox injection
 self.__WB_MANIFEST;
 
-const CACHE_NAME = 'mia-consent-cache-v6';
+const CACHE_NAME = 'mia-consent-cache-v7';
 const BASE_PATH = self.location.pathname.includes('/mia-consent-offline-form/') 
   ? '/mia-consent-offline-form/' 
   : '/';
@@ -12,7 +12,7 @@ const OFFLINE_FILES = [
   `${BASE_PATH}index.html`,
   `${BASE_PATH}terms.html`,
   `${BASE_PATH}manifest.json`,
-  `${BASE_PATH}icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png`
+  `${BASE_PATH}lovable-uploads/9a0a9907-375b-48ce-a1bc-8009bc27059c.png`
 ];
 
 self.addEventListener('install', (event) => {

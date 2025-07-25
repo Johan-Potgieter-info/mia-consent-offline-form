@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { Cloud, HardDrive } from 'lucide-react';
+import { Cloud, HardDrive, CheckCircle } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
 
 interface SaveConfirmationProps {
@@ -57,14 +57,19 @@ const SaveConfirmation = ({
   };
 
   return (
-    <div className={`fixed top-4 right-4 z-50 ${getBgColor()} rounded-lg p-4 shadow-lg animate-fade-in`}>
+    <div className={`fixed top-4 right-4 z-50 ${getBgColor()} rounded-lg p-4 shadow-lg border-2 animate-fade-in`}>
       <div className="flex items-center space-x-3">
-        {getIcon()}
-        <div>
-          <p className={`font-medium ${getTextColor()}`}>
-            Draft Saved Successfully
-          </p>
-          <p className={`text-sm ${getSecondaryColor()}`}>
+        <div className="flex-shrink-0">
+          {getIcon()}
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center space-x-2">
+            <CheckCircle className="w-5 h-5 text-green-500" />
+            <p className={`font-semibold ${getTextColor()}`}>
+              Draft Saved Successfully
+            </p>
+          </div>
+          <p className={`text-sm mt-1 ${getSecondaryColor()}`}>
             {isOnline ? 'Saved to cloud database' : 'Saved locally - will sync when online'}
           </p>
         </div>

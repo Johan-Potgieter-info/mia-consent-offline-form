@@ -12,6 +12,8 @@ interface UseManualSaveProps {
   setIsDirty: (isDirty: boolean) => void;
   setJustSaved: (justSaved: boolean) => void;
   setRetryCount: (count: number) => void;
+  setShowSaveConfirmation?: (show: boolean) => void;
+  setSaveMessage?: (message: string) => void;
 }
 
 // Helper function to check if form has meaningful content
@@ -84,7 +86,9 @@ export const useManualSave = ({
   setLastSaved,
   setIsDirty,
   setJustSaved,
-  setRetryCount
+  setRetryCount,
+  setShowSaveConfirmation,
+  setSaveMessage
 }: UseManualSaveProps) => {
   const { toast } = useToast();
   const { saveForm: saveToHybridStorage, capabilities, getForms } = useHybridStorage();
@@ -116,6 +120,11 @@ export const useManualSave = ({
       if (!capabilities.indexedDB) {
         const fallbackSuccess = fallbackSave(draftData, saveToFallbackStorage);
         if (fallbackSuccess) {
+          // Trigger visual feedback
+          const message = isOnline ? "Draft saved to cloud" : "Draft saved locally";
+          if (setSaveMessage) setSaveMessage(message);
+          if (setShowSaveConfirmation) setShowSaveConfirmation(true);
+          
           toast({
             title: "Draft Updated",
             description: isOnline ? "Form saved as draft to browser storage" : "Form saved as draft locally (offline)",
@@ -141,6 +150,11 @@ export const useManualSave = ({
             console.log('Found duplicate draft, updating existing:', existingDraft.id);
             await updateDraftById(existingDraft.id, { ...existingDraft, ...draftData, id: existingDraft.id });
             
+            // Trigger visual feedback
+            const message = isOnline ? "Draft saved to cloud" : "Draft saved locally";
+            if (setSaveMessage) setSaveMessage(message);
+            if (setShowSaveConfirmation) setShowSaveConfirmation(true);
+            
             setLastSaved(new Date());
             setIsDirty(false);
             setJustSaved(true);
@@ -155,6 +169,12 @@ export const useManualSave = ({
           } else {
             // Update the current draft
             await updateDraftById(formData.id, draftData);
+            
+            // Trigger visual feedback
+            const message = isOnline ? "Draft saved to cloud" : "Draft saved locally";
+            if (setSaveMessage) setSaveMessage(message);
+            if (setShowSaveConfirmation) setShowSaveConfirmation(true);
+            
             setLastSaved(new Date());
             setIsDirty(false);
             setJustSaved(true);
@@ -183,6 +203,11 @@ export const useManualSave = ({
     if (!capabilities.indexedDB) {
       const fallbackSuccess = fallbackSave(draftData, saveToFallbackStorage);
       if (fallbackSuccess) {
+        // Trigger visual feedback
+        const message = isOnline ? "Draft saved to cloud" : "Draft saved locally";
+        if (setSaveMessage) setSaveMessage(message);
+        if (setShowSaveConfirmation) setShowSaveConfirmation(true);
+        
         toast({
           title: "Draft Saved",
           description: isOnline ? "Form saved as draft to browser storage" : "Form saved as draft locally (offline)",
@@ -204,6 +229,12 @@ export const useManualSave = ({
     
     try {
       const result = await saveToHybridStorage(draftData, true);
+      
+      // Trigger visual feedback
+      const message = isOnline ? "Draft saved to cloud" : "Draft saved locally";
+      if (setSaveMessage) setSaveMessage(message);
+      if (setShowSaveConfirmation) setShowSaveConfirmation(true);
+      
       setLastSaved(new Date());
       setIsDirty(false);
       setJustSaved(true);
@@ -221,6 +252,11 @@ export const useManualSave = ({
       
       const fallbackSuccess = fallbackSave(draftData, saveToFallbackStorage);
       if (fallbackSuccess) {
+        // Trigger visual feedback
+        const message = isOnline ? "Draft saved to cloud" : "Draft saved locally";
+        if (setSaveMessage) setSaveMessage(message);
+        if (setShowSaveConfirmation) setShowSaveConfirmation(true);
+        
         toast({
           title: "Draft Saved",
           description: "Saved as draft to browser backup",

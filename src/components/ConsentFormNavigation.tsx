@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from './ui/button';
-import { Save, Send, Loader2 } from 'lucide-react';
+import { Send, Loader2 } from 'lucide-react';
 
 interface ConsentFormNavigationProps {
   sections: Array<{ id: string; title: string; }>;
@@ -54,20 +54,8 @@ const ConsentFormNavigation = ({
         )}
       </div>
 
-      {/* Center Actions */}
-      <div className="flex gap-3 w-full sm:w-auto justify-center">
-        {/* Save Button */}
-        <Button
-          onClick={onSave}
-          variant="outline"
-          size="lg"
-          className="flex items-center gap-2"
-        >
-          <Save className="w-4 h-4" />
-          Save Draft
-        </Button>
-
-        {/* Submit Button - Show if form is complete OR on last section */}
+      {/* Center - Submit Button (when form is complete or on last section) */}
+      <div className="flex justify-center w-full sm:w-auto">
         {(isFormComplete || isLastSection) && (
           <Button
             onClick={onSubmit}

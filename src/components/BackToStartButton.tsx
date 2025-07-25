@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { FormData } from '../types/formTypes';
 
@@ -40,16 +41,18 @@ const BackToStartButton: React.FC<BackToStartButtonProps> = ({
   onDiscard, 
   onResetJustSaved 
 }) => {
+  const navigate = useNavigate();
+
   const handleBackToStart = () => {
     const hasContent = hasMeaningfulContent(formData);
     
     if (isDirty && !justSaved && hasContent) {
       // Show save dialog or auto-save only if form has meaningful content
       onSave().then(() => {
-        window.location.href = '/';
+        navigate('/');
       });
     } else {
-      window.location.href = '/';
+      navigate('/');
     }
     onResetJustSaved();
   };

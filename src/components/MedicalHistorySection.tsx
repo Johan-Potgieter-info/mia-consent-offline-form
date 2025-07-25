@@ -19,9 +19,15 @@ const MedicalHistorySection = ({ formData, onInputChange, onCheckboxChange }: Me
   };
 
   const handleChronicConditionsChange = (condition: string, checked: boolean) => {
-    let currentConditions = Array.isArray(formData.chronicConditions) 
-      ? formData.chronicConditions 
-      : (formData.chronicConditions ? [formData.chronicConditions] : []);
+    let currentConditions = [];
+    
+    if (formData.chronicConditions) {
+      if (typeof formData.chronicConditions === 'string') {
+        currentConditions = formData.chronicConditions.split(', ').filter(c => c.trim());
+      } else if (Array.isArray(formData.chronicConditions)) {
+        currentConditions = [...formData.chronicConditions];
+      }
+    }
     
     if (checked) {
       if (condition === 'None') {
@@ -40,15 +46,21 @@ const MedicalHistorySection = ({ formData, onInputChange, onCheckboxChange }: Me
         onInputChange('chronicConditions', '');
       } else {
         currentConditions = currentConditions.filter(c => c !== condition);
-        onInputChange('chronicConditions', currentConditions.join(', '));
+        onInputChange('chronicConditions', currentConditions.length > 0 ? currentConditions.join(', ') : '');
       }
     }
   };
 
   const handleHabitsChange = (habit: string, checked: boolean) => {
-    let currentHabits = Array.isArray(formData.habits) 
-      ? formData.habits 
-      : (formData.habits ? [formData.habits] : []);
+    let currentHabits = [];
+    
+    if (formData.habits) {
+      if (typeof formData.habits === 'string') {
+        currentHabits = formData.habits.split(', ').filter(h => h.trim());
+      } else if (Array.isArray(formData.habits)) {
+        currentHabits = [...formData.habits];
+      }
+    }
     
     if (checked) {
       if (habit === 'Nil') {
@@ -67,15 +79,21 @@ const MedicalHistorySection = ({ formData, onInputChange, onCheckboxChange }: Me
         onInputChange('habits', '');
       } else {
         currentHabits = currentHabits.filter(h => h !== habit);
-        onInputChange('habits', currentHabits.join(', '));
+        onInputChange('habits', currentHabits.length > 0 ? currentHabits.join(', ') : '');
       }
     }
   };
 
   const handleFemaleConditionsChange = (condition: string, checked: boolean) => {
-    let currentConditions = Array.isArray(formData.femalePatients) 
-      ? formData.femalePatients 
-      : (formData.femalePatients ? [formData.femalePatients] : []);
+    let currentConditions = [];
+    
+    if (formData.femalePatients) {
+      if (typeof formData.femalePatients === 'string') {
+        currentConditions = formData.femalePatients.split(', ').filter(c => c.trim());
+      } else if (Array.isArray(formData.femalePatients)) {
+        currentConditions = [...formData.femalePatients];
+      }
+    }
     
     if (checked) {
       if (condition === 'N/A') {
@@ -94,7 +112,7 @@ const MedicalHistorySection = ({ formData, onInputChange, onCheckboxChange }: Me
         onInputChange('femalePatients', '');
       } else {
         currentConditions = currentConditions.filter(c => c !== condition);
-        onInputChange('femalePatients', currentConditions.join(', '));
+        onInputChange('femalePatients', currentConditions.length > 0 ? currentConditions.join(', ') : '');
       }
     }
   };

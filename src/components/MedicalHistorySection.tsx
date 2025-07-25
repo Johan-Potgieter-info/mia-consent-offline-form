@@ -151,13 +151,11 @@ const MedicalHistorySection = ({ formData, onInputChange, onCheckboxChange }: Me
         </label>
         <div className="grid md:grid-cols-2 gap-2 mb-2">
           {chronicConditionsList.map(condition => (
-            <label key={condition} className="flex items-center">
-              <input
-                type="checkbox"
-                value={condition}
-                className="mr-2"
+            <label key={condition} className="flex items-center space-x-2">
+              <Checkbox
+                id={`chronic-${condition}`}
                 checked={currentConditions.includes(condition)}
-                onChange={(e) => handleChronicConditionsChange(condition, e.target.checked)}
+                onCheckedChange={(checked) => handleChronicConditionsChange(condition, checked === true)}
               />
               <span className="text-sm">{condition}</span>
             </label>
@@ -202,13 +200,11 @@ const MedicalHistorySection = ({ formData, onInputChange, onCheckboxChange }: Me
         </label>
         <div className="grid md:grid-cols-2 gap-2 mb-2">
           {habitsList.map(habit => (
-            <label key={habit} className="flex items-center">
-              <input
-                type="checkbox"
-                value={habit}
-                className="mr-2"
+            <label key={habit} className="flex items-center space-x-2">
+              <Checkbox
+                id={`habit-${habit}`}
                 checked={currentHabits.includes(habit)}
-                onChange={(e) => handleHabitsChange(habit, e.target.checked)}
+                onCheckedChange={(checked) => handleHabitsChange(habit, checked === true)}
               />
               <span className="text-sm">{habit}</span>
             </label>
@@ -292,13 +288,11 @@ const MedicalHistorySection = ({ formData, onInputChange, onCheckboxChange }: Me
         </label>
         <div className="grid md:grid-cols-2 gap-2 mb-2">
           {femaleConditionsList.map(condition => (
-            <label key={condition} className="flex items-center">
-              <input
-                type="checkbox"
-                value={condition}
-                className="mr-2"
+            <label key={condition} className="flex items-center space-x-2">
+              <Checkbox
+                id={`female-${condition}`}
                 checked={currentFemaleConditions.includes(condition)}
-                onChange={(e) => handleFemaleConditionsChange(condition, e.target.checked)}
+                onCheckedChange={(checked) => handleFemaleConditionsChange(condition, checked === true)}
               />
               <span className="text-sm">{condition}</span>
             </label>

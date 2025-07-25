@@ -116,3 +116,27 @@ export const detectCacheIssues = (): boolean => {
     return true;
   }
 };
+
+/**
+ * Force clear old cache versions and refresh
+ */
+export const clearOldCacheVersions = async (): Promise<void> => {
+  if (!isBrowser) return;
+
+  try {
+    if ('caches' in window) {
+      const cacheNames = await caches.keys();
+      const oldCacheNames = cacheNames.filter(name => 
+        name.includes('mia-consent-cache-v') && !name.includes('v8')
+      );
+      
+      await Promise.all(
+        oldCacheNames.map(cacheName => caches.delete(cacheName))
+      );
+      
+      console.log('Old cache versions cleared:', oldCacheNames);
+    }
+  } catch (error) {
+    console.error('Error clearing old cache versions:', error);
+  }
+};

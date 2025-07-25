@@ -20,8 +20,8 @@ The Mia Healthcare Dental Consent Form PWA is an offline-first web application d
 - **Background Sync**: Automatic data synchronization
 
 ### Icon and Branding
-- **Primary Icon**: Mia Healthcare logo (`/lovable-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png`)
-- **Icon Sizes**: 192x192, 512x512 pixels
+- **Primary Icon**: Mia Healthcare logo (`/lovable-uploads/9a0a9907-375b-48ce-a1bc-8009bc27059c.png`)
+- **Icon Sizes**: 48x48, 72x72, 96x96, 144x144, 192x192, 384x384, 512x512 pixels
 - **Maskable Icons**: Android adaptive icon support
 - **Theme Color**: #ef4805 (Mia Healthcare orange)
 - **Background Color**: #ffffff (white)
@@ -87,8 +87,8 @@ Images:                  Cache-First with 1-year expiration
 ```
 
 ### Cache Names
-- **Static Cache**: `mia-consent-form-v5`
-- **Runtime Cache**: `mia-runtime-v5`
+- **Static Cache**: `mia-consent-cache-v8`
+- **Runtime Cache**: `mia-runtime-v8`
 - **Auto-versioning**: Prevents cache conflicts during updates
 
 ### Background Sync

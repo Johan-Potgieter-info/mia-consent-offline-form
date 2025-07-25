@@ -1,10 +1,11 @@
-const CACHE_NAME = 'mia-consent-cache-v5';
+
+const CACHE_NAME = 'mia-consent-cache-v8';
 const OFFLINE_FILES = [
   '/mia-consent-offline-form/',
   '/mia-consent-offline-form/index.html',
   '/mia-consent-offline-form/terms.html',
   '/mia-consent-offline-form/manifest.json',
-  '/mia-consent-offline-form/icon-uploads/2741077b-1d2b-4fa2-9829-1d43a1a54427.png'
+  '/mia-consent-offline-form/lovable-uploads/9a0a9907-375b-48ce-a1bc-8009bc27059c.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -55,7 +56,6 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-consent') {
     console.log('[SW] Background sync triggered for consent data');
-    // Put sync logic here, e.g., send drafts to Supabase
     event.waitUntil(Promise.resolve());
   }
 });
@@ -64,7 +64,6 @@ self.addEventListener('sync', (event) => {
 self.addEventListener('periodicsync', (event) => {
   if (event.tag === 'update-consent-data') {
     console.log('[SW] Periodic sync triggered');
-    // Place your daily refresh logic here if needed
     event.waitUntil(Promise.resolve());
   }
 });

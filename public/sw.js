@@ -1,3 +1,4 @@
+
 self.addEventListener('install', (event) => {
   console.log('[SW] Installing – clearing old cache');
   self.skipWaiting();

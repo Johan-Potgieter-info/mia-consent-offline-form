@@ -2,7 +2,7 @@
 // Required for Workbox injection
 self.__WB_MANIFEST;
 
-const CACHE_NAME = 'mia-consent-cache-v7';
+const CACHE_NAME = 'mia-consent-cache-v8';
 const BASE_PATH = self.location.pathname.includes('/mia-consent-offline-form/') 
   ? '/mia-consent-offline-form/' 
   : '/';

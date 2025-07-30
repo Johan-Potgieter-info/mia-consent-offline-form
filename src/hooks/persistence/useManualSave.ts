@@ -190,8 +190,11 @@ export const useManualSave = ({
       formSchemaVersion: 1 // Current schema version
     };
     
-    // If form already has an ID, update existing draft instead of creating new one
-    if (formData.id) {
+    // For manual saves, always create new drafts to avoid overwriting
+    // Only update existing drafts for auto-saves or explicit updates
+    const isManualSave = true; // This hook is specifically for manual saves
+    
+    if (formData.id && !isManualSave) {
       console.log('Updating existing draft with ID:', formData.id);
       
       if (!capabilities.indexedDB) {
@@ -272,10 +275,8 @@ export const useManualSave = ({
       }
     }
     
-    // Create new draft if no ID exists or update failed
-    if (!formData.id) {
-      draftData.id = Date.now();
-    }
+    // Always create new draft with unique ID for manual saves
+    draftData.id = `draft_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
     if (!capabilities.indexedDB) {
       const fallbackSuccess = fallbackSave(draftData, saveToFallbackStorage);

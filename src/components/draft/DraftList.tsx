@@ -227,6 +227,13 @@ const DraftList = ({
                       )}
                     </div>
 
+                    <div className="text-xs text-gray-500 mb-2">
+                      <div>Draft ID: {String(draft.id).substring(0, 20)}...</div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600 mb-2">
+                    </div>
+
                     {(draft.idNumber || draft.email) && (
                       <div className="text-xs text-gray-500 space-y-1">
                         {draft.idNumber && <div>ID: {draft.idNumber}</div>}

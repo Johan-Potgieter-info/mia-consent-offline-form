@@ -13,6 +13,7 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/consent-form" element={<ConsentPage />} />
+        <Route path="/consent-form/:draftId" element={<ConsentPage />} />
         <Route path="/form" element={<FormPage />} />
         <Route path="/drafts" element={<DraftList />} />
         <Route path="/drafts/:id" element={<DraftEditor />} />

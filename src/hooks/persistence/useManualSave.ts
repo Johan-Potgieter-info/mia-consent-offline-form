@@ -5,6 +5,13 @@ import { useHybridStorage } from '../useHybridStorage';
 import { useFallbackStorage } from './useFallbackStorage';
 import { updateDraftById } from '../../utils/database/drafts';
 import { FormData } from '../../types/formTypes';
+import { 
+  getStorageQuota, 
+  isStorageNearCapacity, 
+  cleanupOldDrafts, 
+  emergencyCleanup,
+  downloadEmergencyExport 
+} from '../../utils/storage/quotaManager';
 
 interface UseManualSaveProps {
   isOnline: boolean;
@@ -22,18 +29,46 @@ const hasMeaningfulContent = (formData: FormData): boolean => {
     'patientName',
     'idNumber', 
     'cellPhone',
+    'whatsappNumber',
     'email',
     'dateOfBirth',
     'birthDate',
     'address',
     'emergencyContactName',
-    'emergencyContactNumber'
+    'emergencyContactNumber',
+    'emergencyPhone'
   ];
   
   return meaningfulFields.some(field => {
     const value = formData[field as keyof FormData];
     return value && typeof value === 'string' && value.trim().length > 0;
   });
+};
+
+// Enhanced save with retry logic and exponential backoff
+const saveWithRetry = async (
+  saveFunction: () => Promise<any>,
+  maxRetries: number = 3,
+  initialDelay: number = 1000
+): Promise<any> => {
+  let lastError: Error;
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await saveFunction();
+    } catch (error) {
+      lastError = error as Error;
+      console.warn(`Save attempt ${attempt + 1} failed:`, error);
+      
+      if (attempt < maxRetries - 1) {
+        const delay = initialDelay * Math.pow(2, attempt);
+        console.log(`Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+  
+  throw lastError!;
 };
 
 // Fallback save function - consolidated logic
@@ -101,6 +136,48 @@ export const useManualSave = ({
     if (!hasMeaningfulContent(formData)) {
       console.log('Form has no meaningful content, skipping save');
       return;
+    }
+
+    // Check storage quota and cleanup if necessary
+    try {
+      const storageNearCapacity = await isStorageNearCapacity();
+      if (storageNearCapacity) {
+        console.log('Storage near capacity, attempting cleanup...');
+        
+        const cleanupResult = await cleanupOldDrafts(
+          () => getForms(true),
+          (id) => capabilities.indexedDB ? updateDraftById(id, null) : Promise.resolve()
+        );
+        
+        if (cleanupResult.deletedCount > 0) {
+          toast({
+            title: "Storage Cleanup",
+            description: `Cleaned up ${cleanupResult.deletedCount} old drafts to free space`,
+            variant: "default",
+          });
+        }
+        
+        // If still near capacity after cleanup, try emergency cleanup
+        const stillNearCapacity = await isStorageNearCapacity();
+        if (stillNearCapacity) {
+          console.log('Still near capacity, attempting emergency cleanup...');
+          
+          const emergencyResult = await emergencyCleanup(
+            () => getForms(true),
+            (id) => capabilities.indexedDB ? updateDraftById(id, null) : Promise.resolve()
+          );
+          
+          if (emergencyResult.deletedCount > 0) {
+            toast({
+              title: "Emergency Storage Cleanup",
+              description: `Removed ${emergencyResult.deletedCount} drafts to prevent storage overflow`,
+              variant: "destructive",
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error during storage quota check:', error);
     }
     
     const draftData: FormData = {
@@ -228,7 +305,12 @@ export const useManualSave = ({
     }
     
     try {
-      const result = await saveToHybridStorage(draftData, true);
+      // Enhanced save with retry logic
+      const result = await saveWithRetry(
+        () => saveToHybridStorage(draftData, true),
+        3,
+        1000
+      );
       
       // Trigger visual feedback
       const message = isOnline ? "Draft saved to cloud" : "Draft saved locally";

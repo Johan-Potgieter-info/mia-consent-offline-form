@@ -14,6 +14,7 @@ interface ValidatedInputProps {
   label?: string;
   onValidationChange?: (isValid: boolean) => void;
   hasError?: boolean;
+  disabled?: boolean;
 }
 
 const ValidatedInput = ({ 
@@ -25,7 +26,8 @@ const ValidatedInput = ({
   className = '',
   label,
   onValidationChange,
-  hasError = false
+  hasError = false,
+  disabled = false
 }: ValidatedInputProps) => {
   const [error, setError] = useState<string>('');
   const [touched, setTouched] = useState(false);
@@ -101,7 +103,8 @@ const ValidatedInput = ({
         onChange={handleChange}
         onBlur={handleBlur}
         placeholder={placeholder}
-        className={`${className} ${showError ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+        disabled={disabled}
+        className={`${className} ${showError ? 'border-red-500 focus-visible:ring-red-500' : ''} ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}
       />
       {showError && (
         <p className="text-sm text-red-600">{errorMessage}</p>

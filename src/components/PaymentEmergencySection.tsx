@@ -125,10 +125,10 @@ const PaymentEmergencySection = ({ formData, onInputChange }: PaymentEmergencySe
 
         <ValidatedInput
           type="tel"
-          label="33. Cell Phone Number *"
+          label="33. Emergency WhatsApp Number *"
           value={formData.emergencyPhone || ''}
           onChange={(value) => onInputChange('emergencyPhone', value)}
-          placeholder="Enter cell phone number"
+          placeholder="Enter WhatsApp number"
           required
         />
       </div>

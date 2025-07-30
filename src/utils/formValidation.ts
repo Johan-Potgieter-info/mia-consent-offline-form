@@ -40,11 +40,15 @@ export const validateForm = (formData: FormData): { isValid: boolean; errors: st
   }
   
   if (!formData.cellPhone?.trim()) {
-    errors.push("Cell phone number is required");
+    errors.push("Contact number is required");
+  }
+  
+  if (!formData.whatsappNumber?.trim()) {
+    errors.push("WhatsApp number is required");
   }
   
   if (!formData.email?.trim()) {
-    errors.push("Email is required");
+    errors.push("Personal email is required");
   }
   
   if (!formData.address?.trim()) {
@@ -82,7 +86,7 @@ export const validateForm = (formData: FormData): { isValid: boolean; errors: st
   }
   
   if (!formData.emergencyPhone?.trim()) {
-    errors.push("Emergency contact phone number is required");
+    errors.push("Emergency WhatsApp number is required");
   }
 
   // Medical History - Required fields

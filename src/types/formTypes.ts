@@ -13,7 +13,9 @@ export interface FormData {
   otherGenderText?: string; // 6 - other specification
   employerSchool?: string; // 7
   occupationGrade?: string; // 8
-  cellPhone?: string; // 9
+  cellPhone?: string; // 9 - Contact Number
+  whatsappNumber?: string; // 9b - WhatsApp Number
+  sameAsContactNumber?: boolean; // 9c - Checkbox for same as contact
   email?: string; // 10
   address?: string; // 11
   postalCode?: string; // 12
@@ -29,6 +31,7 @@ export interface FormData {
   accountHolderEmployer?: string; // 19
   accountHolderOccupation?: string; // 20
   accountHolderCellPhone?: string; // 21
+  accountHolderWhatsappNumber?: string; // 21b - Account Holder WhatsApp
   accountHolderEmail?: string; // 22
   sameAddress?: string; // 23
   accountHolderAddress?: string; // 23
@@ -43,7 +46,7 @@ export interface FormData {
   dependantCode?: string; // 30
   emergencyName?: string; // 31
   emergencyRelationship?: string; // 32
-  emergencyPhone?: string; // 33
+  emergencyPhone?: string; // 33 - Emergency WhatsApp Number
   
   // Medical History (Fields 34-43)
   gpName?: string; // 34

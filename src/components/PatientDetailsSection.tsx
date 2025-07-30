@@ -29,6 +29,22 @@ const PatientDetailsSection = ({
     }
   };
 
+  const handleSameAsContactChange = (checked: boolean) => {
+    updateFormData({ sameAsContactNumber: checked });
+    if (checked) {
+      updateFormData({ whatsappNumber: formData.cellPhone || '' });
+    } else {
+      updateFormData({ whatsappNumber: '' });
+    }
+  };
+
+  const handleContactNumberChange = (value: string) => {
+    updateFormData({ cellPhone: value });
+    if (formData.sameAsContactNumber) {
+      updateFormData({ whatsappNumber: value });
+    }
+  };
+
   return (
     <div className="space-y-6 p-6">
       <h2 className="text-xl font-semibold text-[#ef4805] border-b pb-2">1. Patient Details (Fields 1-12)</h2>
@@ -147,22 +163,44 @@ const PatientDetailsSection = ({
 
         <ValidatedInput
           type="tel"
-          label="9. Cell Phone No. *"
+          label="9. Contact Number *"
           value={formData.cellPhone || ''}
-          onChange={(value) => updateFormData({ cellPhone: value })}
-          placeholder="Enter cell phone number"
+          onChange={handleContactNumberChange}
+          placeholder="Enter contact number"
           required
-          hasError={hasError('cell phone')}
+          hasError={hasError('contact number') || hasError('cell phone')}
         />
+
+        <div>
+          <ValidatedInput
+            type="tel"
+            label="9b. WhatsApp Number *"
+            value={formData.whatsappNumber || ''}
+            onChange={(value) => updateFormData({ whatsappNumber: value })}
+            placeholder="Enter WhatsApp number"
+            required
+            disabled={formData.sameAsContactNumber}
+            hasError={hasError('whatsapp number')}
+          />
+          <label className="flex items-center mt-2">
+            <input
+              type="checkbox"
+              checked={formData.sameAsContactNumber || false}
+              onChange={(e) => handleSameAsContactChange(e.target.checked)}
+              className="mr-2"
+            />
+            <span className="text-sm text-gray-600">Same as Contact Number</span>
+          </label>
+        </div>
 
         <ValidatedInput
           type="email"
-          label="10. Email *"
+          label="10. Personal Email (not work email) *"
           value={formData.email || ''}
           onChange={(value) => updateFormData({ email: value })}
-          placeholder="Enter email address"
+          placeholder="example@gmail.com, example@yahoo.com (personal only)"
           required
-          hasError={hasError('email')}
+          hasError={hasError('email') || hasError('personal email')}
         />
 
         <div className="md:col-span-2">

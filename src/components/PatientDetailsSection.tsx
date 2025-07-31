@@ -2,6 +2,7 @@
 import React from 'react';
 import { FormData } from '../types/formTypes';
 import ValidatedInput from './ValidatedInput';
+import AndroidDatePicker from './AndroidDatePicker';
 
 interface PatientDetailsSectionProps {
   formData: FormData;
@@ -70,14 +71,22 @@ const PatientDetailsSection = ({
           hasError={hasError('age')}
         />
 
-        <ValidatedInput
-          type="date"
-          label="3. Birth Date *"
-          value={formData.birthDate || ''}
-          onChange={(value) => updateFormData({ birthDate: value })}
-          required
-          hasError={hasError('birth date')}
-        />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            3. Birth Date *
+          </label>
+          <AndroidDatePicker
+            value={formData.birthDate ? new Date(formData.birthDate) : undefined}
+            onChange={(date) => updateFormData({ birthDate: date ? date.toISOString().split('T')[0] : '' })}
+            placeholder="Select birth date"
+            className={hasError('birth date') ? 'border-red-500' : ''}
+            maxDate={new Date()}
+            minDate={new Date(1940, 0, 1)}
+          />
+          {hasError('birth date') && (
+            <p className="text-red-500 text-xs mt-1">This field is required.</p>
+          )}
+        </div>
 
         <ValidatedInput
           type="text"

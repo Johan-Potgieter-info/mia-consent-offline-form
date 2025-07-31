@@ -78,19 +78,19 @@ const AndroidDatePicker = ({
           <ChevronDown className="ml-auto h-4 w-4 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent className="w-auto p-0 max-w-[95vw]" align="start">
         {/* Year and Month selectors for easier navigation */}
         <div className="flex items-center justify-between p-3 border-b">
           <Select
             value={displayMonth.getMonth().toString()}
             onValueChange={handleMonthChange}
           >
-            <SelectTrigger className="w-[120px] h-9">
+            <SelectTrigger className="w-[120px] h-11 text-base">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {months.map((month, index) => (
-                <SelectItem key={month} value={index.toString()}>
+                <SelectItem key={month} value={index.toString()} className="text-base py-3">
                   {month}
                 </SelectItem>
               ))}
@@ -101,12 +101,12 @@ const AndroidDatePicker = ({
             value={displayMonth.getFullYear().toString()}
             onValueChange={handleYearChange}
           >
-            <SelectTrigger className="w-[100px] h-9">
+            <SelectTrigger className="w-[100px] h-11 text-base">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="max-h-60">
+            <SelectContent className="max-h-80 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
               {years.map((year) => (
-                <SelectItem key={year} value={year.toString()}>
+                <SelectItem key={year} value={year.toString()} className="text-base py-3 min-h-[44px] flex items-center">
                   {year}
                 </SelectItem>
               ))}

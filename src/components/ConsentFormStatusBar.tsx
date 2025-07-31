@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { AlertCircle, Save, Database, Cloud, HardDrive, CheckCircle } from 'lucide-react';
-import { Region } from '../utils/regionDetection';
+import { Region } from '../utils/regionSelection';
 import RegionDropdown from './RegionDropdown';
 
 interface ConsentFormStatusBarProps {

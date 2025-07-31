@@ -1,7 +1,7 @@
 
 import { FormData, FormSubmissionResult } from '../types/formTypes';
 import { PreparedFormData } from './formDataPreparation';
-import { Region } from './regionDetection';
+import { Region } from './regionSelection';
 import { submissionLogger } from './submissionEventLogger';
 import { StorageCapabilities } from './storage/capabilities';
 

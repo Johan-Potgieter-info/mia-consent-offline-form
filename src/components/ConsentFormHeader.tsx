@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Region } from '../utils/regionDetection';
+import { Region } from '../utils/regionSelection';
 import { getIconPath } from '../utils/assetPaths';
 
 interface ConsentFormHeaderProps {

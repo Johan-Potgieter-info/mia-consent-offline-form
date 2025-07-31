@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { REGIONS, Region } from '../utils/regionDetection';
+import { REGIONS, Region } from '../utils/regionSelection';
 
 interface RegionSelectorProps {
   onRegionSelect: (region: Region) => void;

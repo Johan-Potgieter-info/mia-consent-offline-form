@@ -52,10 +52,10 @@ const PatientDetailsSection = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <ValidatedInput
           type="text"
-          label="1. Patient Name *"
+          label="1. Patient Name & Surname *"
           value={formData.patientName || ''}
           onChange={(value) => updateFormData({ patientName: value })}
-          placeholder="Enter full name"
+          placeholder="Enter patient's full name and surname"
           required
           hasError={hasError('patient name')}
         />

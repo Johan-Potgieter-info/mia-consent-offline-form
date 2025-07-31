@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { getRegionWithFallback, Region, REGIONS } from '../utils/regionDetection';
+import { getDefaultRegion, Region, REGIONS } from '../utils/regionSelection';
 import { useToast } from '@/hooks/use-toast';
 
 interface UseRegionDetectionResult {
@@ -57,7 +57,7 @@ export const useRegionDetection = (): UseRegionDetectionResult => {
     if (regionDetectionComplete && currentRegion) return currentRegion;
     
     try {
-      const region = await getRegionWithFallback();
+      const region = await getDefaultRegion();
       setCurrentRegion(region);
       setRegionDetected(true);
       setRegionDetectionComplete(true);

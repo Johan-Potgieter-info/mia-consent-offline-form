@@ -4,7 +4,7 @@ import { useHybridStorage } from './useHybridStorage';
 import { useToast } from '@/hooks/use-toast';
 import { useFormSession } from './useFormSession';
 import { FormData, FormSubmissionResult } from '../types/formTypes';
-import { Region } from '../utils/regionDetection';
+import { Region } from '../utils/regionSelection';
 import { checkServerConnectivity } from '../utils/connectivity';
 import { submissionLogger } from '../utils/submissionEventLogger';
 import { validateForm } from '../utils/formValidation';

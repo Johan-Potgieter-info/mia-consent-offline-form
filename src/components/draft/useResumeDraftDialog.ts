@@ -6,7 +6,7 @@ import { useStaleDataCleanup } from '../../hooks/useStaleDataCleanup';
 import { useAutoRetry } from '../../hooks/useAutoRetry';
 import { useHybridStorage } from '../../hooks/useHybridStorage';
 import { getQueue, removeFromQueue, incrementRetry, updateQueuedSubmission } from '../../utils/submissionQueue';
-import { REGIONS } from '../../utils/regionDetection';
+import { REGIONS } from '../../utils/regionSelection';
 
 interface UseResumeDraftDialogProps {
   isOpen: boolean;

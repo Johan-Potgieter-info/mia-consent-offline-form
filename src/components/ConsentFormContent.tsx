@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { AlertCircle } from 'lucide-react';
-import { Region } from '../utils/regionDetection';
+import { Region } from '../utils/regionSelection';
 
 interface ConsentFormContentProps {
   currentRegion: Region | null;

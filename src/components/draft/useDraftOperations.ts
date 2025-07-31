@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useHybridStorage } from '../../hooks/useHybridStorage';
 import { FormData } from '../../types/formTypes';
-import { REGIONS } from '../../utils/regionDetection';
+import { REGIONS } from '../../utils/regionSelection';
 
 export const useDraftOperations = (isOpen: boolean) => {
   const [drafts, setDrafts] = useState<FormData[]>([]);

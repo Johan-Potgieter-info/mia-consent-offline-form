@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
-import { REGIONS } from '../utils/regionDetection';
+import { REGIONS } from '../utils/regionSelection';
 import { useToast } from '@/hooks/use-toast';
 import { useRegionDetection } from './useRegionDetection';
 import { useHybridStorage } from './useHybridStorage';

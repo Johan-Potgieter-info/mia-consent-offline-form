@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ChevronDown, MapPin } from 'lucide-react';
-import { Region, REGIONS } from '../utils/regionDetection';
+import { Region, REGIONS } from '../utils/regionSelection';
 import {
   Popover,
   PopoverContent,

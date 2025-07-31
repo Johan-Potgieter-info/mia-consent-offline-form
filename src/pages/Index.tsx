@@ -137,9 +137,8 @@ const Index = () => {
         {/* Status Bar - simplified for landing page */}
         <div className="flex justify-between items-center mb-8 p-4 bg-white rounded-lg shadow-sm">
           <ConnectionIndicator />
-          <div className="flex items-center gap-2 text-sm">
-            <MapPin className="w-4 h-4 text-blue-600" />
-            <span className="text-blue-600">Location will be detected when you start</span>
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <span>Select your region when starting a new form</span>
           </div>
         </div>
 

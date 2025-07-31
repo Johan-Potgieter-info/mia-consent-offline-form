@@ -11,7 +11,7 @@ import FormValidationErrors from './FormValidationErrors';
 import FormSectionsContainer from './FormSectionsContainer';
 import FormStatusBadge from './FormStatusBadge';
 import { FormData } from '../types/formTypes';
-import { Region } from '../utils/regionDetection';
+import { Region } from '../utils/regionSelection';
 import { useFormSections } from '../hooks/useFormSections';
 
 interface ConsentFormLayoutProps {

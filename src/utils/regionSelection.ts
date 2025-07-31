@@ -1,4 +1,3 @@
-
 export interface Region {
   code: string;
   name: string;
@@ -27,7 +26,7 @@ export const REGIONS: Record<string, Region> = {
   }
 };
 
-export const getRegionWithFallback = async (): Promise<Region> => {
-  // Simple fallback to PTA region
+export const getDefaultRegion = async (): Promise<Region> => {
+  // Default to PTA region for manual selection
   return REGIONS.PTA;
 };

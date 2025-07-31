@@ -1,6 +1,6 @@
 
 import { FormData } from '../types/formTypes';
-import { Region } from './regionDetection';
+import { Region } from './regionSelection';
 import { migrateFormData, CURRENT_FORM_VERSION } from './formVersioning';
 import { SensitiveDataEncryption } from './sensitiveDataEncryption';
 

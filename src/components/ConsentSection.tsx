@@ -250,7 +250,7 @@ const ConsentSection: React.FC<ConsentSectionProps> = ({
             49. Cancellation Policy Acknowledgment
           </label>
           <p className="text-sm text-gray-600 mb-2">
-            Please note that Mia Healthcare charges a cancellation fee of R200.00 for appointments canceled less than 12 hours before the scheduled time. For cancellations made less than 2 hours before the appointment, the fee will be up to 50% of the consultation or service fee. Cancellations can be made by calling our offices or using the cancellation links provided in our communications. Late cancellations are reviewed according to ethical guidelines, and reasonable cancellations may be honored without charge.
+            I confirm that by confirming this appointment, I agree to keep my appointment for the agreed upon date and time. Please note that Mia Healthcare charges R250 per appointment missed or cancelled within 24 hours of the scheduled time. The cancellation policy will be discussed during the appointment booking process.
           </p>
           <label className="flex items-center">
             <input

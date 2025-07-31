@@ -116,10 +116,10 @@ const PaymentEmergencySection = ({ formData, onInputChange }: PaymentEmergencySe
 
         <ValidatedInput
           type="text"
-          label="32. Relationship *"
+          label="32. Relationship to Patient *"
           value={formData.emergencyRelationship || ''}
           onChange={(value) => onInputChange('emergencyRelationship', value)}
-          placeholder="Enter relationship"
+          placeholder="Enter relationship to patient (e.g., Mother, Father, Spouse, Friend)"
           required
         />
 

@@ -155,10 +155,10 @@ const PatientDetailsSection = ({
 
         <ValidatedInput
           type="text"
-          label="8. Occupation/Grade"
+          label="8. Occupation (Adult Patients) / Grade (Patients Under 18)"
           value={formData.occupationGrade || ''}
           onChange={(value) => updateFormData({ occupationGrade: value })}
-          placeholder="Enter occupation or grade"
+          placeholder="Enter occupation (adults) or school grade (under 18)"
         />
 
         <ValidatedInput

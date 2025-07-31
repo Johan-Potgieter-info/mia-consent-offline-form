@@ -214,7 +214,7 @@ const MedicalHistorySection = ({ formData, onInputChange, onCheckboxChange }: Me
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          38. Habits/Substance Abuse *
+          38. Habits *
         </label>
         <div className="grid md:grid-cols-2 gap-2 mb-2">
           {habitsList.map(habit => (

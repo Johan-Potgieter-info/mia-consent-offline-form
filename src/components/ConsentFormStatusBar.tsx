@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { AlertCircle, Save, Database, Cloud, HardDrive, CheckCircle } from 'lucide-react';
 import { Region } from '../utils/regionSelection';
 import RegionDropdown from './RegionDropdown';
+import { ConnectionStatus } from './ConnectionStatus';
 
 interface ConsentFormStatusBarProps {
   isOnline: boolean;
@@ -95,11 +96,7 @@ const ConsentFormStatusBar = ({
   return (
     <div className="bg-white rounded-lg shadow-sm p-3 mb-6 flex justify-between items-center">
       <div className="flex items-center space-x-4 flex-wrap gap-y-2">
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-          isOnline ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-        }`}>
-          {isOnline ? 'Online' : 'Offline'}
-        </span>
+        <ConnectionStatus />
         
         {getStorageIndicator()}
         

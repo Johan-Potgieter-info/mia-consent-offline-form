@@ -72,7 +72,11 @@ export const processSubmission = async (
     
     // FIXED: Use actual connectivity instead of capabilities check
     // If we can reach the server, treat it as online regardless of capabilities
-    if (actuallyOnline) {
+    // Re-verify connectivity before deciding submission path
+    const { checkServerConnectivity } = await import('./connectivity');
+    const stillOnline = await checkServerConnectivity();
+    
+    if (stillOnline && capabilities.supabase) {
       return await handleOnlineSubmission(
         preparedData, 
         formId, 

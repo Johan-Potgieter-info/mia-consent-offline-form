@@ -38,11 +38,11 @@ const AndroidDatePicker = ({
   const [isOpen, setIsOpen] = useState(false);
   const [displayMonth, setDisplayMonth] = useState(value || new Date());
 
-  // Generate years from 1940 to current year
+  // Generate years from 1940 to current year (oldest first for birth dates)
   const currentYear = new Date().getFullYear();
   const years = Array.from(
     { length: currentYear - 1940 + 1 }, 
-    (_, i) => currentYear - i
+    (_, i) => 1940 + i
   );
 
   const months = [

@@ -50,9 +50,13 @@ const ConsentForm = () => {
         setShowOnlineSuccessDialog={containerData.setShowOnlineSuccessDialog}
         showOfflineSummaryDialog={containerData.showOfflineSummaryDialog}
         setShowOfflineSummaryDialog={containerData.setShowOfflineSummaryDialog}
+        showSyncSuccessDialog={containerData.showSyncSuccessDialog}
+        setShowSyncSuccessDialog={containerData.setShowSyncSuccessDialog}
         offlineFormData={containerData.offlineFormData}
         onlineFormData={containerData.onlineFormData}
         pendingForms={containerData.pendingForms}
+        syncedForms={containerData.syncedForms}
+        syncStats={containerData.syncStats}
       />
     </>
   );

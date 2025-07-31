@@ -14,7 +14,7 @@ interface UseHybridStorageResult {
   saveForm: (formData: any, isDraft?: boolean) => Promise<any>;
   getForms: (isDraft?: boolean) => Promise<any[]>;
   deleteForm: (id: string | number, isDraft?: boolean) => Promise<void>;
-  syncData: () => Promise<{ success: number; failed: number }>;
+  syncData: () => Promise<{ success: number; failed: number; syncedForms: any[] }>;
   isOnline: boolean;
 }
 
@@ -158,7 +158,7 @@ export const useHybridStorage = (): UseHybridStorageResult => {
     }
   };
 
-  const syncData = async (): Promise<{ success: number; failed: number }> => {
+  const syncData = async (): Promise<{ success: number; failed: number; syncedForms: any[] }> => {
     try {
       return await syncToSupabase();
     } catch (error) {
@@ -168,7 +168,7 @@ export const useHybridStorage = (): UseHybridStorageResult => {
         description: "Unable to sync data to cloud storage.",
         variant: "destructive",
       });
-      return { success: 0, failed: 0 };
+      return { success: 0, failed: 0, syncedForms: [] };
     }
   };
 

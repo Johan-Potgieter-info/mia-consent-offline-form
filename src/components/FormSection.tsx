@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 
 interface FormSectionProps {
@@ -11,10 +11,22 @@ interface FormSectionProps {
 }
 
 const FormSection = ({ id, title, isActive, onToggle, children }: FormSectionProps) => {
+  const sectionRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (isActive && sectionRef.current) {
+      sectionRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  }, [isActive]);
+
   return (
     <>
       <button
         type="button"
+        ref={sectionRef}
         onClick={() => onToggle(id)}
         className={`w-full text-left p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors ${
           isActive ? 'bg-[#ef4805] text-white' : 'text-gray-700'

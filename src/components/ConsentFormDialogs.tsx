@@ -4,6 +4,7 @@ import SaveConfirmation from './SaveConfirmation';
 import OfflineSubmissionDialog from './OfflineSubmissionDialog';
 import OnlineSuccessDialog from './OnlineSuccessDialog';
 import OfflineSummaryDialog from './OfflineSummaryDialog';
+import SyncSuccessDialog from './SyncSuccessDialog';
 import { FormData } from '../types/formTypes';
 
 interface ConsentFormDialogsProps {
@@ -16,9 +17,13 @@ interface ConsentFormDialogsProps {
   setShowOnlineSuccessDialog: (show: boolean) => void;
   showOfflineSummaryDialog: boolean;
   setShowOfflineSummaryDialog: (show: boolean) => void;
+  showSyncSuccessDialog: boolean;
+  setShowSyncSuccessDialog: (show: boolean) => void;
   offlineFormData: FormData | undefined;
   onlineFormData: FormData | undefined;
   pendingForms: FormData[];
+  syncedForms: FormData[];
+  syncStats: { success: number; failed: number };
 }
 
 const ConsentFormDialogs = ({
@@ -31,9 +36,13 @@ const ConsentFormDialogs = ({
   setShowOnlineSuccessDialog,
   showOfflineSummaryDialog,
   setShowOfflineSummaryDialog,
+  showSyncSuccessDialog,
+  setShowSyncSuccessDialog,
   offlineFormData,
   onlineFormData,
-  pendingForms
+  pendingForms,
+  syncedForms,
+  syncStats
 }: ConsentFormDialogsProps) => {
   return (
     <>
@@ -60,6 +69,13 @@ const ConsentFormDialogs = ({
         onClose={() => setShowOfflineSummaryDialog(false)}
         currentForm={offlineFormData}
         pendingForms={pendingForms}
+      />
+
+      <SyncSuccessDialog
+        isOpen={showSyncSuccessDialog}
+        onClose={() => setShowSyncSuccessDialog(false)}
+        syncedForms={syncedForms}
+        syncStats={syncStats}
       />
     </>
   );

@@ -8,6 +8,7 @@ import { useFormManagement } from './useFormManagement';
 import { useDialogStates } from './useDialogStates';
 import { useDraftLoader } from './useDraftLoader';
 import { useFormActions } from './useFormActions';
+import { useSyncSuccessHandler } from './useSyncSuccessHandler';
 import { initConnectivityMonitoring } from '../utils/connectivity';
 import { cleanupOldSubmissions } from '../utils/submissionQueue';
 
@@ -18,6 +19,7 @@ export const useConsentFormContainer = () => {
     saveForm,
     getForms,
     deleteForm,
+    syncData,
     isInitialized,
     isOnline
   } = useHybridStorage();
@@ -27,6 +29,9 @@ export const useConsentFormContainer = () => {
     initConnectivityMonitoring();
     cleanupOldSubmissions(); // Clean up old failed submissions
   }, []);
+
+  // Handle sync success dialog when coming back online
+  useSyncSuccessHandler({ isOnline, syncData });
 
   // Restore region detection
   const {

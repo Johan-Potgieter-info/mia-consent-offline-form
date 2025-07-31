@@ -9,15 +9,20 @@ import { getStorageCapabilities } from './capabilities';
  * Sync IndexedDB data to Supabase when connection is restored
  * Only syncs completed forms, not drafts
  */
-export const syncToSupabase = async (): Promise<{ success: number; failed: number }> => {
+export const syncToSupabase = async (): Promise<{ 
+  success: number; 
+  failed: number; 
+  syncedForms: any[];
+}> => {
   const capabilities = getStorageCapabilities();
   
   if (!capabilities.indexedDB || !capabilities.supabase) {
     console.log('Sync skipped: required storage not available');
-    return { success: 0, failed: 0 };
+    return { success: 0, failed: 0, syncedForms: [] };
   }
 
   const results = { success: 0, failed: 0 };
+  const syncedForms: any[] = [];
 
   try {
     // Only sync completed forms, NOT drafts
@@ -33,6 +38,7 @@ export const syncToSupabase = async (): Promise<{ success: number; failed: numbe
       try {
         await saveFormToSupabase(form, false); // false = not a draft
         results.success++;
+        syncedForms.push(form);
         console.log(`Successfully synced completed form: ${form.id}`);
         
         // Mark as synced in IndexedDB (we'd need to implement this)
@@ -49,7 +55,7 @@ export const syncToSupabase = async (): Promise<{ success: number; failed: numbe
     console.error('Sync process error:', error);
   }
 
-  return results;
+  return { ...results, syncedForms };
 };
 
 /**

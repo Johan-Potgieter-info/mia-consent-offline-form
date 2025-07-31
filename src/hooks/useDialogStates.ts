@@ -8,9 +8,12 @@ export const useDialogStates = () => {
   const [showOfflineDialog, setShowOfflineDialog] = useState(false);
   const [showOnlineSuccessDialog, setShowOnlineSuccessDialog] = useState(false);
   const [showOfflineSummaryDialog, setShowOfflineSummaryDialog] = useState(false);
+  const [showSyncSuccessDialog, setShowSyncSuccessDialog] = useState(false);
   const [offlineFormData, setOfflineFormData] = useState<FormData | undefined>(undefined);
   const [onlineFormData, setOnlineFormData] = useState<FormData | undefined>(undefined);
   const [pendingForms, setPendingForms] = useState<FormData[]>([]);
+  const [syncedForms, setSyncedForms] = useState<FormData[]>([]);
+  const [syncStats, setSyncStats] = useState<{ success: number; failed: number }>({ success: 0, failed: 0 });
 
   return {
     showSaveConfirmation,
@@ -23,11 +26,17 @@ export const useDialogStates = () => {
     setShowOnlineSuccessDialog,
     showOfflineSummaryDialog,
     setShowOfflineSummaryDialog,
+    showSyncSuccessDialog,
+    setShowSyncSuccessDialog,
     offlineFormData,
     setOfflineFormData,
     onlineFormData,
     setOnlineFormData,
     pendingForms,
-    setPendingForms
+    setPendingForms,
+    syncedForms,
+    setSyncedForms,
+    syncStats,
+    setSyncStats
   };
 };

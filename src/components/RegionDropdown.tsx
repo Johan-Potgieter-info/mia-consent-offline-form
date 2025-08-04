@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ChevronDown, MapPin } from 'lucide-react';
 import { Region, REGIONS } from '../utils/regionSelection';
 import {
@@ -22,7 +22,14 @@ const RegionDropdown = ({
   isFromDraft = false,
   isDetected = false 
 }: RegionDropdownProps) => {
+  const [open, setOpen] = useState(false);
+  
   if (!currentRegion) return null;
+
+  const handleRegionSelect = (region: Region) => {
+    onRegionSelect(region);
+    setOpen(false);
+  };
 
   const getIndicatorColor = () => {
     if (isFromDraft) return 'bg-purple-100 text-purple-800';
@@ -37,7 +44,7 @@ const RegionDropdown = ({
   };
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
@@ -60,7 +67,7 @@ const RegionDropdown = ({
           {Object.values(REGIONS).map((region) => (
             <button
               key={region.code}
-              onClick={() => onRegionSelect(region)}
+              onClick={() => handleRegionSelect(region)}
               className={`w-full text-left p-3 rounded-lg border transition-colors ${
                 currentRegion.code === region.code
                   ? 'border-[#ef4805] bg-orange-50 text-[#ef4805]'

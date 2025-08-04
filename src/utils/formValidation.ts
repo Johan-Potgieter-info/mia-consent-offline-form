@@ -1,7 +1,7 @@
 
 import { FormData } from '../types/formTypes';
 
-export const validateForm = (formData: FormData): { isValid: boolean; errors: string[] } => {
+export const validateForm = (formData: FormData, regionCode?: string): { isValid: boolean; errors: string[] } => {
   const errors: string[] = [];
 
   console.log('Validating comprehensive form data:', {
@@ -127,6 +127,25 @@ export const validateForm = (formData: FormData): { isValid: boolean; errors: st
   
   if (!formData.cancellationPolicy || formData.cancellationPolicy !== 'Acknowledge cancellation policy') {
     errors.push("You must acknowledge the cancellation policy");
+  }
+
+  // NAM-specific consent validation
+  if (regionCode === 'NAM') {
+    if (!formData.namItcBlacklistingConsent || formData.namItcBlacklistingConsent !== 'Agree') {
+      errors.push("You must acknowledge the ITC blacklisting policy");
+    }
+    
+    if (!formData.namMedicalAidClaimingResponsibility || formData.namMedicalAidClaimingResponsibility !== 'Agree') {
+      errors.push("You must acknowledge medical aid claiming responsibility");
+    }
+    
+    if (!formData.namInformationSharingAuthorization || formData.namInformationSharingAuthorization !== 'Agree') {
+      errors.push("You must authorize information sharing with medical aid");
+    }
+    
+    if (!formData.namPrivacyConfidentialityAcknowledgment || formData.namPrivacyConfidentialityAcknowledgment !== 'Agree') {
+      errors.push("You must acknowledge privacy and confidentiality terms");
+    }
   }
 
   console.log('Comprehensive validation result:', { isValid: errors.length === 0, errors });

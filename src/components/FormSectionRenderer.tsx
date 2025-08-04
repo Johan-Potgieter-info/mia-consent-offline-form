@@ -9,6 +9,7 @@ interface FormSectionRendererProps {
   handleInputChange: (field: keyof FormData, value: string) => void;
   handleCheckboxChange: (field: keyof FormData, value: string, checked: boolean) => void;
   validationErrors: string[];
+  currentRegion?: any;
 }
 
 const FormSectionRenderer = ({
@@ -16,7 +17,8 @@ const FormSectionRenderer = ({
   formData,
   handleInputChange,
   handleCheckboxChange,
-  validationErrors
+  validationErrors,
+  currentRegion
 }: FormSectionRendererProps) => {
   const { sections } = useFormSections();
 
@@ -57,6 +59,7 @@ const FormSectionRenderer = ({
         validationErrors={validationErrors}
         onInputChange={handleInputChange}
         onCheckboxChange={handleCheckboxChange}
+        currentRegion={currentRegion}
       />
     );
   };

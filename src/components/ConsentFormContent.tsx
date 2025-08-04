@@ -20,11 +20,14 @@ const ConsentFormContent = ({
     <div className="p-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-[#ef4805] mb-2">
-          Mia Information and Consent Form {currentRegion?.code || 'PTA'}
+          {currentRegion?.code === 'NAM' ? 'MIA Healthcare Mobile Clinic' : 'Mia Information and Consent Form'} {currentRegion?.code || 'PTA'}
           {isResuming && <span className="text-lg text-gray-600 ml-2">(Resumed)</span>}
         </h1>
         <p className="text-gray-600">
-          {currentRegion?.doctor || 'Dr. Vorster'} Practice Number: {currentRegion?.practiceNumber || '1227831'}
+          {currentRegion?.code === 'NAM' 
+            ? `${currentRegion.doctor} - Operated by Digi Dental` 
+            : currentRegion?.doctor || 'Dr. Vorster'
+          } Practice Number: {currentRegion?.practiceNumber || '1227831'}
         </p>
         {regionDetected && currentRegion && (
           <p className="text-sm text-gray-500 mt-1">

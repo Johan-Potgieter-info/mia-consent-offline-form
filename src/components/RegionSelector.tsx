@@ -18,7 +18,7 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
   return (
     <div className="mb-4 p-4 bg-blue-50 rounded-lg border">
       <h3 className="text-lg font-semibold mb-2">Select Your Region</h3>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
         {Object.values(REGIONS).map((region) => (
           <button
             key={region.code}

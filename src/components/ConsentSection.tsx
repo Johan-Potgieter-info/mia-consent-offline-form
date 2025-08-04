@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { FormData } from "../types/formTypes";
 import ValidatedInput from "./ValidatedInput";
+import { Region } from "../utils/regionSelection";
 
 interface ConsentSectionProps {
   formData?: FormData;
@@ -9,13 +10,15 @@ interface ConsentSectionProps {
   onCheckboxChange?: (field: keyof FormData, value: string, checked: boolean) => void;
   updateFormData?: (updates: Partial<FormData>) => void;
   validationErrors?: string[];
+  currentRegion?: Region | null;
 }
 
 const ConsentSection: React.FC<ConsentSectionProps> = ({
   formData,
   onInputChange,
   updateFormData = () => {},
-  validationErrors
+  validationErrors,
+  currentRegion
 }) => {
   const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
   const termsRef = useRef<HTMLDivElement>(null);
@@ -285,6 +288,133 @@ const ConsentSection: React.FC<ConsentSectionProps> = ({
           onChange={(value) => onInputChange && onInputChange('signature', value)}
           placeholder="Enter your full name and date"
         />
+
+        {/* NAM-specific consent fields */}
+        {currentRegion?.code === 'NAM' && (
+          <div className="space-y-6 mt-8 border-t pt-6">
+            <h3 className="text-lg font-medium text-[#ef4805]">Namibian-Specific Consent Requirements</h3>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                I understand that if my account remains unpaid after 90 days, my details may be submitted to ITC for blacklisting and legal recovery action.
+              </label>
+              <div className="space-y-2">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="namItcBlacklistingConsent"
+                    value="Agree"
+                    checked={formData?.namItcBlacklistingConsent === 'Agree'}
+                    onChange={(e) => handleRadioChange('namItcBlacklistingConsent', e.target.value)}
+                    className="mr-2"
+                  />
+                  <span className="text-sm">Agree</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="namItcBlacklistingConsent"
+                    value="Disagree"
+                    checked={formData?.namItcBlacklistingConsent === 'Disagree'}
+                    onChange={(e) => handleRadioChange('namItcBlacklistingConsent', e.target.value)}
+                    className="mr-2"
+                  />
+                  <span className="text-sm">Disagree</span>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                I understand that MIA will submit claims on my behalf where possible, but I remain responsible for any shortfalls or unpaid amounts.
+              </label>
+              <div className="space-y-2">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="namMedicalAidClaimingResponsibility"
+                    value="Agree"
+                    checked={formData?.namMedicalAidClaimingResponsibility === 'Agree'}
+                    onChange={(e) => handleRadioChange('namMedicalAidClaimingResponsibility', e.target.value)}
+                    className="mr-2"
+                  />
+                  <span className="text-sm">Agree</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="namMedicalAidClaimingResponsibility"
+                    value="Disagree"
+                    checked={formData?.namMedicalAidClaimingResponsibility === 'Disagree'}
+                    onChange={(e) => handleRadioChange('namMedicalAidClaimingResponsibility', e.target.value)}
+                    className="mr-2"
+                  />
+                  <span className="text-sm">Disagree</span>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                I authorize MIA to share relevant information with my medical aid for claim purposes.
+              </label>
+              <div className="space-y-2">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="namInformationSharingAuthorization"
+                    value="Agree"
+                    checked={formData?.namInformationSharingAuthorization === 'Agree'}
+                    onChange={(e) => handleRadioChange('namInformationSharingAuthorization', e.target.value)}
+                    className="mr-2"
+                  />
+                  <span className="text-sm">Agree</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="namInformationSharingAuthorization"
+                    value="Disagree"
+                    checked={formData?.namInformationSharingAuthorization === 'Disagree'}
+                    onChange={(e) => handleRadioChange('namInformationSharingAuthorization', e.target.value)}
+                    className="mr-2"
+                  />
+                  <span className="text-sm">Disagree</span>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                I understand that my personal and medical information will be kept confidential and used only for healthcare, administrative, or legal purposes in accordance with Namibian regulations.
+              </label>
+              <div className="space-y-2">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="namPrivacyConfidentialityAcknowledgment"
+                    value="Agree"
+                    checked={formData?.namPrivacyConfidentialityAcknowledgment === 'Agree'}
+                    onChange={(e) => handleRadioChange('namPrivacyConfidentialityAcknowledgment', e.target.value)}
+                    className="mr-2"
+                  />
+                  <span className="text-sm">Agree</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="namPrivacyConfidentialityAcknowledgment"
+                    value="Disagree"
+                    checked={formData?.namPrivacyConfidentialityAcknowledgment === 'Disagree'}
+                    onChange={(e) => handleRadioChange('namPrivacyConfidentialityAcknowledgment', e.target.value)}
+                    className="mr-2"
+                  />
+                  <span className="text-sm">Disagree</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {!isScrolledToBottom && (

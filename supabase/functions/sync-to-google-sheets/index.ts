@@ -150,7 +150,11 @@ async function appendToGoogleSheet(data: any): Promise<void> {
     decryptedData.region_label || '',
     decryptedData.submission_region || '',
     decryptedData.status || '',
-    decryptedData.created_at || ''
+    decryptedData.created_at || '',
+    decryptedData.nam_itc_blacklisting_consent || '',
+    decryptedData.nam_medical_aid_claiming_responsibility || '',
+    decryptedData.nam_information_sharing_authorization || '',
+    decryptedData.nam_privacy_confidentiality_acknowledgment || ''
   ];
 
   const sheetsUrl = `https://sheets.googleapis.com/v4/spreadsheets/${GOOGLE_SHEET_ID}/values/Sheet1:append?valueInputOption=RAW`;

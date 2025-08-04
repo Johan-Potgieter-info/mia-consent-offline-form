@@ -46,6 +46,10 @@ export type Database = {
           medical_aid_no: string | null
           medical_aid_plan: string | null
           medication: string
+          nam_information_sharing_authorization: boolean | null
+          nam_itc_blacklisting_consent: boolean | null
+          nam_medical_aid_claiming_responsibility: boolean | null
+          nam_privacy_confidentiality_acknowledgment: boolean | null
           occupation_grade: string | null
           patient_name: string
           payment_preference: string | null
@@ -95,6 +99,10 @@ export type Database = {
           medical_aid_no?: string | null
           medical_aid_plan?: string | null
           medication: string
+          nam_information_sharing_authorization?: boolean | null
+          nam_itc_blacklisting_consent?: boolean | null
+          nam_medical_aid_claiming_responsibility?: boolean | null
+          nam_privacy_confidentiality_acknowledgment?: boolean | null
           occupation_grade?: string | null
           patient_name: string
           payment_preference?: string | null
@@ -144,6 +152,10 @@ export type Database = {
           medical_aid_no?: string | null
           medical_aid_plan?: string | null
           medication?: string
+          nam_information_sharing_authorization?: boolean | null
+          nam_itc_blacklisting_consent?: boolean | null
+          nam_medical_aid_claiming_responsibility?: boolean | null
+          nam_privacy_confidentiality_acknowledgment?: boolean | null
           occupation_grade?: string | null
           patient_name?: string
           payment_preference?: string | null

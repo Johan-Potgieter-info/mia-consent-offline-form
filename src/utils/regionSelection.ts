@@ -23,10 +23,20 @@ export const REGIONS: Record<string, Region> = {
     name: 'Cape Town',
     doctor: 'Dr Soni',
     practiceNumber: '1030817'
+  },
+  NAM: {
+    code: 'NAM',
+    name: 'Namibia',
+    doctor: 'MIA Healthcare Mobile Clinic',
+    practiceNumber: '087 5201'
   }
 };
 
 export const getDefaultRegion = async (): Promise<Region> => {
   // Default to PTA region for manual selection
   return REGIONS.PTA;
+};
+
+export const isNamibianRegion = (regionCode?: string): boolean => {
+  return regionCode === 'NAM';
 };

@@ -139,6 +139,7 @@ const ConsentFormLayout = ({
           handleInputChange={handleInputChange}
           handleCheckboxChange={handleCheckboxChange}
           validationErrors={validationErrors || []}
+          currentRegion={currentRegion}
         />
 
         <ConsentFormContent

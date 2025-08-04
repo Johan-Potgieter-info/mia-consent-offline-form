@@ -71,6 +71,12 @@ export interface FormData {
   musicPreference?: string; // 50
   signature?: string; // 51
   
+  // NAM-specific consent fields
+  namItcBlacklistingConsent?: string;
+  namMedicalAidClaimingResponsibility?: string;
+  namInformationSharingAuthorization?: string;
+  namPrivacyConfidentialityAcknowledgment?: string;
+  
   // Legacy fields for backward compatibility
   consentAgreement?: boolean;
   emergencyContactName?: string;

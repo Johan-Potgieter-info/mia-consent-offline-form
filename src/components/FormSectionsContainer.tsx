@@ -11,6 +11,7 @@ interface FormSectionsContainerProps {
   formData: FormData;
   handleInputChange: (field: keyof FormData, value: string) => void;
   handleCheckboxChange: (field: keyof FormData, value: string, checked: boolean) => void;
+  currentRegion?: any;
   validationErrors: string[];
 }
 
@@ -20,7 +21,8 @@ const FormSectionsContainer = ({
   formData,
   handleInputChange,
   handleCheckboxChange,
-  validationErrors
+  validationErrors,
+  currentRegion
 }: FormSectionsContainerProps) => {
   const { sections } = useFormSections();
 
@@ -42,6 +44,7 @@ const FormSectionsContainer = ({
                 handleInputChange={handleInputChange}
                 handleCheckboxChange={handleCheckboxChange}
                 validationErrors={validationErrors}
+                currentRegion={currentRegion}
               />
             )}
           </FormSection>

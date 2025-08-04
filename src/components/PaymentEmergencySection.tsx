@@ -1,14 +1,16 @@
 
 import React from 'react';
 import ValidatedInput from './ValidatedInput';
+import { Region } from '../utils/regionSelection';
 
 interface PaymentEmergencySectionProps {
   formData: any;
   onInputChange: (name: string, value: string) => void;
   onCheckboxChange?: (name: string, value: string, checked: boolean) => void;
+  currentRegion?: Region;
 }
 
-const PaymentEmergencySection = ({ formData, onInputChange }: PaymentEmergencySectionProps) => {
+const PaymentEmergencySection = ({ formData, onInputChange, currentRegion }: PaymentEmergencySectionProps) => {
   const handlePaymentPreferenceChange = (value: string) => {
     onInputChange('paymentPreference', value);
     // Clear medical aid fields if not "Medical Aid"
@@ -19,6 +21,21 @@ const PaymentEmergencySection = ({ formData, onInputChange }: PaymentEmergencySe
   };
 
   const showMedicalAidDetails = formData.paymentPreference === 'Medical Aid';
+  const isNamibianRegion = currentRegion?.code === 'NAM';
+  
+  // Get payment options based on region
+  const getPaymentOptions = () => {
+    if (isNamibianRegion) {
+      return [
+        { value: 'EFT', label: 'EFT' },
+        { value: 'Medical Aid', label: 'Medical Aid (NAMAF rates)' }
+      ];
+    }
+    return [
+      { value: 'Card/EFT/Snapcan', label: 'Card/EFT/Snapcan' },
+      { value: 'Medical Aid', label: 'Medical Aid' }
+    ];
+  };
 
   return (
     <div className="space-y-6 p-6">
@@ -29,33 +46,41 @@ const PaymentEmergencySection = ({ formData, onInputChange }: PaymentEmergencySe
           25. Payment Preference
         </label>
         <div className="space-y-2">
-          <label className="flex items-center">
-            <input
-              type="radio"
-              name="paymentPreference"
-              value="Card/EFT/Snapcan"
-              checked={formData.paymentPreference === 'Card/EFT/Snapcan'}
-              onChange={(e) => handlePaymentPreferenceChange(e.target.value)}
-              className="mr-2"
-            />
-            <span className="text-sm">Card/EFT/Snapcan</span>
-          </label>
-          <label className="flex items-center">
-            <input
-              type="radio"
-              name="paymentPreference"
-              value="Medical Aid"
-              checked={formData.paymentPreference === 'Medical Aid'}
-              onChange={(e) => handlePaymentPreferenceChange(e.target.value)}
-              className="mr-2"
-            />
-            <span className="text-sm">Medical Aid</span>
-          </label>
+          {getPaymentOptions().map((option) => (
+            <label key={option.value} className="flex items-center">
+              <input
+                type="radio"
+                name="paymentPreference"
+                value={option.value}
+                checked={formData.paymentPreference === option.value}
+                onChange={(e) => handlePaymentPreferenceChange(e.target.value)}
+                className="mr-2"
+              />
+              <span className="text-sm">{option.label}</span>
+            </label>
+          ))}
         </div>
+        
+        {isNamibianRegion && (
+          <div className="mt-2 p-3 bg-blue-50 rounded-md">
+            <p className="text-sm text-blue-700">
+              <strong>Note:</strong> We only accept EFT payments and Medical Aid claims in line with NAMAF rates. 
+              No on-site card payments are currently available in Namibia.
+            </p>
+          </div>
+        )}
       </div>
 
       {showMedicalAidDetails && (
         <div className="bg-gray-50 p-4 rounded-lg space-y-4">
+          {isNamibianRegion && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
+              <p className="text-sm text-green-700">
+                <strong>NAMAF Compliance:</strong> Medical aid claims will be processed in accordance with 
+                Namibian Medical Aid Fund (NAMAF) approved rates and procedures.
+              </p>
+            </div>
+          )}
           <div className="grid md:grid-cols-2 gap-4">
             <ValidatedInput
               type="text"

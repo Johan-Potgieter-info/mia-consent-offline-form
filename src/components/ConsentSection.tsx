@@ -81,17 +81,60 @@ const ConsentSection: React.FC<ConsentSectionProps> = ({
           ref={termsRef}
           className="max-h-72 overflow-y-scroll p-4 border-t border-gray-300 text-sm space-y-4"
         >
-          <h3 className="text-lg font-semibold text-orange-600">MIA Consent Form Contents</h3>
-          <p>1. I, the undersigned, hereby give my voluntary consent for dental examination, diagnosis and treatment as deemed necessary by the dental professional in attendance.</p>
-          <p>2. I understand that dental treatment may involve procedures such as cleaning, scaling, polishing, and the use of diagnostic tools including X-rays or photos.</p>
-          <p>3. I understand the nature and purpose of the treatment and acknowledge that no guarantees or assurances have been made to me concerning the results of the procedure.</p>
-          <p>4. I understand that there may be risks and complications associated with dental treatment, including but not limited to sensitivity, discomfort, and allergic reactions.</p>
-          <p>5. I confirm that I have disclosed all relevant medical history and current medications.</p>
-          <p>6. I understand that the dental provider may refer me for further treatment if necessary, and that this referral may incur additional costs not covered during the screening.</p>
-          <p>7. I acknowledge that I have the right to ask questions and that I may withdraw my consent at any time before or during the treatment.</p>
-          <p>8. I give consent for my dental records to be shared with other healthcare professionals if needed for further treatment or referral.</p>
-          <p>9. I understand the confidentiality of my health information and consent to the collection and use of this information for medical and administrative purposes.</p>
-          <p>10. I confirm that I have read and understood the information above, and that I am signing this consent voluntarily and without coercion.</p>
+          {currentRegion?.code === 'NAM' ? (
+            <>
+              <h3 className="text-lg font-semibold text-orange-600">MIA Healthcare Mobile Clinic Consent Form</h3>
+              
+              <p>I voluntarily consent to receive medical and dental services from MIA Healthcare Mobile Clinic, including examination, diagnosis, and treatment (e.g., cleaning, scaling, polishing, X-rays, or photos) as deemed necessary by the attending dental or medical professional.</p>
+              
+              <p>☐ I understand the nature and purpose of the treatment and acknowledge that no guarantees or assurances have been made regarding the results of any procedure.</p>
+              
+              <p>☐ I understand that dental and medical treatments may involve risks, including but not limited to sensitivity, discomfort, or allergic reactions.</p>
+              
+              <p>☐ I confirm that I have disclosed all relevant medical history, current medications, allergies, and chronic conditions, and I understand that incomplete disclosure may affect treatment outcomes.</p>
+              
+              <p>☐ I understand that MIA Healthcare Mobile Clinic operates under Digi Dental for administrative purposes and shares the same practice number (087 5201).</p>
+              
+              <p>☐ I authorize MIA Healthcare Mobile Clinic to share relevant medical and dental information with my medical aid for claim purposes and with other healthcare professionals for further treatment or referral, if necessary.</p>
+              
+              <p>☐ I understand that MIA will submit claims to my medical aid where possible, but I remain responsible for any shortfalls or unpaid amounts.</p>
+              
+              <p>☐ I understand that MIA is not contracted to all medical aid plans. If my plan is not covered, I am responsible for settling the account in full and claiming back from my medical aid directly.</p>
+              
+              <p>☐ I acknowledge that if my account remains unpaid after 90 days, my details may be submitted to ITC for blacklisting and legal recovery action.</p>
+              
+              <p>☐ I understand that I may be referred for further treatment, which may incur additional costs not covered during the initial screening.</p>
+              
+              <p>☐ I acknowledge my right to ask questions about my treatment and to withdraw consent at any time before or during the procedure.</p>
+              
+              <p>☐ I confirm that all information provided in this form is true and accurate to the best of my knowledge.</p>
+              
+              <p>☐ I consent to the collection, use, and storage of my personal and medical information for healthcare, administrative, or legal purposes, in accordance with Namibian privacy and patient rights guidelines.</p>
+              
+              <p>☐ I understand that MIA Healthcare Mobile Clinic is responsible for protecting my medical records in line with Namibian regulations.</p>
+              
+              <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded">
+                <h4 className="font-semibold text-gray-800 mb-2">LEGAL DISCLAIMER</h4>
+                <p className="text-xs leading-relaxed">
+                  By signing below, I confirm that I have read, understood, and voluntarily agree to the terms above. I consent to receive medical and dental services from MIA Healthcare Mobile Clinic, operated by Digi Dental (Practice Number: 087 5201). I authorize MIA to submit claims to my medical aid where applicable and understand that I am fully responsible for any unpaid amounts. If my medical aid does not cover the costs, I will settle the account and claim back directly. I acknowledge that unpaid accounts after 90 days may be submitted to ITC for listing and further recovery action. My personal and medical information will be kept confidential and secure, used only for healthcare, administrative, or lawful purposes, in accordance with Namibian regulations.
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
+              <h3 className="text-lg font-semibold text-orange-600">MIA Consent Form Contents</h3>
+              <p>1. I, the undersigned, hereby give my voluntary consent for dental examination, diagnosis and treatment as deemed necessary by the dental professional in attendance.</p>
+              <p>2. I understand that dental treatment may involve procedures such as cleaning, scaling, polishing, and the use of diagnostic tools including X-rays or photos.</p>
+              <p>3. I understand the nature and purpose of the treatment and acknowledge that no guarantees or assurances have been made to me concerning the results of the procedure.</p>
+              <p>4. I understand that there may be risks and complications associated with dental treatment, including but not limited to sensitivity, discomfort, and allergic reactions.</p>
+              <p>5. I confirm that I have disclosed all relevant medical history and current medications.</p>
+              <p>6. I understand that the dental provider may refer me for further treatment if necessary, and that this referral may incur additional costs not covered during the screening.</p>
+              <p>7. I acknowledge that I have the right to ask questions and that I may withdraw my consent at any time before or during the treatment.</p>
+              <p>8. I give consent for my dental records to be shared with other healthcare professionals if needed for further treatment or referral.</p>
+              <p>9. I understand the confidentiality of my health information and consent to the collection and use of this information for medical and administrative purposes.</p>
+              <p>10. I confirm that I have read and understood the information above, and that I am signing this consent voluntarily and without coercion.</p>
+            </>
+          )}
         </div>
       </details>
 

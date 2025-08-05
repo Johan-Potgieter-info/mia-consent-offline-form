@@ -87,31 +87,31 @@ const ConsentSection: React.FC<ConsentSectionProps> = ({
               
               <p>I voluntarily consent to receive medical and dental services from MIA Healthcare Mobile Clinic, including examination, diagnosis, and treatment (e.g., cleaning, scaling, polishing, X-rays, or photos) as deemed necessary by the attending dental or medical professional.</p>
               
-              <p>☐ I understand the nature and purpose of the treatment and acknowledge that no guarantees or assurances have been made regarding the results of any procedure.</p>
+              <p>I understand the nature and purpose of the treatment and acknowledge that no guarantees or assurances have been made regarding the results of any procedure.</p>
               
-              <p>☐ I understand that dental and medical treatments may involve risks, including but not limited to sensitivity, discomfort, or allergic reactions.</p>
+              <p>I understand that dental and medical treatments may involve risks, including but not limited to sensitivity, discomfort, or allergic reactions.</p>
               
-              <p>☐ I confirm that I have disclosed all relevant medical history, current medications, allergies, and chronic conditions, and I understand that incomplete disclosure may affect treatment outcomes.</p>
+              <p>I confirm that I have disclosed all relevant medical history, current medications, allergies, and chronic conditions, and I understand that incomplete disclosure may affect treatment outcomes.</p>
               
-              <p>☐ I understand that MIA Healthcare Mobile Clinic operates under Digi Dental for administrative purposes and shares the same practice number (087 5201).</p>
+              <p>I understand that MIA Healthcare Mobile Clinic operates under Digi Dental for administrative purposes and shares the same practice number (087 5201).</p>
               
-              <p>☐ I authorize MIA Healthcare Mobile Clinic to share relevant medical and dental information with my medical aid for claim purposes and with other healthcare professionals for further treatment or referral, if necessary.</p>
+              <p>I authorize MIA Healthcare Mobile Clinic to share relevant medical and dental information with my medical aid for claim purposes and with other healthcare professionals for further treatment or referral, if necessary.</p>
               
-              <p>☐ I understand that MIA will submit claims to my medical aid where possible, but I remain responsible for any shortfalls or unpaid amounts.</p>
+              <p>I understand that MIA will submit claims to my medical aid where possible, but I remain responsible for any shortfalls or unpaid amounts.</p>
               
-              <p>☐ I understand that MIA is not contracted to all medical aid plans. If my plan is not covered, I am responsible for settling the account in full and claiming back from my medical aid directly.</p>
+              <p>I understand that MIA is not contracted to all medical aid plans. If my plan is not covered, I am responsible for settling the account in full and claiming back from my medical aid directly.</p>
               
-              <p>☐ I acknowledge that if my account remains unpaid after 90 days, my details may be submitted to ITC for blacklisting and legal recovery action.</p>
+              <p>I acknowledge that if my account remains unpaid after 90 days, my details may be submitted to ITC for blacklisting and legal recovery action.</p>
               
-              <p>☐ I understand that I may be referred for further treatment, which may incur additional costs not covered during the initial screening.</p>
+              <p>I understand that I may be referred for further treatment, which may incur additional costs not covered during the initial screening.</p>
               
-              <p>☐ I acknowledge my right to ask questions about my treatment and to withdraw consent at any time before or during the procedure.</p>
+              <p>I acknowledge my right to ask questions about my treatment and to withdraw consent at any time before or during the procedure.</p>
               
-              <p>☐ I confirm that all information provided in this form is true and accurate to the best of my knowledge.</p>
+              <p>I confirm that all information provided in this form is true and accurate to the best of my knowledge.</p>
               
-              <p>☐ I consent to the collection, use, and storage of my personal and medical information for healthcare, administrative, or legal purposes, in accordance with Namibian privacy and patient rights guidelines.</p>
+              <p>I consent to the collection, use, and storage of my personal and medical information for healthcare, administrative, or legal purposes, in accordance with Namibian privacy and patient rights guidelines.</p>
               
-              <p>☐ I understand that MIA Healthcare Mobile Clinic is responsible for protecting my medical records in line with Namibian regulations.</p>
+              <p>I understand that MIA Healthcare Mobile Clinic is responsible for protecting my medical records in line with Namibian regulations.</p>
               
               <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded">
                 <h4 className="font-semibold text-gray-800 mb-2">LEGAL DISCLAIMER</h4>

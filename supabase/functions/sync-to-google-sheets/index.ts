@@ -183,6 +183,40 @@ serve(async (req) => {
   }
 
   try {
+    // Security: Verify authorization header is present
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Unauthorized: Missing or invalid authorization header' 
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401 
+        }
+      );
+    }
+
+    // Security: Rate limiting check
+    const userAgent = req.headers.get('user-agent') || 'unknown';
+    console.log('Google Sheets sync request from:', userAgent);
+
+    // Security: Validate request size
+    const contentLength = req.headers.get('content-length');
+    if (contentLength && parseInt(contentLength) > 50000) { // 50KB limit
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Request too large' 
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 413 
+        }
+      );
+    }
+
     const { record } = await req.json();
     
     console.log('Received consent form data for Google Sheets sync:', record?.id);

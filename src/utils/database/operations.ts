@@ -2,7 +2,9 @@
 // Core database operations with proper error handling
 
 import { initDB } from './initialization';
-import { encryptSensitiveFields, decryptSensitiveFields } from '../encryption';
+import { encryptSensitiveFields as legacyEncrypt, decryptSensitiveFields as legacyDecrypt } from '../encryption';
+import { encryptSensitiveFields, decryptSensitiveFields, verifyDataIntegrity } from '../secureEncryption';
+import { sanitizeFormData } from '../inputSecurity';
 import { FormData } from '../../types/formTypes';
 
 /**
@@ -10,19 +12,28 @@ import { FormData } from '../../types/formTypes';
  */
 export const saveToIndexedDB = async (data: FormData, storeName: string): Promise<number> => {
   try {
+    // Security: Sanitize input data
+    const sanitizedData = sanitizeFormData(data);
+    
+    // Security: Verify data integrity
+    if (!verifyDataIntegrity(sanitizedData)) {
+      throw new Error('Data integrity check failed');
+    }
+
     const db = await initDB();
     const tx = db.transaction(storeName, 'readwrite');
     const store = tx.objectStore(storeName);
     
-    console.log(`Saving to ${storeName}:`, data);
+    console.log(`Saving to ${storeName}:`, { id: sanitizedData.id, timestamp: sanitizedData.timestamp });
     
-    // Add timestamp and encryption metadata
+    // Add timestamp and encryption metadata with secure encryption
     const dataToSave = {
-      ...data,
-      timestamp: data.timestamp || new Date().toISOString(),
+      ...sanitizedData,
+      timestamp: sanitizedData.timestamp || new Date().toISOString(),
       lastModified: new Date().toISOString(),
       encrypted: true,
-      ...encryptSensitiveFields(data)
+      secureEncryption: true,
+      ...(await encryptSensitiveFields(sanitizedData))
     };
     
     return new Promise((resolve, reject) => {
@@ -58,10 +69,16 @@ export const getAllFromIndexedDB = async (storeName: string): Promise<FormData[]
         console.log(`Retrieved ${allData.length} items from ${storeName}`);
         
         // Decrypt sensitive fields and ensure proper typing
-        const decryptedData = allData.map(item => {
+        const decryptedData = await Promise.all(allData.map(async item => {
           const formData = item as any;
-          return decryptSensitiveFields(formData) as FormData;
-        });
+          
+          // Use secure decryption for new data, fallback to legacy for old data
+          if (formData.secureEncryption) {
+            return await decryptSensitiveFields(formData) as FormData;
+          } else {
+            return legacyDecrypt(formData) as FormData;
+          }
+        }));
         
         resolve(decryptedData);
       };
@@ -107,16 +124,25 @@ export const deleteFromIndexedDB = async (id: number, storeName: string): Promis
  */
 export const updateInIndexedDB = async (id: number | string, data: FormData, storeName: string): Promise<void> => {
   try {
+    // Security: Sanitize input data
+    const sanitizedData = sanitizeFormData(data);
+    
+    // Security: Verify data integrity
+    if (!verifyDataIntegrity(sanitizedData)) {
+      throw new Error('Data integrity check failed');
+    }
+
     const db = await initDB();
     const tx = db.transaction(storeName, 'readwrite');
     const store = tx.objectStore(storeName);
     
     const dataToUpdate = {
-      ...data,
+      ...sanitizedData,
       id: typeof id === 'string' ? parseInt(id) : id,
       lastModified: new Date().toISOString(),
       encrypted: true,
-      ...encryptSensitiveFields(data)
+      secureEncryption: true,
+      ...(await encryptSensitiveFields(sanitizedData))
     };
     
     return new Promise((resolve, reject) => {

@@ -1,14 +1,14 @@
-
 // Core database operations with proper error handling
 
 import { initDB } from './initialization';
 import { encryptSensitiveFields as legacyEncrypt, decryptSensitiveFields as legacyDecrypt } from '../encryption';
 import { encryptSensitiveFields, decryptSensitiveFields, verifyDataIntegrity } from '../secureEncryption';
-import { sanitizeFormData } from '../inputSecurity';
+import { sanitizeFormData, sanitizeInput, validateInput } from '../inputSecurity';
 import { FormData } from '../../types/formTypes';
+import { supabase } from '../supabaseClient'; // Import Supabase client
 
 /**
- * Save data to a specific store
+ * Save data to a specific IndexedDB store
  */
 export const saveToIndexedDB = async (data: FormData, storeName: string): Promise<number> => {
   try {
@@ -54,7 +54,7 @@ export const saveToIndexedDB = async (data: FormData, storeName: string): Promis
 };
 
 /**
- * Get all data from a specific store
+ * Get all data from a specific IndexedDB store
  */
 export const getAllFromIndexedDB = async (storeName: string): Promise<FormData[]> => {
   try {
@@ -69,18 +69,23 @@ export const getAllFromIndexedDB = async (storeName: string): Promise<FormData[]
         console.log(`Retrieved ${allData.length} items from ${storeName}`);
         
         // Decrypt sensitive fields and ensure proper typing
-        const decryptedData = await Promise.all(allData.map(async item => {
-          const formData = item as any;
-          
-          // Use secure decryption for new data, fallback to legacy for old data
-          if (formData.secureEncryption) {
-            return await decryptSensitiveFields(formData) as FormData;
-          } else {
-            return legacyDecrypt(formData) as FormData;
-          }
-        }));
-        
-        resolve(decryptedData);
+        try {
+          const decryptedData = await Promise.all(
+            allData.map(async (item) => {
+              const formData = item as any;
+              // Use secure decryption for new data, fallback to legacy for old data
+              if (formData.secureEncryption) {
+                return await decryptSensitiveFields(formData) as FormData;
+              } else {
+                return legacyDecrypt(formData) as FormData;
+              }
+            })
+          );
+          resolve(decryptedData);
+        } catch (decryptError) {
+          console.error('Decryption failed:', decryptError);
+          reject(decryptError);
+        }
       };
       request.onerror = () => {
         console.error(`Failed to get all from ${storeName}:`, request.error);
@@ -94,7 +99,7 @@ export const getAllFromIndexedDB = async (storeName: string): Promise<FormData[]
 };
 
 /**
- * Delete data from a specific store
+ * Delete data from a specific IndexedDB store
  */
 export const deleteFromIndexedDB = async (id: number, storeName: string): Promise<void> => {
   try {
@@ -120,7 +125,7 @@ export const deleteFromIndexedDB = async (id: number, storeName: string): Promis
 };
 
 /**
- * Update data in a specific store
+ * Update data in a specific IndexedDB store
  */
 export const updateInIndexedDB = async (id: number | string, data: FormData, storeName: string): Promise<void> => {
   try {
@@ -158,6 +163,40 @@ export const updateInIndexedDB = async (id: number | string, data: FormData, sto
     });
   } catch (error) {
     console.error(`Failed to update in ${storeName}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Save form data to Supabase (aligned with previous security fixes)
+ */
+export const saveFormData = async (formData: FormData): Promise<void> => {
+  try {
+    // Security: Sanitize input data
+    const sanitizedData = Object.fromEntries(
+      Object.entries(formData).map(([key, value]) => [
+        key,
+        typeof value === 'string' ? sanitizeInput(value) : value
+      ])
+    );
+
+    // Security: Validate input
+    if (!validateInput(JSON.stringify(sanitizedData))) {
+      throw new Error('Invalid input data');
+    }
+
+    // Security: Encrypt sensitive data
+    const encryptedData = await encryptSensitiveFields(sanitizedData);
+
+    // Save to Supabase
+    const { error } = await supabase.from('form_drafts').insert({ data: encryptedData });
+    if (error) {
+      console.error('Failed to save to Supabase:', error);
+      throw new Error('Failed to save form data');
+    }
+    console.log('Successfully saved form data to Supabase');
+  } catch (error) {
+    console.error('Failed to save form data:', error);
     throw error;
   }
 };

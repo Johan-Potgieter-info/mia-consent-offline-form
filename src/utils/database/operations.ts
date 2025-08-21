@@ -64,7 +64,7 @@ export const getAllFromIndexedDB = async (storeName: string): Promise<FormData[]
     
     return new Promise((resolve, reject) => {
       const request = store.getAll();
-      request.onsuccess = () => {
+      request.onsuccess = async () => {
         const allData = request.result;
         console.log(`Retrieved ${allData.length} items from ${storeName}`);
         

@@ -150,20 +150,20 @@ export const validateTextInput = (
 
 // Sanitize entire form data object
 export const sanitizeFormData = <T extends Record<string, any>>(data: T): T => {
-  const sanitizedData = { ...data };
+  const result: Record<string, any> = { ...data };
 
-  Object.keys(sanitizedData).forEach(key => {
-    const value = sanitizedData[key];
+  Object.keys(result).forEach(key => {
+    const value = result[key];
     if (typeof value === 'string') {
-      sanitizedData[key] = sanitizeInput(value);
+      result[key] = sanitizeInput(value);
     } else if (Array.isArray(value)) {
-      sanitizedData[key] = value.map(item => 
+      result[key] = value.map(item => 
         typeof item === 'string' ? sanitizeInput(item) : item
       );
     }
   });
 
-  return sanitizedData;
+  return result as T;
 };
 
 // Rate limiting helper (client-side)

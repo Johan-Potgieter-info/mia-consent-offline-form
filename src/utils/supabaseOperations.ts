@@ -1,21 +1,17 @@
-
 import { FormData } from '../types/formTypes';
 import { supabase } from '../integrations/supabase/client';
+import { checkServerConnectivity } from './connectivity';
 
 export const testSupabaseConnection = async (): Promise<boolean> => {
-  try {
-    console.log('Testing Supabase connection...');
-    const { data, error } = await supabase.from('consent_forms').select('count').limit(1);
-    if (error) {
-      console.error('Supabase connection test error:', error);
-      return false;
-    }
+  // Avoid SELECTs due to RLS; use service availability check instead
+  console.log('Testing Supabase connection via health/preflight checks...');
+  const ok = await checkServerConnectivity();
+  if (!ok) {
+    console.error('Supabase connection test failed');
+  } else {
     console.log('Supabase connection test successful');
-    return true;
-  } catch (error) {
-    console.error('Supabase connection test failed:', error);
-    return false;
   }
+  return ok;
 };
 
 export const saveFormToSupabase = async (formData: FormData, isDraft: boolean): Promise<FormData> => {

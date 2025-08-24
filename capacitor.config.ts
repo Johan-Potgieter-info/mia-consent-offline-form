@@ -2,8 +2,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.aba393644b3f416b89f3910ca3b93712',
-  appName: 'Mia',
+  appId: 'com.miahealthcare.consentform',
+  appName: 'Mia Healthcare Consent Form',
   webDir: 'dist',
   bundledWebRuntime: false,
   plugins: {

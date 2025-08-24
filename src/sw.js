@@ -12,7 +12,7 @@ const OFFLINE_FILES = [
   `${BASE_PATH}index.html`,
   `${BASE_PATH}terms.html`,
   `${BASE_PATH}manifest.json`,
-  `${BASE_PATH}lovable-uploads/9a0a9907-375b-48ce-a1bc-8009bc27059c.png`
+  `${BASE_PATH}assets/mia-logo.png`
 ];
 
 self.addEventListener('install', (event) => {

@@ -1,166 +1,238 @@
+# Mia Healthcare Consent Form PWA
 
-# Mia Healthcare - Dental Consent Form PWA
+A Progressive Web Application (PWA) for capturing dental consent forms with robust offline capabilities.
 
-A Progressive Web Application (PWA) for offline dental consent form capture, designed for Mia Healthcare.
+## 📋 Project Information
 
-**Owner:** Mia Healthcare  
-**Developer:** Johan Potgieter
+**Owner:** Mia Healthcare Technologies  
+**Developer:** Johan Potgieter  
+**Contact:** johan@code-solutions.co.za  
+**Version:** 1.0.0  
+**Status:** Production Ready  
 
-## Features
+## ✨ Features
 
-- **Offline-First Design**: Forms work completely offline with automatic sync when online
-- **Progressive Web App**: Installable on desktop and mobile devices
-- **Region-Aware**: Automatically detects user location for compliance requirements
-- **Draft Management**: Save and resume incomplete forms
-- **Hybrid Storage**: Local storage with cloud backup for completed forms
-- **Mobile Optimized**: Touch-friendly interface for tablets and smartphones
+- **Offline-First Design**: Works seamlessly without internet connection
+- **Progressive Web App**: Installable on mobile devices and desktops
+- **Region-Aware Forms**: Automatically detects and adapts to different practice regions
+- **Secure Data Handling**: Client-side encryption and secure data transmission
+- **Draft Management**: Auto-save functionality with draft recovery
+- **Hybrid Storage**: Local IndexedDB with cloud sync to Supabase
+- **Mobile Optimized**: Native mobile app capabilities via Capacitor
+- **Background Sync**: Automatic data synchronization when connection returns
 
-## PWA Installation
+## 🛠 Technical Stack
 
-### Desktop Installation
-1. Open the app in Chrome, Edge, or other modern browser
-2. Look for the "Install" button in the address bar
-3. Click "Install" to add the app to your desktop
-4. The app will use the Mia Healthcare logo as the desktop icon
-
-### Mobile Installation
-1. Open the app in mobile browser (Chrome/Safari)
-2. Tap the browser menu
-3. Select "Add to Home Screen" or "Install App"
-4. The app icon will appear on your home screen
-
-## Technical Specifications
-
-### Technologies Used
 - **Frontend**: React 18 with TypeScript
 - **Build Tool**: Vite
-- **UI Framework**: Tailwind CSS with shadcn/ui components
-- **Database**: Supabase (cloud) with IndexedDB (local fallback)
-- **State Management**: TanStack Query
-- **PWA Features**: Service Worker with advanced caching
-- **Mobile Support**: Capacitor for native mobile apps
+- **Styling**: Tailwind CSS with shadcn/ui components
+- **State Management**: TanStack Query for server state
+- **Local Storage**: IndexedDB for offline data persistence
+- **Cloud Backend**: Supabase (authentication, database, real-time sync)
+- **Mobile**: Capacitor for iOS/Android app deployment
+- **Service Worker**: Custom implementation for offline functionality
 
-### Browser Support
-- Chrome 90+
-- Firefox 88+
-- Safari 14+
-- Edge 90+
-
-## Development Setup
+## 🚀 Quick Start for New Owner
 
 ### Prerequisites
+
 - Node.js 18+ and npm
 - Git
 
-### Local Development
-```bash
-# Clone the repository
-git clone <YOUR_GIT_URL>
-cd <YOUR_PROJECT_NAME>
+### Setup Instructions
 
-# Install dependencies
+1. **Clone the repository**:
+   ```bash
+   git clone [YOUR-REPO-URL]
+   cd mia-healthcare-consent-form
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Environment Configuration**:
+   Create a `.env` file in the root directory:
+   ```env
+   VITE_BASE_URL="/"
+   VITE_SUPABASE_PROJECT_ID="jofuqlexuxzamltxxzuq"
+   VITE_SUPABASE_PUBLISHABLE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvZnVxbGV4dXh6YW1sdHh4enVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkxMDA2NjAsImV4cCI6MjA2NDY3NjY2MH0.Fq_Sx7NUeZF2k-erwrj_V-2npReXum9Cmuufsco3Cmw"
+   VITE_SUPABASE_URL="https://jofuqlexuxzamltxxzuq.supabase.co"
+   ```
+
+4. **Start development server**:
+   ```bash
+   npm run dev
+   ```
+
+5. **Access the application**:
+   Open [http://localhost:8080](http://localhost:8080) in your browser
+
+## 📱 Mobile App Development
+
+### Setup Mobile Development Environment
+
+```bash
+# Install mobile dependencies (already included)
 npm install
 
-# Start development server
-npm run dev
-```
-
-The app will be available at `http://localhost:8080`
-
-### Building for Production
-```bash
-# Build the PWA
+# Build web app
 npm run build
 
-# Preview the production build
-npm run preview
-```
+# Add mobile platforms
+npx cap add android    # For Android
+npx cap add ios        # For iOS (macOS only)
 
-## PWA Deployment
-
-### Web Deployment
-The built PWA can be deployed to any static hosting service:
-- Netlify
-- Vercel
-- GitHub Pages
-- AWS S3 + CloudFront
-- Any web server
-
-### Mobile App Deployment (Optional)
-For native mobile apps using Capacitor:
-
-```bash
-# Build web app first
-npm run build
-
-# Sync with mobile platforms
+# Sync with platforms
 npx cap sync
+```
 
-# Run on Android
+### Running on Mobile
+
+```bash
+# Android (requires Android Studio)
 npx cap run android
 
-# Run on iOS (macOS with Xcode required)
+# iOS (requires macOS with Xcode)
 npx cap run ios
 ```
 
-## PWA Manifest Configuration
+### Building for Production
 
-The app includes a comprehensive PWA manifest with:
-- **App Name**: "Mia Healthcare Consent Form"
-- **Short Name**: "Mia"
-- **Theme Color**: #ef4805 (Mia orange)
-- **Display Mode**: Standalone (app-like experience)
-- **Icons**: Multiple sizes using Mia Healthcare logo
-- **Offline Support**: Full functionality without internet
+```bash
+# Android APK
+./scripts/build-android.sh     # Linux/macOS
+scripts\build-android.bat      # Windows
 
-## Service Worker Features
-
-- **Cache-First Strategy**: Static resources cached for instant loading
-- **Background Sync**: Automatic form submission when connection restored
-- **Update Management**: Seamless app updates
-- **Offline Fallbacks**: Graceful degradation when offline
-
-## Data Management
-
-### Storage Strategy
-- **Drafts**: Stored locally (IndexedDB) for privacy
-- **Completed Forms**: Synced to cloud database (Supabase)
-- **Hybrid Approach**: Works offline, syncs when online
-
-### Data Privacy
-- Forms stored locally until completion
-- Encrypted transmission to cloud
-- Compliant with healthcare data requirements
-
-## Configuration
-
-### Environment Variables
-Create a `.env` file for production deployment:
-```
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_key
+# iOS App (macOS only)
+./scripts/build-ios.sh
 ```
 
-### Region Detection
-The app automatically detects user region for compliance but can be manually overridden.
+## 🌐 Web Deployment
 
-## Support and Maintenance
+### GitHub Pages Deployment
+
+1. **Update repository settings**:
+   - Go to Settings > Pages
+   - Select "Deploy from a branch"
+   - Choose "gh-pages" branch
+
+2. **Deploy**:
+   ```bash
+   npm run deploy
+   ```
+
+3. **Access deployed app**:
+   Your app will be available at: `https://[USERNAME].github.io/mia-healthcare-consent-form`
+
+### Custom Domain Setup
+
+If you want to use a custom domain:
+
+1. Add a `CNAME` file to the `public/` directory with your domain
+2. Configure DNS settings to point to GitHub Pages
+3. Update `vite.config.ts` base path if needed
+
+## 🗄 Database Configuration
+
+This application uses Supabase as the backend service. The current database includes:
+
+- **Form submissions**: Encrypted patient data with regional support
+- **Draft management**: Auto-saved form drafts
+- **Real-time sync**: Automatic cloud synchronization
+- **Row Level Security**: Implemented for data protection
+
+### Database Schema
+
+Key tables:
+- `form_drafts`: Patient consent form data
+- `form_submissions`: Finalized submissions
+- `sync_logs`: Synchronization tracking
+
+## 🔒 Security Features
+
+- **Client-side encryption**: Sensitive data encrypted before storage
+- **Input sanitization**: All user inputs sanitized against XSS
+- **Row Level Security**: Supabase RLS policies implemented
+- **Rate limiting**: Client-side rate limiting for API calls
+- **Content Security Policy**: Secure headers implementation
+
+## 📊 Monitoring & Analytics
+
+- **Error tracking**: Console logging with error categorization
+- **Performance monitoring**: Build-time analytics
+- **Offline usage tracking**: Local storage metrics
+- **Sync success rates**: Connection quality monitoring
+
+## 🔧 Maintenance & Support
 
 ### Developer Contact
+
 **Johan Potgieter**  
-Developer and Technical Lead
+Email: johan@code-solutions.co.za  
+Role: Lead Developer & Technical Architect  
 
-### Issue Reporting
-For technical issues or feature requests, contact the developer directly.
+Available for:
+- Technical support and bug fixes
+- Feature enhancements
+- Database migrations
+- Performance optimizations
+- Security updates
 
-### Updates
-The PWA automatically updates when new versions are deployed. Users will be notified of available updates.
+### Troubleshooting
 
-## License
+Common issues and solutions:
 
-Proprietary software owned by Mia Healthcare.  
-Developed by Johan Potgieter.
+1. **Build failures**: Check Node.js version (18+ required)
+2. **Mobile app issues**: Ensure Android Studio/Xcode properly configured
+3. **Sync problems**: Verify Supabase environment variables
+4. **Performance issues**: Clear IndexedDB and reinstall PWA
+
+### Updating Dependencies
+
+```bash
+# Check for updates
+npm outdated
+
+# Update packages
+npm update
+
+# Update major versions (review breaking changes)
+npm install package@latest
+```
+
+## 📄 License & Ownership
+
+**© 2024 Mia Healthcare Technologies**  
+All rights reserved.
+
+This software is proprietary to Mia Healthcare Technologies. Unauthorized copying, modification, distribution, or use is strictly prohibited.
+
+**Developer Attribution:**  
+Developed by Johan Potgieter - Code Solutions
+
+## 🔄 Version History
+
+- **v1.0.0** (Current): Production release with full offline capabilities
+  - Complete rebranding from Lovable to Mia Healthcare Technologies
+  - Production-ready mobile app support
+  - Enhanced security and encryption
+  - Comprehensive documentation and handover materials
+
+## 📞 Support & Contact
+
+For technical support, feature requests, or any questions about this application:
+
+**Primary Contact:**  
+Johan Potgieter  
+Developer & Technical Lead  
+Email: johan@code-solutions.co.za  
+
+**Business Contact:**  
+Mia Healthcare Technologies  
+[Add business contact information here]
 
 ---
 
-*This Progressive Web Application provides Mia Healthcare with a modern, offline-capable solution for dental consent form management.*
+*This application is ready for production use and has been thoroughly tested across multiple platforms and devices. All Lovable references have been removed and the codebase is optimized for transfer to the new owner.*

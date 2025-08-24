@@ -3,9 +3,9 @@
 import { initDB } from './initialization';
 import { encryptSensitiveFields as legacyEncrypt, decryptSensitiveFields as legacyDecrypt } from '../encryption';
 import { encryptSensitiveFields, decryptSensitiveFields, verifyDataIntegrity } from '../secureEncryption';
-import { sanitizeFormData, sanitizeInput, validateInput } from '../inputSecurity';
+import { sanitizeFormData, sanitizeInput, validateTextInput } from '../inputSecurity';
 import { FormData } from '../../types/formTypes';
-import { supabase } from '../supabaseClient'; // Import Supabase client
+import { supabase } from '../../integrations/supabase/client';
 
 /**
  * Save data to a specific IndexedDB store
@@ -181,15 +181,16 @@ export const saveFormData = async (formData: FormData): Promise<void> => {
     );
 
     // Security: Validate input
-    if (!validateInput(JSON.stringify(sanitizedData))) {
-      throw new Error('Invalid input data');
+    const validation = validateTextInput(JSON.stringify(sanitizedData), 'form data', { required: true, maxLength: 50000 });
+    if (!validation.isValid) {
+      throw new Error(validation.error || 'Invalid input data');
     }
 
     // Security: Encrypt sensitive data
     const encryptedData = await encryptSensitiveFields(sanitizedData);
 
     // Save to Supabase
-    const { error } = await supabase.from('form_drafts').insert({ data: encryptedData });
+    const { error } = await supabase.from('form_drafts').insert(encryptedData);
     if (error) {
       console.error('Failed to save to Supabase:', error);
       throw new Error('Failed to save form data');

@@ -13,7 +13,7 @@ export const getAssetPath = (path: string): string => {
   return `${normalizedBasePath}${cleanPath}`;
 };
 
-// Specific helper for icon uploads - handle both environments
+// Specific helper for Mia Healthcare logo - handle both environments
 export const getIconPath = (): string => {
-  return getAssetPath('lovable-uploads/9a0a9907-375b-48ce-a1bc-8009bc27059c.png');
+  return getAssetPath('assets/mia-logo.png');
 };

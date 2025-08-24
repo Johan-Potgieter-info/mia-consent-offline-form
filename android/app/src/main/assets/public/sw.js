@@ -5,7 +5,7 @@ const OFFLINE_FILES = [
   '/mia-consent-offline-form/index.html',
   '/mia-consent-offline-form/terms.html',
   '/mia-consent-offline-form/manifest.json',
-  '/mia-consent-offline-form/lovable-uploads/9a0a9907-375b-48ce-a1bc-8009bc27059c.png'
+  '/mia-consent-offline-form/assets/mia-logo.png'
 ];
 
 self.addEventListener('install', (event) => {

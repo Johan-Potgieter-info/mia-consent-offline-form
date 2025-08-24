@@ -20,8 +20,8 @@ The Mia Healthcare Dental Consent Form PWA is an offline-first web application d
 - **Background Sync**: Automatic data synchronization
 
 ### Icon and Branding
-- **Primary Icon**: Mia Healthcare logo (`/lovable-uploads/9a0a9907-375b-48ce-a1bc-8009bc27059c.png`)
-- **Icon Sizes**: 48x48, 72x72, 96x96, 144x144, 192x192, 384x384, 512x512 pixels
+- **Primary Icon**: Mia Healthcare logo (`/assets/mia-logo.png`)
+- **Icon Sizes**: 192x192, 512x512 pixels (optimized for PWA requirements)
 - **Maskable Icons**: Android adaptive icon support
 - **Theme Color**: #ef4805 (Mia Healthcare orange)
 - **Background Color**: #ffffff (white)
@@ -66,7 +66,7 @@ Workbox (built-in)        - PWA Utilities
 ├── public/
 │   ├── sw.js                 # Service Worker
 │   ├── manifest.json         # PWA Manifest
-│   └── lovable-uploads/      # Mia Healthcare Assets
+│   └── assets/               # Mia Healthcare Assets
 ├── src/
 │   ├── components/           # React Components
 │   ├── hooks/               # Custom React Hooks
@@ -258,8 +258,41 @@ npm run preview      # Preview production build
 - **Multi-language**: Internationalization support
 - **Advanced Analytics**: Detailed usage insights
 
+## Asset Management
+
+### Logo Specifications
+- **File**: `/assets/mia-logo.png`
+- **Format**: PNG (Portable Network Graphics)
+- **Design**: Circular design with "mia" branding in white text
+- **Background**: Orange-to-red gradient (#ef4805 theme)
+- **Tagline**: "SMILES DELIVERED • LIVES TRANSFORMED"
+- **Resolution**: High-resolution for crisp display across all devices
+- **Usage**: PWA icons, favicons, app shortcuts, and branding
+
+### Asset Path Structure
+```
+public/assets/                     # Web deployment assets
+└── mia-logo.png                  # Primary logo file
+
+android/app/src/main/assets/public/assets/  # Android app assets
+└── mia-logo.png                  # Android-specific logo copy
+```
+
+### PWA Manifest Icons
+- **Icon Sizes**: 192x192px and 512x512px
+- **Purpose**: "any maskable" for Android adaptive icons
+- **Environment Paths**:
+  - Web: `/assets/mia-logo.png`
+  - Android: `/mia-consent-offline-form/assets/mia-logo.png`
+
+### Quality Assurance
+- **PWA Validation**: Test with PWABuilder.com for manifest compliance
+- **Cross-platform**: Verify icon display on desktop and mobile
+- **Android Build**: Run `npx cap sync` to update native app assets
+- **Asset Search**: Use `grep -r "lovable-uploads" .` to verify no legacy references
+
 ---
 
 **Technical Contact:** Johan Potgieter (Developer)  
-**Last Updated:** June 2025  
+**Last Updated:** August 2025  
 **Version:** 1.0.0

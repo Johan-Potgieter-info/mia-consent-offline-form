@@ -37,7 +37,7 @@ export default defineConfig(({ mode }) => {
         }
       })
     ].filter(Boolean),
-    base: './',
+    base: basePath,
     server: {
       host: "::",
       port: 8080
@@ -56,7 +56,7 @@ export default defineConfig(({ mode }) => {
             vendor: ['react', 'react-dom'],
             router: ['react-router-dom'],
             ui: ['@radix-ui/react-dialog', '@radix-ui/react-toast'],
-            database: './',
+            database: ['idb'],
             forms: ['react-hook-form']
           },
         },

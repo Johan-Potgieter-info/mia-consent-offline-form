@@ -4,9 +4,12 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import path from "path";
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   const isProduction = mode === 'production';
-  const basePath = isProduction ? '/mia-consent-offline-form/' : '/';
+  const isBuild = command === 'build';
+  
+  // Use relative base for Capacitor builds, absolute base for web deployment
+  const basePath = isProduction && !process.env.CAPACITOR_BUILD ? '/mia-consent-offline-form/' : '/';
 
   return {
     plugins: [
@@ -37,7 +40,7 @@ export default defineConfig(({ mode }) => {
         }
       })
     ].filter(Boolean),
-    base: './',
+    base: isBuild && process.env.CAPACITOR_BUILD ? './' : basePath,
     server: {
       host: "::",
       port: 8080

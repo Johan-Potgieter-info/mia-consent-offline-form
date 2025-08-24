@@ -7,9 +7,16 @@ import DraftList from './pages/DraftList';
 import DraftEditor from './pages/DraftEditor';
 import NotFound from './pages/NotFound';
 
+// Detect if running in Capacitor (mobile app)
+const isCapacitor = window.location.protocol === 'app:' || 
+                    window.location.hostname === 'localhost' && window.location.port === '';
+
 const App: React.FC = () => {
+  // Use empty basename for Capacitor, web deployment basename for browser
+  const basename = isCapacitor ? "/" : "/mia-consent-offline-form";
+  
   return (
-    <Router basename="/mia-consent-offline-form">
+    <Router basename={basename}>
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/consent-form" element={<ConsentPage />} />

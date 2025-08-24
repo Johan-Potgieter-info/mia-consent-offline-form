@@ -1,13 +1,19 @@
 
+// Detect if running in Capacitor (mobile app)
+const isCapacitor = window.location.protocol === 'app:' || 
+                    (window.location.hostname === 'localhost' && !window.location.port);
+
 // Helper function to get correct asset paths for both environments
 export const getAssetPath = (path: string): string => {
-  // Use Vite's BASE_URL which is set correctly based on the environment
+  // For Capacitor/mobile apps, use relative paths from the public directory
+  if (isCapacitor) {
+    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+    return `./${cleanPath}`;
+  }
+  
+  // For web deployment, use Vite's BASE_URL
   const basePath = import.meta.env.BASE_URL;
-  
-  // Remove leading slash if present to avoid double slashes
   const cleanPath = path.startsWith('/') ? path.slice(1) : path;
-  
-  // Ensure we always have a trailing slash on basePath for consistency
   const normalizedBasePath = basePath.endsWith('/') ? basePath : `${basePath}/`;
   
   return `${normalizedBasePath}${cleanPath}`;

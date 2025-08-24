@@ -291,6 +291,57 @@ android/app/src/main/assets/public/assets/  # Android app assets
 - **Android Build**: Run `npx cap sync` to update native app assets
 - **Asset Search**: Use `grep -r "lovable-uploads" .` to verify no legacy references
 
+## Android Build (Codespaces) – Step 7.5.1
+
+Objective: Install Android SDK CLI in Codespaces, verify Capacitor config, create android/local.properties, and build a release APK.
+
+Prereqs already configured in this repo: Java 21 (via Gradle config), Gradle wrapper 8.9, AGP 8.7.2, compile/target SDK 35.
+
+Commands (run from repo root):
+
+```bash
+# 1) Android SDK
+export ANDROID_SDK_ROOT="$HOME/android-sdk"; export ANDROID_HOME="$ANDROID_SDK_ROOT"
+mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"; cd /tmp
+curl -L -o cmdline-tools.zip "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
+unzip -q cmdline-tools.zip
+mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools/latest"
+mv cmdline-tools/* "$ANDROID_SDK_ROOT/cmdline-tools/latest/"
+export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH"
+yes | sdkmanager --licenses
+sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
+# 2) Create and verify local.properties (environment-specific)
+cd /workspaces/mia-consent-offline-form
+printf "sdk.dir=%s\n" "$ANDROID_SDK_ROOT" > android/local.properties
+cat android/local.properties   # expect: sdk.dir=/home/codespace/android-sdk
+
+# 3) Verify Capacitor config consistency BEFORE build
+grep -E "appId|webDir" capacitor.config.ts  # expect appId: 'com.miahealthcare.consentform', webDir: 'dist'
+
+# 4) Build APK
+./scripts/build-android.sh
+ls -l android/app/build/outputs/apk/release/app-release.apk || true
+
+# 5) Post-build AndroidManifest checks
+# (only change if needed)
+grep -n "androidx.core.content.FileProvider" android/app/src/main/AndroidManifest.xml || true
+grep -n "uses-permission.*INTERNET" android/app/src/main/AndroidManifest.xml || true
+grep -n "usesCleartextTraffic" android/app/src/main/AndroidManifest.xml || echo "Note: usesCleartextTraffic not set (set to true in <application> only if you use HTTP endpoints)."
+```
+
+Testing on device/emulator (outside Codespaces):
+- Physical/emulator: `adb install -r android/app/build/outputs/apk/release/app-release.apk`
+- Or locally: `npx cap run android`
+- Verify: splash + Mia logo, online Supabase insert, offline IndexedDB save → auto sync when online.
+
+Git hygiene:
+- Do NOT commit `android/local.properties` (environment-specific). Add `android/local.properties` to .gitignore in your fork if missing.
+
+Troubleshooting:
+- SDK not found: ensure `sdk.dir` path is correct and CLI tools are in PATH; re-run `./scripts/build-android.sh`.
+- After pulling changes: always run `npx cap sync` to update native platforms.
+
 ---
 
 **Technical Contact:** Johan Potgieter (Developer)  

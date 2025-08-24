@@ -1,5 +1,5 @@
 {
-  "id": "/mia-consent-offline-form/",
+  "id": "/",
   "name": "Mia Healthcare Consent Form",
   "short_name": "Mia Healthcare",
   "description": "Professional offline dental consent form application for Mia Healthcare - capture patient consent forms with full offline capability and automatic cloud sync",
@@ -9,8 +9,8 @@
   "orientation": "portrait-primary",
   "theme_color": "#ef4805",
   "background_color": "#ffffff",
-  "start_url": "/mia-consent-offline-form/",
-  "scope": "/mia-consent-offline-form/",
+  "start_url": "/",
+  "scope": "/",
   "lang": "en-US",
   "dir": "ltr",
   "categories": ["medical", "healthcare", "productivity", "business"],
@@ -24,18 +24,18 @@
   "protocol_handlers": [
     {
       "protocol": "web+miaconsent",
-      "url": "/mia-consent-offline-form/consent-form?form=%s"
+      "url": "/consent-form?form=%s"
     }
   ],
   "icons": [
     {
-      "src": "/mia-consent-offline-form/assets/mia-logo.png",
+      "src": "/assets/mia-logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/mia-consent-offline-form/assets/mia-logo.png",
+      "src": "/assets/mia-logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -43,7 +43,7 @@
   ],
   "screenshots": [
     {
-      "src": "/mia-consent-offline-form/assets/mia-logo.png",
+      "src": "/assets/mia-logo.png",
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide"
@@ -52,10 +52,10 @@
   "shortcuts": [
     {
       "name": "New Consent Form",
-      "url": "/mia-consent-offline-form/consent-form",
+      "url": "/consent-form",
       "icons": [
         {
-          "src": "/mia-consent-offline-form/assets/mia-logo.png",
+          "src": "/assets/mia-logo.png",
           "sizes": "192x192",
           "type": "image/png"
         }
@@ -63,14 +63,23 @@
     },
     {
       "name": "Draft Forms",
-      "url": "/mia-consent-offline-form/?tab=drafts",
+      "url": "/?tab=drafts",
       "icons": [
         {
-          "src": "/mia-consent-offline-form/assets/mia-logo.png",
+          "src": "/assets/mia-logo.png",
           "sizes": "192x192",
           "type": "image/png"
         }
       ]
     }
-  ]
+  ],
+  "related_applications": [
+    {
+      "platform": "windows",
+      "url": "https://apps.microsoft.com/detail/9P23LZQRW0QZ",
+      "id": "JohanPotgieter.MiaOfflineConsent"
+    }
+  ],
+  "prefer_related_applications": true,
+  "iarc_rating_id": "pending"
 }

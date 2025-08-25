@@ -6,7 +6,7 @@ A Progressive Web Application (PWA) for capturing dental consent forms with robu
 
 **Owner:** Mia Healthcare Technologies  
 **Developer:** Johan Potgieter  
-**Contact:** johan@live.co.za 
+**Contact:** johan.p@live.co.za 
 **Version:** 1.0.0  
 **Status:** Production Ready  
 
@@ -170,7 +170,7 @@ Key tables:
 ### Developer Contact
 
 **Johan Potgieter**  
-Email: johan@code-solutions.co.za  
+Email: johan.p@live.co.za  
 Role: Lead Developer & Technical Architect  
 
 Available for:
@@ -210,7 +210,7 @@ All rights reserved.
 This software is proprietary to Mia Healthcare Technologies. Unauthorized copying, modification, distribution, or use is strictly prohibited.
 
 **Developer Attribution:**  
-Developed by Johan Potgieter - Code Solutions
+Developed by Johan Potgieter
 
 ## 🔄 Version History
 
@@ -227,7 +227,7 @@ For technical support, feature requests, or any questions about this application
 **Primary Contact:**  
 Johan Potgieter  
 Developer & Technical Lead  
-Email: johan@code-solutions.co.za  
+Email: johan.p@live.co.za
 
 **Business Contact:**  
 Mia Healthcare Technologies  
